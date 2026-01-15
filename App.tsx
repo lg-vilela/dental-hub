@@ -19,6 +19,8 @@ interface TenantConfig {
     clinic_id: string;
     name: string;
     subdomain: string;
+    status: 'active' | 'suspended';
+    plan: 'starter' | 'pro' | 'enterprise';
     branding: {
         primaryColor: string; // Hex for primary
         primaryDark: string;
@@ -26,6 +28,22 @@ interface TenantConfig {
         logoIcon: string;
         font: 'manrope' | 'public';
     };
+    settings: {
+        openingHours: string;
+        maxDoctors: number;
+        appointmentsPerMonth: number;
+    };
+}
+
+
+type UserRole = 'admin' | 'dentist' | 'receptionist';
+
+interface User {
+    id: string;
+    name: string;
+    role: UserRole;
+    email: string;
+    avatar?: string;
 }
 
 interface NavItem {
@@ -36,29 +54,43 @@ interface NavItem {
 
 // --- Mock Data ---
 
-const tenants: Record<string, TenantConfig> = {
+const initialTenants: Record<string, TenantConfig> = {
     'clinic_1': {
         clinic_id: 'clinic_1',
         name: 'Dental Care',
         subdomain: 'dental-care',
+        status: 'active',
+        plan: 'pro',
         branding: {
             primaryColor: '#0b8593', // Teal
             primaryDark: '#086f7b',
             primaryLight: '#e0f2f1',
             logoIcon: 'dentistry',
             font: 'manrope'
+        },
+        settings: {
+            openingHours: '08:00 - 18:00',
+            maxDoctors: 5,
+            appointmentsPerMonth: 200
         }
     },
     'clinic_2': {
         clinic_id: 'clinic_2',
         name: 'DentalCloud',
         subdomain: 'dental-cloud',
+        status: 'active',
+        plan: 'enterprise',
         branding: {
             primaryColor: '#2997db', // Blue
             primaryDark: '#1e70a3',
             primaryLight: '#e1f5fe',
             logoIcon: 'medical_services',
             font: 'public'
+        },
+        settings: {
+            openingHours: '07:00 - 20:00',
+            maxDoctors: 15,
+            appointmentsPerMonth: 1000
         }
     }
 };
@@ -741,15 +773,180 @@ const FinancialsView = () => {
     );
 };
 
+// 5. Clinic Settings View
+const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
+    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan'>('identity');
+    const [tempName, setTempName] = useState(tenant.name);
+    const [tempColor, setTempColor] = useState(tenant.branding.primaryColor);
+
+    useEffect(() => {
+        setTempName(tenant.name);
+        setTempColor(tenant.branding.primaryColor);
+    }, [tenant]);
+
+    const handleSave = () => {
+        updateConfig({
+            name: tempName,
+            branding: {
+                ...tenant.branding,
+                primaryColor: tempColor
+            }
+        });
+        alert('Configurações salvas com sucesso!');
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Configurações da Clínica</h2>
+                    <p className="text-slate-500 text-sm">Gerencie a identidade e planos da sua conta.</p>
+                </div>
+                <button onClick={handleSave} className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
+                    <span className="material-symbols-outlined">save</span> Salvar Alterações
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                {/* Sidebar Navigation */}
+                <div className="lg:col-span-1">
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div className="p-4 border-b border-slate-100 bg-slate-50">
+                            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Menu</h3>
+                        </div>
+                        <nav className="flex flex-col p-2">
+                            {[
+                                { id: 'identity', label: 'Identidade Visual', icon: 'palette' },
+                                { id: 'branding', label: 'Marca & Logo', icon: 'verified' },
+                                { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
+                            ].map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id as any)}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id ? 'bg-primary/10 text-primary' : 'text-slate-600 hover:bg-slate-50'}`}
+                                >
+                                    <span className="material-symbols-outlined">{item.icon}</span>
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="lg:col-span-3 space-y-6">
+                    {/* Identity Tab */}
+                    {activeTab === 'identity' && (
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="p-6 border-b border-slate-100">
+                                <h3 className="text-lg font-bold text-slate-900">Identidade da Clínica</h3>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Nome da Clínica</label>
+                                    <input
+                                        type="text"
+                                        value={tempName}
+                                        onChange={(e) => setTempName(e.target.value)}
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    />
+                                    <p className="text-xs text-slate-400">Este nome aparecerá em relatórios e no topo do menu.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Cor Primária (Hex)</label>
+                                    <div className="flex gap-4 items-center">
+                                        <div className="size-12 rounded-xl border border-slate-200 shadow-sm" style={{ backgroundColor: tempColor }}></div>
+                                        <input
+                                            type="text"
+                                            value={tempColor}
+                                            onChange={(e) => setTempColor(e.target.value)}
+                                            className="w-40 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-mono uppercase"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Plan Tab */}
+                    {activeTab === 'plan' && (
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                                <h3 className="text-lg font-bold text-slate-900">Seu Plano</h3>
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${tenant.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {tenant.status === 'active' ? 'Ativo' : 'Suspenso'}
+                                </span>
+                            </div>
+                            <div className="p-8">
+                                <div className="flex items-center gap-6 mb-8">
+                                    <div className="size-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                                        <span className="material-symbols-outlined text-4xl">workspace_premium</span>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-900 capitalize">Plano {tenant.plan}</h2>
+                                        <p className="text-slate-500">Próxima renovação em 12 dias.</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                        <p className="text-xs font-bold text-slate-400 uppercase">Profissionais</p>
+                                        <p className="text-xl font-bold text-slate-900 mt-1">3 <span className="text-slate-400 text-sm font-normal">/ {tenant.settings.maxDoctors}</span></p>
+                                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                                            <div className="h-full bg-primary" style={{ width: `${(3 / tenant.settings.maxDoctors) * 100}%` }}></div>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                        <p className="text-xs font-bold text-slate-400 uppercase">Consultas/Mês</p>
+                                        <p className="text-xl font-bold text-slate-900 mt-1">142 <span className="text-slate-400 text-sm font-normal">/ {tenant.settings.appointmentsPerMonth}</span></p>
+                                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                                            <div className="h-full bg-green-500" style={{ width: `${(142 / tenant.settings.appointmentsPerMonth) * 100}%` }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Branding Tab Placeholder */}
+                    {activeTab === 'branding' && (
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-8 flex flex-col items-center justify-center text-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">architecture</span>
+                            <h3 className="text-slate-900 font-bold text-lg">Configurações Avançadas de Marca</h3>
+                            <p className="text-slate-500 max-w-md mt-2">Upload de logo personalizado e fontes estarão disponíveis na próxima atualização.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // 4. Main App Container
 export default function App() {
     const [activePage, setActivePage] = useState('dashboard');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    // State for Tenants (now mutable)
+    const [tenants, setTenants] = useState<Record<string, TenantConfig>>(initialTenants);
+
     // Simulation of loading a specific tenant based on URL or Login
-    // Try changing this to 'clinic_2' to see blue theme and 'DentalCloud' name
     const [activeTenant, setActiveTenant] = useState<TenantConfig>(tenants['clinic_1']);
+
+    // Update activeTenant when tenants state changes
+    useEffect(() => {
+        if (tenants[activeTenant.clinic_id]) {
+            setActiveTenant(tenants[activeTenant.clinic_id]);
+        }
+    }, [tenants, activeTenant.clinic_id]);
+
+    const updateTenantConfig = (newConfig: Partial<TenantConfig>) => {
+        setTenants(prev => ({
+            ...prev,
+            [activeTenant.clinic_id]: { ...prev[activeTenant.clinic_id], ...newConfig }
+        }));
+    };
 
     // Apply Tenant Theme Variables
     useEffect(() => {
@@ -824,8 +1021,8 @@ export default function App() {
                         {activePage === 'schedule' && <ScheduleView openModal={() => setIsModalOpen(true)} />}
                         {activePage === 'patients' && <PatientRecord />}
                         {activePage === 'financials' && <FinancialsView />}
-                        {/* Other pages placeholders */}
-                        {(activePage === 'inventory' || activePage === 'settings') && (
+                        {activePage === 'settings' && <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />}
+                        {activePage === 'inventory' && (
                             <div className="flex items-center justify-center h-[500px] bg-white rounded-xl border border-slate-200 border-dashed">
                                 <div className="text-center text-slate-400">
                                     <span className="material-symbols-outlined text-6xl mb-4">construction</span>
