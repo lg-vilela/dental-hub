@@ -1,0 +1,5 @@
+{
+  "name": "Plataforma SaaS Odontológica",
+  "description": "Um Micro SaaS multi-inquilino para clínicas odontológicas com agendamento, odontogramas e painéis financeiros.",
+  "requestFramePermissions": []
+}
