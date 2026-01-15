@@ -134,14 +134,29 @@ const Sidebar = ({
       </nav>
 
       {/* Pro Plan Widget */}
+      {/* Pro Plan Widget */}
       <div className="p-4 border-t border-slate-100">
-        <div className="bg-gradient-to-br from-primary/10 to-transparent rounded-xl p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-primary">
-            <span className="material-symbols-outlined text-xl">workspace_premium</span>
-            <span className="text-xs font-bold uppercase tracking-wider">Plano Pro</span>
+        <div className="bg-slate-900 rounded-xl p-4 flex flex-col gap-4 relative overflow-hidden group">
+
+          <div className="flex flex-col gap-1 z-10">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-8 w-[2px] bg-primary"></div>
+              <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Developed By</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/logo-vilela.png" alt="Vilela CodeLab" className="h-8 w-auto object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
-          <p className="text-xs text-slate-600">Sua licença expira em 12 dias.</p>
-          <button onClick={handleRenew} className="text-xs font-bold text-primary hover:underline text-left mt-1">Renovar Licença →</button>
+
+          <div className="pt-3 border-t border-slate-800">
+            <p className="text-[10px] text-slate-500">Sua licença expira em <span className="text-white font-bold">12 dias</span>.</p>
+            <button onClick={handleRenew} className="text-[10px] font-bold text-primary hover:text-white transition-colors text-left mt-1 flex items-center gap-1">
+              Renovar Agora <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
+            </button>
+          </div>
+
+          {/* Abstract BG Shape */}
+          <div className="absolute -right-6 -bottom-6 size-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500"></div>
         </div>
       </div>
     </aside>
