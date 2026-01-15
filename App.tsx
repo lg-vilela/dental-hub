@@ -29,7 +29,11 @@ interface TenantConfig {
         font: 'manrope' | 'public';
     };
     settings: {
-        openingHours: string;
+        openingHours: string; // Display text (deprecated or kept for summary)
+        openingTime: string; // "08:00"
+        closingTime: string; // "19:00"
+        slotDuration: number; // minutes
+        workingDays: number[]; // 0=Sun, 1=Mon
         maxDoctors: number;
         appointmentsPerMonth: number;
     };
@@ -70,6 +74,10 @@ const initialTenants: Record<string, TenantConfig> = {
         },
         settings: {
             openingHours: '08:00 - 18:00',
+            openingTime: '08:00',
+            closingTime: '18:00',
+            slotDuration: 30, // 30 min slots
+            workingDays: [1, 2, 3, 4, 5], // Mon-Fri
             maxDoctors: 5,
             appointmentsPerMonth: 200
         }
@@ -89,6 +97,10 @@ const initialTenants: Record<string, TenantConfig> = {
         },
         settings: {
             openingHours: '07:00 - 20:00',
+            openingTime: '07:00',
+            closingTime: '20:00',
+            slotDuration: 15, // High volume
+            workingDays: [1, 2, 3, 4, 5, 6], // Mon-Sat
             maxDoctors: 15,
             appointmentsPerMonth: 1000
         }
@@ -375,7 +387,7 @@ const Dashboard = ({ openModal, setPage }: { openModal: () => void; setPage: (p:
 };
 
 // Schedule View
-const ScheduleView = ({ openModal }: { openModal: () => void }) => {
+const ScheduleView = ({ openModal, tenant }: { openModal: () => void; tenant: TenantConfig }) => {
     const [date, setDate] = useState(new Date(2023, 9, 23)); // Oct 23, 2023
     const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
 
@@ -392,6 +404,28 @@ const ScheduleView = ({ openModal }: { openModal: () => void }) => {
     };
 
     const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    // Helper: Generate Time Slots
+    const generateSlots = () => {
+        const slots = [];
+        const [startHour, startMin] = tenant.settings.openingTime.split(':').map(Number);
+        const [endHour, endMin] = tenant.settings.closingTime.split(':').map(Number);
+        const duration = tenant.settings.slotDuration;
+
+        let current = new Date();
+        current.setHours(startHour, startMin, 0, 0);
+
+        const end = new Date();
+        end.setHours(endHour, endMin, 0, 0);
+
+        while (current < end) {
+            slots.push(current.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+            current.setMinutes(current.getMinutes() + duration);
+        }
+        return slots;
+    };
+
+    const timeSlots = generateSlots();
 
     return (
         <div className="h-full flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -446,11 +480,13 @@ const ScheduleView = ({ openModal }: { openModal: () => void }) => {
                         <p>Visualização semanal em desenvolvimento.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] h-[1000px]">
+                    <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] min-h-full">
                         {/* Times */}
-                        <div className="border-r border-slate-200 bg-slate-50/50 flex flex-col text-right pr-2 pt-2 gap-[85px] text-xs font-medium text-slate-400">
-                            {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(t => (
-                                <div key={t} className="h-6">{t}</div>
+                        <div className="border-r border-slate-200 bg-slate-50/50 flex flex-col text-right pr-2 pt-2 text-xs font-medium text-slate-400" >
+                            {timeSlots.map((t, i) => (
+                                <div key={i} className="h-24 border-b border-transparent relative group">
+                                    <span className="-mt-3 block text-[10px]">{t}</span>
+                                </div>
                             ))}
                         </div>
 
@@ -460,22 +496,22 @@ const ScheduleView = ({ openModal }: { openModal: () => void }) => {
                                 // Easter egg interaction
                                 if (colIdx === 3) alert('Cadeira não atribuída. Clique em Novo Agendamento para adicionar.');
                             }}>
-                                {/* Horizontal guides */}
-                                {Array.from({ length: 10 }).map((_, i) => (
-                                    <div key={i} className="absolute w-full h-px bg-slate-100 top-[24px]" style={{ top: `${(i * 100) + 12}px` }}></div>
+                                {/* Horizontal guides (dynamic) */}
+                                {timeSlots.map((_, i) => (
+                                    <div key={i} className="absolute w-full h-px bg-slate-100" style={{ top: `${i * 96}px` }}></div>
                                 ))}
 
-                                {/* Mock Appointments */}
+                                {/* Mock Appointments (Fixed positions for demo, would be dynamic in real app) */}
                                 {colIdx === 0 && (
                                     <>
-                                        <div onClick={(e) => { e.stopPropagation(); alert('Consulta: Sarah Conner - Canal'); }} className="absolute top-[110px] left-1 right-1 h-[90px] bg-blue-50 border-l-4 border-blue-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all">
+                                        <div onClick={(e) => { e.stopPropagation(); alert('Consulta: Sarah Conner - Canal'); }} className="absolute top-[110px] left-1 right-1 h-[90px] bg-blue-50 border-l-4 border-blue-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
                                             <p className="text-xs font-bold text-blue-700">Sarah Conner</p>
                                             <p className="text-[10px] text-blue-600">Canal (Endo)</p>
                                             <div className="mt-1 flex gap-1">
                                                 <span className="px-1 py-0.5 bg-white/50 rounded text-[9px] text-blue-700 font-bold">Confirmado</span>
                                             </div>
                                         </div>
-                                        <div className="absolute top-[320px] left-1 right-1 h-[60px] bg-amber-50 border-l-4 border-amber-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all">
+                                        <div className="absolute top-[320px] left-1 right-1 h-[60px] bg-amber-50 border-l-4 border-amber-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
                                             <p className="text-xs font-bold text-amber-700">John Wick</p>
                                             <p className="text-[10px] text-amber-600">Emergência</p>
                                         </div>
@@ -483,7 +519,7 @@ const ScheduleView = ({ openModal }: { openModal: () => void }) => {
                                 )}
 
                                 {colIdx === 2 && (
-                                    <div className="absolute top-[220px] left-1 right-1 h-[140px] bg-purple-50 border-l-4 border-purple-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all">
+                                    <div className="absolute top-[220px] left-1 right-1 h-[140px] bg-purple-50 border-l-4 border-purple-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
                                         <p className="text-xs font-bold text-purple-700">Cirurgia Complexa</p>
                                         <p className="text-[10px] text-purple-600">Extração Sisos (4x)</p>
                                         <div className="mt-2 flex items-center gap-1 text-purple-700">
@@ -775,13 +811,23 @@ const FinancialsView = () => {
 
 // 5. Clinic Settings View
 const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
-    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan'>('identity');
+    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan' | 'schedule'>('identity');
     const [tempName, setTempName] = useState(tenant.name);
     const [tempColor, setTempColor] = useState(tenant.branding.primaryColor);
+
+    // Schedule Settings State
+    const [openingTime, setOpeningTime] = useState(tenant.settings.openingTime);
+    const [closingTime, setClosingTime] = useState(tenant.settings.closingTime);
+    const [slotDuration, setSlotDuration] = useState(tenant.settings.slotDuration);
+    const [workingDays, setWorkingDays] = useState(tenant.settings.workingDays);
 
     useEffect(() => {
         setTempName(tenant.name);
         setTempColor(tenant.branding.primaryColor);
+        setOpeningTime(tenant.settings.openingTime);
+        setClosingTime(tenant.settings.closingTime);
+        setSlotDuration(tenant.settings.slotDuration);
+        setWorkingDays(tenant.settings.workingDays);
     }, [tenant]);
 
     const handleSave = () => {
@@ -790,6 +836,13 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
             branding: {
                 ...tenant.branding,
                 primaryColor: tempColor
+            },
+            settings: {
+                ...tenant.settings,
+                openingTime,
+                closingTime,
+                slotDuration,
+                workingDays
             }
         });
         alert('Configurações salvas com sucesso!');
@@ -818,6 +871,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                             {[
                                 { id: 'identity', label: 'Identidade Visual', icon: 'palette' },
                                 { id: 'branding', label: 'Marca & Logo', icon: 'verified' },
+                                { id: 'schedule', label: 'Agenda & Horários', icon: 'calendar_clock' },
                                 { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
                             ].map(item => (
                                 <button
@@ -862,6 +916,70 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                                             onChange={(e) => setTempColor(e.target.value)}
                                             className="w-40 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-mono uppercase"
                                         />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Schedule Settings Tab */}
+                    {activeTab === 'schedule' && (
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+                            <div className="p-6 border-b border-slate-100">
+                                <h3 className="text-lg font-bold text-slate-900">Configuração da Agenda</h3>
+                            </div>
+                            <div className="p-8 space-y-8">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700">Horário de Abertura</label>
+                                        <input
+                                            type="time"
+                                            value={openingTime}
+                                            onChange={(e) => setOpeningTime(e.target.value)}
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-slate-700">Horário de Fechamento</label>
+                                        <input
+                                            type="time"
+                                            value={closingTime}
+                                            onChange={(e) => setClosingTime(e.target.value)}
+                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold text-lg"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Duração do Slot (Agendamento Padrão)</label>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {[15, 30, 45, 60].map(dur => (
+                                            <button
+                                                key={dur}
+                                                onClick={() => setSlotDuration(dur)}
+                                                className={`px-4 py-3 rounded-xl border font-bold transition-all ${slotDuration === dur ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                            >
+                                                {dur} min
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-700">Dias de Funcionamento</label>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, i) => {
+                                            const isActive = workingDays.includes(i);
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setWorkingDays(prev => isActive ? prev.filter(d => d !== i) : [...prev, i])}
+                                                    className={`size-10 rounded-lg font-bold text-sm transition-all border ${isActive ? 'bg-primary text-white border-primary' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'}`}
+                                                >
+                                                    {day[0]}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>
@@ -1018,7 +1136,7 @@ export default function App() {
                 <main className="flex-1 overflow-y-auto p-4 sm:p-8">
                     <div className="max-w-[1400px] mx-auto">
                         {activePage === 'dashboard' && <Dashboard openModal={() => setIsModalOpen(true)} setPage={setActivePage} />}
-                        {activePage === 'schedule' && <ScheduleView openModal={() => setIsModalOpen(true)} />}
+                        {activePage === 'schedule' && <ScheduleView openModal={() => setIsModalOpen(true)} tenant={activeTenant} />}
                         {activePage === 'patients' && <PatientRecord />}
                         {activePage === 'financials' && <FinancialsView />}
                         {activePage === 'settings' && <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />}
