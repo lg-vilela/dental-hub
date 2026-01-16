@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TenantConfig } from '../src/types'; // Fixed path if needed, assuming src/types exists or types in root? 
+import { TenantConfig } from '../types';
 // Actually types is likely in src/types based on usage. The file was in components/ScheduleView.tsx so `../src/types` or `../types` depending on structure.
 // Let's assume `../src/types` is safer if components is in root.
 // Wait, `list_dir` of root showed `components` and `src`. So `../src/types` is correct.
