@@ -455,6 +455,13 @@ const FinancialsView = () => {
             <div className="flex flex-col h-[calc(100vh-140px)]">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>
+
+                    {/* Debug Info */}
+                    {!canAccessFinancials && (
+                        <div className="bg-red-50 text-red-700 text-xs p-2 rounded border border-red-200">
+                            <strong>Debug:</strong> {(useAuth() as any).authError || 'User has no clinic linked.'}
+                        </div>
+                    )}
                     <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
                         {[
                             { id: 'cashflow', label: 'Fluxo de Caixa', icon: 'monitoring' },

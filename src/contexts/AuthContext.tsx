@@ -36,9 +36,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [clinic, setClinic] = useState<ClinicData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [authError, setAuthError] = useState<string | null>(null);
 
     // Fetch Profile and Clinic Data
     const fetchProfileData = async (userId: string) => {
+        setAuthError(null);
         try {
             // 1. Get Profile
             const { data: profileData, error: profileError } = await supabase
@@ -49,6 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (profileError) {
                 console.warn('Profile fetch error:', profileError);
+                setAuthError(`Profile Error: ${profileError.message} (${profileError.code})`);
 
                 // Auto-Heal: If profile missing (PGRST116), create one.
                 if (profileError.code === 'PGRST116') {
@@ -85,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                     } catch (healingErr) {
                         console.error('Auto-healing failed:', healingErr);
+                        setAuthError(`Auto-healing failed: ${healingErr.message || healingErr}`);
                     }
                 }
                 return;
@@ -100,12 +104,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     .eq('id', profileData.clinic_id)
                     .single();
 
-                if (!clinicError) {
+                if (clinicError) {
+                    setAuthError(`Clinic Error: ${clinicError.message}`);
+                } else {
                     setClinic(clinicData as ClinicData);
                 }
+            } else {
+                setAuthError('Profile has no Clinic ID linked.');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching user data:', error);
+            setAuthError(`Catch Error: ${error.message || error}`);
         }
     };
 
@@ -157,6 +166,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             } else {
                 setProfile(null);
                 setClinic(null);
+                setAuthError(null); // Clear error on sign out
             }
 
             // Should ensure loading is false after any auth event handling
@@ -192,11 +202,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Helper wrappers
     const customSignIn = async (email: string, password: string) => {
+        setAuthError(null);
         const res = await supabase.auth.signInWithPassword({ email, password });
+        if (res.error) {
+            setAuthError(res.error.message);
+        }
         return res;
     };
 
     const customSignUp = async (email: string, password: string, meta: any) => {
+        setAuthError(null);
         // 1. Create Auth User
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -211,12 +226,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         });
 
+        if (error) {
+            setAuthError(error.message);
+        }
+
         // If trigger is NOT enabled (user didn't run SQL), we might need manual fallbacks.
         // But the prompt asked to generate SQL for it. So we assume SQL is run.
         return { data, error };
     };
 
     const customSignOut = async () => {
+        setAuthError(null); // Clear any existing errors on sign out
         await supabase.auth.signOut();
         setSession(null);
         setUser(null);
@@ -234,8 +254,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             signIn: customSignIn as any,
             signUp: customSignUp as any,
             signOut: customSignOut,
-            isLoading
-        }}>
+            isLoading,
+            authError: authError // Exposed for debugging
+        } as any}>
             {children}
         </AuthContext.Provider>
     );
