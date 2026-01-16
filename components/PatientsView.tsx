@@ -2,59 +2,111 @@ import React, { useState } from 'react';
 import OdontogramView from './OdontogramView';
 
 // 5b. Digital Anamnesis
-const AnamnesisTab = () => {
-    const [answers, setAnswers] = useState<Record<string, boolean>>({
+// 5b. Digital Anamnesis
+import { anamnesisService } from '../src/services/anamnesisService';
+
+const AnamnesisTab = ({ patientId }: { patientId: string }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [answers, setAnswers] = useState<Record<string, any>>({
         'hipertensao': false,
         'diabetes': false,
-        'alergia_medicamento': true,
+        'alergia_medicamento': false,
         'fumante': false,
-        'cardiaco': false
+        'cardiaco': false,
+        'gestante': false,
+        'notes': ''
     });
+
+    useEffect(() => {
+        loadAnamnesis();
+    }, [patientId]);
+
+    const loadAnamnesis = async () => {
+        setIsLoading(true);
+        try {
+            const data = await anamnesisService.getByPatientId(patientId);
+            if (data?.answers) {
+                setAnswers(data.answers);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        try {
+            await anamnesisService.save(patientId, answers);
+            alert('Anamnese salva com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao salvar anamnese.');
+        }
+    };
 
     const toggle = (key: string) => setAnswers(prev => ({ ...prev, [key]: !prev[key] }));
 
     return (
         <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
-            <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex gap-3 items-start">
-                <span className="material-symbols-outlined text-red-500">warning</span>
-                <div>
-                    <h4 className="font-bold text-red-900">Alertas Médicos</h4>
-                    <p className="text-sm text-red-700">Paciente alérgico a <span className="font-bold">Penicilina</span> e <span className="font-bold">Dipirona</span>.</p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                    { id: 'hipertensao', label: 'Hipertensão / Pressão Alta' },
-                    { id: 'diabetes', label: 'Diabetes' },
-                    { id: 'alergia_medicamento', label: 'Alergia a Medicamentos' },
-                    { id: 'fumante', label: 'Fumante / Tabagista' },
-                    { id: 'cardiaco', label: 'Problemas Cardíacos' },
-                    { id: 'gestante', label: 'Gestante / Lactante' }
-                ].map(q => (
-                    <div key={q.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
-                        <span className="font-medium text-slate-700">{q.label}</span>
-                        <button
-                            onClick={() => toggle(q.id)}
-                            className={`w-12 h-6 rounded-full transition-colors relative ${answers[q.id] ? 'bg-primary' : 'bg-slate-200'}`}
-                        >
-                            <div className={`size-4 bg-white rounded-full absolute top-1 transition-transform ${answers[q.id] ? 'left-7' : 'left-1'}`}></div>
-                        </button>
+            {/* Alerts Section (Dynamic) */}
+            {(answers.alergia_medicamento || answers.hipertensao || answers.diabetes || answers.cardiaco) && (
+                <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex gap-3 items-start">
+                    <span className="material-symbols-outlined text-red-500">warning</span>
+                    <div>
+                        <h4 className="font-bold text-red-900">Alertas Médicos</h4>
+                        <ul className="text-sm text-red-700 list-disc list-inside">
+                            {answers.alergia_medicamento && <li>Paciente possui alergia a medicamentos.</li>}
+                            {answers.hipertensao && <li>Histórico de Hipertensão.</li>}
+                            {answers.diabetes && <li>Histórico de Diabetes.</li>}
+                            {answers.cardiaco && <li>Condição Cardíaca.</li>}
+                        </ul>
                     </div>
-                ))}
-            </div>
+                </div>
+            )}
 
-            <div className="space-y-2">
-                <label className="font-bold text-slate-700">Observações Adicionais</label>
-                <textarea className="w-full p-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 h-32 resize-none" placeholder="Digite detalhes sobre as condições de saúde..."></textarea>
-            </div>
+            {isLoading ? <p>Carregando anamnese...</p> : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[
+                            { id: 'hipertensao', label: 'Hipertensão / Pressão Alta' },
+                            { id: 'diabetes', label: 'Diabetes' },
+                            { id: 'alergia_medicamento', label: 'Alergia a Medicamentos' },
+                            { id: 'fumante', label: 'Fumante / Tabagista' },
+                            { id: 'cardiaco', label: 'Problemas Cardíacos' },
+                            { id: 'gestante', label: 'Gestante / Lactante' }
+                        ].map(q => (
+                            <div key={q.id} className="flex justify-between items-center p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+                                <span className="font-medium text-slate-700">{q.label}</span>
+                                <button
+                                    onClick={() => toggle(q.id)}
+                                    className={`w-12 h-6 rounded-full transition-colors relative ${answers[q.id] ? 'bg-primary' : 'bg-slate-200'}`}
+                                >
+                                    <div className={`size-4 bg-white rounded-full absolute top-1 transition-transform ${answers[q.id] ? 'left-7' : 'left-1'}`}></div>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
 
-            <button className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-colors">
-                <span className="material-symbols-outlined">save</span> Salvar Anamnese
-            </button>
+                    <div className="space-y-2">
+                        <label className="font-bold text-slate-700">Observações Adicionais</label>
+                        <textarea
+                            value={answers.notes || ''}
+                            onChange={(e) => setAnswers(prev => ({ ...prev, notes: e.target.value }))}
+                            className="w-full p-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 h-32 resize-none"
+                            placeholder="Digite detalhes sobre as condições de saúde..."
+                        ></textarea>
+                    </div>
+
+                    <button onClick={handleSave} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-colors">
+                        <span className="material-symbols-outlined">save</span> Salvar Anamnese
+                    </button>
+                </>
+            )}
         </div>
     );
 };
+
 
 // 5c. Evolution Timeline
 const EvolutionTab = () => {
@@ -292,7 +344,7 @@ const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }
 
             <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                 {activeTab === 'odontogram' && <OdontogramView />}
-                {activeTab === 'anamnesis' && <AnamnesisTab />}
+                {activeTab === 'anamnesis' && <AnamnesisTab patientId={patient.id} />}
                 {activeTab === 'evolution' && <EvolutionTab />}
                 {activeTab === 'files' && <FilesTab />}
             </div>
