@@ -3,6 +3,7 @@ import { financialService, Transaction } from '../src/services/financialService'
 import { budgetsService, Budget } from '../src/services/budgetsService';
 import { servicesService, Service } from '../src/services/servicesService';
 import { useAuth } from '../src/contexts/AuthContext';
+import { useToast } from '../src/contexts/ToastContext';
 import { supabase } from '../src/lib/supabase';
 
 // 6a. Cash Flow Dashboard
@@ -14,13 +15,7 @@ const CashFlowTab = () => {
     const [showAddForm, setShowAddForm] = useState(false);
 
     // Quick Add Form State
-    const [newTrx, setNewTrx] = useState({
-        description: '',
-        amount: '',
-        type: 'income' as 'income' | 'expense',
-        category: 'Outros',
-        date: new Date().toISOString().split('T')[0]
-    });
+
 
     const loadData = async () => {
         setIsLoading(true);
@@ -44,13 +39,23 @@ const CashFlowTab = () => {
         }
     };
 
+    const [newTrx, setNewTrx] = useState({ description: '', amount: '', type: 'income', category: 'Tratamento', date: new Date().toISOString().split('T')[0] });
+    const { showToast } = useToast();
+
     useEffect(() => {
         loadData();
     }, []);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!clinic) return alert('Clínica não encontrada.');
+
+        // Debugging Clinic Availability
+        if (!clinic?.id) {
+            console.error('Clinic Data Missing:', { clinic });
+            showToast('Erro: Dados da clínica não carregados. Recarregue a página.', 'error');
+            return;
+        }
+
         try {
             await financialService.createTransaction({
                 clinic_id: clinic.id,
@@ -60,12 +65,13 @@ const CashFlowTab = () => {
                 category: newTrx.category,
                 date: newTrx.date
             });
+            showToast('Transação registrada com sucesso!', 'success');
             setShowAddForm(false);
             setNewTrx({ ...newTrx, description: '', amount: '' });
             loadData();
         } catch (err: any) {
             console.error(err);
-            alert('Erro ao adicionar transação: ' + (err.message || 'Erro deconhecido'));
+            showToast('Erro ao salvar: ' + (err.message || 'Erro desconhecido'), 'error');
         }
     };
 
@@ -160,6 +166,7 @@ const BudgetsTab = () => {
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const { showToast } = useToast();
 
     // Form State
     const [patients, setPatients] = useState<any[]>([]);
@@ -241,11 +248,12 @@ const BudgetsTab = () => {
                 items: items,
                 notes: notes
             });
+            showToast('Orçamento salvo com sucesso!', 'success');
             setIsCreating(false);
             loadBudgets();
         } catch (error) {
             console.error(error);
-            alert('Erro ao salvar orçamento.');
+            showToast('Erro ao salvar orçamento.', 'error');
         }
     };
 
@@ -401,9 +409,12 @@ const BudgetsTab = () => {
                                                     try {
                                                         await budgetsService.convertToTransaction(b);
                                                         setBudgets(budgets.map(bg => bg.id === b.id ? { ...bg, status: 'paid' } : bg));
-                                                        alert('Pagamento registrado no caixa!');
+                                                        showToast('Pagamento registrado no caixa!', 'success');
                                                         // Optionally refresh cash flow tab if we switch to it
-                                                    } catch (e) { console.error(e); alert('Erro ao registrar.'); }
+                                                    } catch (e: any) {
+                                                        console.error(e);
+                                                        showToast('Erro ao registrar: ' + e.message, 'error');
+                                                    }
                                                 }
                                             }}
                                             className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
