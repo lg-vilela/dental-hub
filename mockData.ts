@@ -8,9 +8,9 @@ export const initialTenants: Record<string, TenantConfig> = {
         status: 'active',
         plan: 'pro',
         branding: {
-            primaryColor: '#009B82', // Dental Hub Teal (Updated)
-            primaryDark: '#007A65',
-            primaryLight: '#E6F5F3',
+            primaryColor: '#617FA3', // Dental Hub Blue
+            primaryDark: '#4A6280',
+            primaryLight: '#F0F4F8',
             logoIcon: 'dentistry',
             font: 'manrope'
         },
