@@ -78,5 +78,23 @@ export const budgetsService = {
             .update({ status })
             .eq('id', id);
         if (error) throw error;
+    },
+
+    async convertToTransaction(budget: Budget) {
+        // 1. Mark as Paid
+        await this.updateMultiStatus(budget.id, 'paid');
+
+        // 2. Add to Cash Flow
+        const { error } = await supabase.from('transactions').insert({
+            clinic_id: budget.clinic_id,
+            description: `Recebimento Orçamento #${budget.id.substring(0, 6)}`,
+            amount: budget.total_value,
+            type: 'income',
+            category: 'Tratamentos',
+            date: new Date().toISOString().split('T')[0],
+            patient_id: budget.patient_id
+        });
+
+        if (error) throw error;
     }
 };

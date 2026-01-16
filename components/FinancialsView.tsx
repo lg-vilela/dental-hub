@@ -394,8 +394,20 @@ const BudgetsTab = () => {
                                         </button>
                                     )}
                                     {b.status === 'approved' && (
-                                        <button onClick={() => handleStatusChange(b.id, 'paid')} className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">
-                                            Pago
+                                        <button
+                                            onClick={async () => {
+                                                if (confirm('Confirmar pagamento e lançar no caixa?')) {
+                                                    try {
+                                                        await budgetsService.convertToTransaction(b);
+                                                        setBudgets(budgets.map(bg => bg.id === b.id ? { ...bg, status: 'paid' } : bg));
+                                                        alert('Pagamento registrado no caixa!');
+                                                        // Optionally refresh cash flow tab if we switch to it
+                                                    } catch (e) { console.error(e); alert('Erro ao registrar.'); }
+                                                }
+                                            }}
+                                            className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100"
+                                        >
+                                            Receber & Lançar
                                         </button>
                                     )}
                                     <button className="text-slate-400 hover:text-slate-600">
