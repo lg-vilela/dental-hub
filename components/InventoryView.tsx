@@ -167,48 +167,50 @@ const InventoryView = () => {
                         </button>
                     </div>
                 ) : (
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th className="px-6 py-4 font-bold text-slate-500">Item</th>
-                                <th className="px-6 py-4 font-bold text-slate-500">Categoria</th>
-                                <th className="px-6 py-4 font-bold text-slate-500 text-right">Qtd.</th>
-                                <th className="px-6 py-4 font-bold text-slate-500 text-center">Status</th>
-                                <th className="px-6 py-4 font-bold text-slate-500 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {items.map(item => {
-                                const status = getStatus(item.quantity, item.min_quantity);
-                                return (
-                                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <p className="font-bold text-slate-900">{item.name}</p>
-                                            <p className="text-xs text-slate-400">{item.unit}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-bold text-slate-600">{item.category}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right font-mono font-medium text-slate-700">{item.quantity}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-${status.color}-100 text-${status.color}-700 border border-${status.color}-200`}>
-                                                <div className={`size-1.5 rounded-full bg-${status.color}-500`}></div> {status.label}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => openModal(item)}
-                                                className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-colors"
-                                                title="Editar Item"
-                                            >
-                                                <span className="material-symbols-outlined">edit</span>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th className="px-6 py-4 font-bold text-slate-500">Item</th>
+                                    <th className="px-6 py-4 font-bold text-slate-500">Categoria</th>
+                                    <th className="px-6 py-4 font-bold text-slate-500 text-right">Qtd.</th>
+                                    <th className="px-6 py-4 font-bold text-slate-500 text-center">Status</th>
+                                    <th className="px-6 py-4 font-bold text-slate-500 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {items.map(item => {
+                                    const status = getStatus(item.quantity, item.min_quantity);
+                                    return (
+                                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <p className="font-bold text-slate-900">{item.name}</p>
+                                                <p className="text-xs text-slate-400">{item.unit}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2 py-1 bg-slate-100 rounded text-xs font-bold text-slate-600">{item.category}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-mono font-medium text-slate-700">{item.quantity}</td>
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-${status.color}-100 text-${status.color}-700 border border-${status.color}-200`}>
+                                                    <div className={`size-1.5 rounded-full bg-${status.color}-500`}></div> {status.label}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => openModal(item)}
+                                                    className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-primary transition-colors"
+                                                    title="Editar Item"
+                                                >
+                                                    <span className="material-symbols-outlined">edit</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 

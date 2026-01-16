@@ -248,7 +248,7 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="relative flex-1 max-w-md">
                     <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
                     <input
@@ -283,57 +283,59 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                            <th className="px-6 py-4 font-bold text-slate-500">Paciente</th>
-                            <th className="px-6 py-4 font-bold text-slate-500">Contato</th>
-                            <th className="px-6 py-4 font-bold text-slate-500">Cadastro</th>
-                            <th className="px-6 py-4 font-bold text-slate-500">Status</th>
-                            <th className="px-6 py-4 font-bold text-slate-500">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {isLoading ? (
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-50 border-b border-slate-100">
                             <tr>
-                                <td colSpan={5} className="p-8 text-center text-slate-400">Carregando pacientes...</td>
+                                <th className="px-6 py-4 font-bold text-slate-500">Paciente</th>
+                                <th className="px-6 py-4 font-bold text-slate-500">Contato</th>
+                                <th className="px-6 py-4 font-bold text-slate-500">Cadastro</th>
+                                <th className="px-6 py-4 font-bold text-slate-500">Status</th>
+                                <th className="px-6 py-4 font-bold text-slate-500">Ações</th>
                             </tr>
-                        ) : filteredPatients.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="p-8 text-center text-slate-400">
-                                    {searchTerm ? 'Nenhum paciente encontrado para a busca.' : 'Nenhum paciente cadastrado.'}
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredPatients.map(p => (
-                                <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">{p.full_name.charAt(0)}</div>
-                                            <div>
-                                                <p className="font-bold text-slate-900">{p.full_name}</p>
-                                                <p className="text-xs text-slate-400">{p.birth_date ? 'Nasc: ' + new Date(p.birth_date).toLocaleDateString() : 'Idade n/a'}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                        <div>{p.phone || '-'}</div>
-                                        <div className="text-xs text-slate-400">{p.email}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{new Date(p.created_at).toLocaleDateString()}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700`}>
-                                            Ativo
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <button onClick={() => onSelect(p)} className="text-primary font-bold text-sm hover:underline">Abrir Prontuário</button>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={5} className="p-8 text-center text-slate-400">Carregando pacientes...</td>
+                                </tr>
+                            ) : filteredPatients.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="p-8 text-center text-slate-400">
+                                        {searchTerm ? 'Nenhum paciente encontrado para a busca.' : 'Nenhum paciente cadastrado.'}
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                filteredPatients.map(p => (
+                                    <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">{p.full_name.charAt(0)}</div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900">{p.full_name}</p>
+                                                    <p className="text-xs text-slate-400">{p.birth_date ? 'Nasc: ' + new Date(p.birth_date).toLocaleDateString() : 'Idade n/a'}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">
+                                            <div>{p.phone || '-'}</div>
+                                            <div className="text-xs text-slate-400">{p.email}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{new Date(p.created_at).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700`}>
+                                                Ativo
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <button onClick={() => onSelect(p)} className="text-primary font-bold text-sm hover:underline">Abrir Prontuário</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <AddPatientModal

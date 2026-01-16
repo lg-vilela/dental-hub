@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tenant, activePage, setPage, openPubl
     };
 
     return (
-        <aside className="w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 flex flex-col h-screen fixed left-0 top-0 z-20 hidden lg:flex font-['Manrope'] shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
+        <aside className="w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 flex flex-col h-full font-['Manrope'] shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
             {/* Clinic Identity */}
             <div className="h-24 flex items-center px-6 gap-3 border-b border-slate-100/50">
                 <div className="relative group">
