@@ -306,10 +306,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
                             A solução definitiva para gestão odontológica de alta performance.
                         </p>
-                        <div className="pt-6">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Developed by</p>
-                            <img src="https://i.postimg.cc/JhBKhfRB/selo-vilelacodelab.png" alt="Vilela CodeLab" className="w-28 opacity-80 hover:opacity-100 transition-opacity" />
-                        </div>
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
@@ -328,12 +324,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         </ul>
                     </div>
                 </div>
-                <div className="max-w-[1400px] mx-auto px-6 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
-                    <p>&copy; 2026 Dental Hub. Feito com 💙 para dentistas.</p>
-                    <div className="flex gap-8">
-                        <a href="#" className="hover:text-white transition-colors">Termos</a>
-                        <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+                <div className="max-w-[1400px] mx-auto px-6 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex flex-col md:flex-row items-center gap-6 text-sm text-slate-500">
+                        <p>&copy; 2026 Dental Hub. Todos os direitos reservados.</p>
+                        <div className="flex gap-6">
+                            <a href="#" className="hover:text-white transition-colors">Termos</a>
+                            <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+                        </div>
                     </div>
+                    <img src="https://i.postimg.cc/02HZYY53/selo-de-desenvolvimento.png" alt="Desenvolvido por Vilela CodeLab" className="h-10 opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
             </footer>
         </div>
