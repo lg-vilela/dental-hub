@@ -252,9 +252,183 @@ const TeamTab = () => {
     );
 };
 
+// 6f. Services Tab (New)
+import { servicesService, Service } from '../src/services/servicesService';
+
+const ServicesTab = () => {
+    const [services, setServices] = useState<Service[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentService, setCurrentService] = useState<Partial<Service>>({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' });
+
+    useEffect(() => {
+        loadServices();
+    }, []);
+
+    const loadServices = async () => {
+        try {
+            const data = await servicesService.getServices();
+            setServices(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!currentService.title) return alert('Nome é obrigatório');
+
+        try {
+            if (currentService.id) {
+                await servicesService.updateService(currentService.id, currentService);
+            } else {
+                await servicesService.createService(currentService as any);
+            }
+            setIsEditing(false);
+            setCurrentService({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' });
+            loadServices();
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao salvar serviço.');
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Excluir este serviço?')) return;
+        try {
+            await servicesService.deleteService(id);
+            loadServices();
+        } catch (error) {
+            alert('Erro ao excluir.');
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900">Serviços e Preços</h3>
+                    <p className="text-sm text-slate-500">Defina os procedimentos disponíveis para agendamento.</p>
+                </div>
+                {!isEditing && (
+                    <button onClick={() => setIsEditing(true)} className="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+                        <span className="material-symbols-outlined">add</span> Novo Serviço
+                    </button>
+                )}
+            </div>
+
+            {isEditing ? (
+                <div className="p-6 bg-slate-50 border-b border-slate-100 animate-in slide-in-from-top-2">
+                    <h4 className="font-bold text-slate-900 mb-4">{currentService.id ? 'Editar Serviço' : 'Novo Serviço'}</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Nome do Procedimento</label>
+                            <input
+                                value={currentService.title}
+                                onChange={e => setCurrentService({ ...currentService, title: e.target.value })}
+                                className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-700"
+                                placeholder="Ex: Limpeza Dental"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Preço (R$)</label>
+                            <input
+                                type="number"
+                                value={currentService.price}
+                                onChange={e => setCurrentService({ ...currentService, price: Number(e.target.value) })}
+                                className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-700"
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Duração (min)</label>
+                            <select
+                                value={currentService.duration_minutes}
+                                onChange={e => setCurrentService({ ...currentService, duration_minutes: Number(e.target.value) })}
+                                className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-700 bg-white"
+                            >
+                                {[15, 30, 45, 60, 90, 120].map(m => <option key={m} value={m}>{m} min</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">Ícone</label>
+                            <div className="flex gap-2">
+                                {['dentistry', 'clean_hands', 'medical_services', 'brightness_7', 'emergency'].map(icon => (
+                                    <button
+                                        key={icon}
+                                        onClick={() => setCurrentService({ ...currentService, icon })}
+                                        className={`size-10 rounded-lg flex items-center justify-center border transition-all ${currentService.icon === icon ? 'bg-primary text-white border-primary' : 'bg-white text-slate-400 border-slate-200'}`}
+                                    >
+                                        <span className="material-symbols-outlined">{icon}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <button onClick={() => { setIsEditing(false); setCurrentService({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' }); }} className="px-4 py-2 font-bold text-slate-500 hover:bg-slate-200 rounded-lg transition-colors">Cancelar</button>
+                        <button onClick={handleSave} className="px-6 py-2 bg-primary text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">Salvar</button>
+                    </div>
+                </div>
+            ) : null}
+
+            <div className="p-0">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+                        <tr>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Serviço</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Duração</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Preço</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {isLoading ? (
+                            <tr><td colSpan={4} className="p-8 text-center text-slate-400">Carregando...</td></tr>
+                        ) : services.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="p-12 text-center text-slate-400">
+                                    <div className="flex flex-col items-center">
+                                        <span className="material-symbols-outlined text-4xl opacity-30 mb-2">playlist_add</span>
+                                        <p>Nenhum serviço cadastrado.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : services.map(s => (
+                            <tr key={s.id} className="hover:bg-slate-50 group">
+                                <td className="px-6 py-4 font-bold text-slate-900 flex items-center gap-3">
+                                    <div className="size-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-[18px]">{s.icon}</span>
+                                    </div>
+                                    {s.title}
+                                </td>
+                                <td className="px-6 py-4 text-slate-600 font-medium">{s.duration_minutes} min</td>
+                                <td className="px-6 py-4 font-bold text-emerald-600">
+                                    {s.price === 0 ? 'Grátis' : `R$ ${s.price.toFixed(2)}`}
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => { setCurrentService(s); setIsEditing(true); }} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg">
+                                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button onClick={() => handleDelete(s.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 // 5. Clinic Settings View
 const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
-    const [activeTab, setActiveTab] = useState<'schedule' | 'plan' | 'security' | 'team'>('schedule');
+    const [activeTab, setActiveTab] = useState<'schedule' | 'services' | 'plan' | 'security' | 'team'>('schedule');
 
     // Schedule Settings State
     const [openingTime, setOpeningTime] = useState(tenant.settings.openingTime);
@@ -304,6 +478,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                         <nav className="flex flex-col p-2">
                             {[
                                 { id: 'schedule', label: 'Agenda & Horários', icon: 'calendar_clock' },
+                                { id: 'services', label: 'Serviços & Preços', icon: 'payments' },
                                 { id: 'team', label: 'Membros da Equipe', icon: 'group' },
                                 { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
                                 { id: 'security', label: 'Segurança & LGPD', icon: 'shield_lock' },
@@ -386,6 +561,9 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                             </div>
                         </div>
                     )}
+
+                    {/* Services Tab */}
+                    {activeTab === 'services' && <ServicesTab />}
 
                     {/* Team Tab */}
                     {activeTab === 'team' && <TeamTab />}
