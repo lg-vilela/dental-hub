@@ -73,6 +73,13 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         }
     };
 
+    const handleBack = () => {
+        if (step > 1) {
+            setStep(step - 1);
+            setError('');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
             <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500">
@@ -226,34 +233,42 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                         </div>
                     )}
 
-                    <div className="mt-10 flex flex-col items-end gap-4">
+                    {/* Footer Actions */}
+                    <div className="mt-10 flex flex-col gap-4">
                         {error && (
-                            <div className="text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+                            <div className="text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded-lg border border-red-100 animate-in fade-in slide-in-from-bottom-2">
                                 {error}
                             </div>
                         )}
-                        <button
-                            onClick={handleNext}
-                            disabled={
-                                (step === 1 && (!formData.name || !formData.email || !formData.password)) ||
-                                (step === 2 && !formData.clinicName) ||
-                                isLoading
-                            }
-                            className="bg-primary text-white text-lg font-bold py-4 px-10 rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20"
-                        >
-                            {isLoading ? (
-                                <div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            ) : (
-                                <>
-                                    {step === 5 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
-export default SetupWizard;
+                        <div className="flex items-center gap-3 justify-end">
+                            {step > 1 && (
+                                <button
+                                    onClick={handleBack}
+                                    disabled={isLoading}
+                                    className="text-slate-500 font-bold px-6 py-4 hover:text-slate-800 transition-colors disabled:opacity-50"
+                                >
+                                    Voltar
+                                </button>
+                            )}
+
+                            <button
+                                onClick={handleNext}
+                                disabled={
+                                    (step === 1 && (!formData.name || !formData.email || !formData.password)) ||
+                                    (step === 2 && !formData.clinicName) ||
+                                    isLoading
+                                }
+                                className="bg-primary text-white text-lg font-bold py-4 px-10 rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20 flex-1 justify-center sm:flex-none"
+                            >
+                                {isLoading ? (
+                                    <div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <>
+                                        {step === 5 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    export default SetupWizard;
