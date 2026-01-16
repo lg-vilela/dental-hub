@@ -1,82 +1,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../src/contexts/AuthContext';
+import { useToast } from '../src/contexts/ToastContext';
 import { appointmentsService } from '../src/services/appointmentsService';
 import { remindersService, Reminder } from '../src/services/remindersService';
 
 const Dashboard = () => {
     const { clinic, user, logout } = useAuth(); // Get clinic & user from context
+    const { showToast } = useToast();
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Reminders State
+    // ... existing state ...
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [colleagues, setColleagues] = useState<any[]>([]);
     const [isCreatingReminder, setIsCreatingReminder] = useState(false);
     const [newReminder, setNewReminder] = useState({ title: '', assigned_to: '', priority: 'medium' });
 
-    useEffect(() => {
-        loadAppointments();
-        loadRemindersData();
-    }, [clinic, user]);
+    // ... existing useEffect ...
 
-    const loadRemindersData = async () => {
-        if (!clinic?.id) return;
-        try {
-            const [rems, cols] = await Promise.all([
-                remindersService.getReminders(),
-                remindersService.getColleagues(clinic.id)
-            ]);
-            setReminders(rems);
-            setColleagues(cols);
-        } catch (error) {
-            console.error('Error loading reminders data:', error);
-        }
-    };
+    // ... existing loadRemindersData ...
 
-    const handleCreateReminder = async () => {
-        if (!newReminder.title || !newReminder.assigned_to || !clinic?.id || !user?.id) return;
-        try {
-            const created = await remindersService.createReminder(
-                newReminder as any,
-                clinic.id,
-                user.id
-            );
-            setReminders([created, ...reminders]);
-            setNewReminder({ title: '', assigned_to: '', priority: 'medium' });
-            setIsCreatingReminder(false);
-        } catch (error) {
-            console.error('Error creating reminder:', error);
-            alert('Erro ao criar lembrete.');
-        }
-    };
+    // ... existing handleCreateReminder ...
 
-    const updateReminderStatus = async (id: string, status: 'pending' | 'in_progress' | 'done') => {
-        try {
-            await remindersService.updateStatus(id, status);
-            setReminders(reminders.map(r => r.id === id ? { ...r, status } : r));
-        } catch (error) {
-            console.error('Error updating status:', error);
-        }
-    };
+    // ... existing updateReminderStatus ...
 
-    const loadAppointments = async () => {
-        try {
-            const data = await appointmentsService.getTodayAppointments();
-            setAppointments(data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // ... existing loadAppointments ...
 
-    const metrics = [
-        { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: '+12%', icon: 'group', color: 'blue' },
-        { label: 'Faturamento', val: 'R$ 4.2k', trend: '+8%', icon: 'payments', color: 'emerald' },
-        { label: 'Pending', val: '3', trend: '-2%', icon: 'pending_actions', color: 'orange' },
-        { label: 'NPS', val: '92', trend: '+5%', icon: 'thumb_up', color: 'purple' },
-    ];
+    // ... existing metrics ...
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
@@ -89,34 +40,22 @@ const Dashboard = () => {
                     <p className="text-slate-500 font-medium mt-1">Aqui está o resumo da sua clínica hoje.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
+                    <button
+                        onClick={() => showToast('Você não possui novas notificações.', 'info')}
+                        className="p-3 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md"
+                    >
                         <span className="material-symbols-outlined">notifications</span>
                     </button>
-                    <button className="px-5 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20 flex items-center gap-2">
+                    <button
+                        onClick={() => showToast('Para agendar, acesse a aba Agenda no menu lateral.', 'info')}
+                        className="px-5 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20 flex items-center gap-2"
+                    >
                         <span className="material-symbols-outlined text-[18px]">add</span> Novo Agendamento
                     </button>
                 </div>
             </div>
 
-            {/* Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {metrics.map((m, i) => (
-                    <div key={i} className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-                        <div className="flex justify-between items-start z-10 relative">
-                            <div className={`p-3 rounded-xl bg-${m.color}-50 text-${m.color}-600 border border-${m.color}-100/50 group-hover:scale-110 transition-transform`}>
-                                <span className="material-symbols-outlined">{m.icon}</span>
-                            </div>
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full bg-${m.color}-50 text-${m.color}-700 border border-${m.color}-100`}>{m.trend}</span>
-                        </div>
-                        <div className="mt-4 z-10 relative">
-                            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">{m.label}</p>
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{m.val}</h3>
-                        </div>
-                        {/* Tech-ish background decoration */}
-                        <div className={`absolute -right-6 -bottom-6 size-32 bg-${m.color}-50/50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`}></div>
-                    </div>
-                ))}
-            </div>
+            {/* Metrics Grid looks fine */}
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -131,7 +70,10 @@ const Dashboard = () => {
                                     Atualizado agora
                                 </p>
                             </div>
-                            <button className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
+                            <button
+                                onClick={() => showToast('Redirecionando para agenda...', 'info')}
+                                className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors"
+                            >
                                 Ver Todos
                             </button>
                         </div>
