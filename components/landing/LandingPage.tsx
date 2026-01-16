@@ -24,6 +24,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <span className="font-extrabold text-2xl text-slate-800 tracking-tight">Dental Hub</span>
                     </div>
                     <div className="flex items-center gap-4">
+                        {/* Socials */}
+                        <div className="hidden md:flex items-center gap-3 mr-2 border-r border-slate-200 pr-6 h-8">
+                            <a href="https://instagram.com/vilelacodelab" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram" className="size-6" />
+                            </a>
+                            <a href="https://wa.me/5511953840339" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="size-6" />
+                            </a>
+                        </div>
+
                         <button onClick={onLogin} className="text-sm font-bold text-slate-600 hover:text-[#617FA3] px-4 py-2 rounded-full hover:bg-slate-50 transition-all">
                             Entrar
                         </button>
@@ -303,20 +313,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                             </div>
                             <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
-                        <div className="pt-6 flex flex-col gap-4">
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Developed by</p>
-                                <img src="https://i.postimg.cc/02HZYY53/selo-de-desenvolvimento.png" alt="Vilela CodeLab" className="h-8 opacity-80 hover:opacity-100 transition-opacity" />
-                            </div>
-                            <div className="flex gap-3">
-                                <a href="https://wa.me/5511953840339" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-[#25D366] transition-colors shadow-lg shadow-black/20">
-                                    <span className="material-symbols-outlined text-xl">chat</span>
-                                </a>
-                                <a href="https://instagram.com/vilelacodelab" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-[#E1306C] transition-colors shadow-lg shadow-black/20">
-                                    <span className="material-symbols-outlined text-xl">photo_camera</span>
-                                </a>
-                            </div>
-                        </div>
+
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
@@ -344,6 +341,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         </div>
                     </div>
 
+                    <img src="https://i.postimg.cc/02HZYY53/selo-de-desenvolvimento.png" alt="Desenvolvido por Vilela CodeLab" className="h-10 opacity-70 hover:opacity-100 transition-opacity" />
                 </div>
             </footer>
         </div>
