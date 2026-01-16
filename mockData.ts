@@ -3,7 +3,7 @@ import { TenantConfig } from './types';
 export const initialTenants: Record<string, TenantConfig> = {
     'clinic_1': {
         clinic_id: 'clinic_1',
-        name: 'Dental Care',
+        name: 'Dental Hub',
         subdomain: 'dental-care',
         status: 'active',
         plan: 'pro',
