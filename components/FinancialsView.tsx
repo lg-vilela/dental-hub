@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { financialService, Transaction } from '../src/services/financialService';
+import { budgetsService, Budget } from '../src/services/budgetsService';
+import { servicesService, Service } from '../src/services/servicesService';
 import { useAuth } from '../src/contexts/AuthContext';
+import { supabase } from '../src/lib/supabase';
 
 // 6a. Cash Flow Dashboard
 const CashFlowTab = () => {
@@ -150,12 +153,263 @@ const CashFlowTab = () => {
 };
 
 // 6b. Budget / Treatment Plans (Still Mocked or Hidden for now? Let's hide it to avoid confusion or keep as "Coming Soon")
+// 6b. Budget / Treatment Plans
 const BudgetsTab = () => {
+    const { clinic } = useAuth();
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isCreating, setIsCreating] = useState(false);
+
+    // Form State
+    const [patients, setPatients] = useState<any[]>([]);
+    const [availableServices, setAvailableServices] = useState<Service[]>([]);
+
+    const [selectedPatient, setSelectedPatient] = useState('');
+    const [notes, setNotes] = useState('');
+    const [items, setItems] = useState<{ service_id: string, title: string, quantity: number, unit_price: number }[]>([]);
+
+    useEffect(() => {
+        loadBudgets();
+    }, []);
+
+    const loadBudgets = async () => {
+        setIsLoading(true);
+        try {
+            const data = await budgetsService.getBudgets();
+            setBudgets(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const startCreation = async () => {
+        setIsCreating(true);
+        // Load dependencies
+        try {
+            // Fetch simplified patients list
+            const { data: pats } = await supabase.from('patients').select('id, full_name').order('full_name');
+            setPatients(pats || []);
+
+            const svcs = await servicesService.getServices();
+            setAvailableServices(svcs);
+
+            // Reset form
+            setItems([]);
+            setSelectedPatient('');
+            setNotes('');
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const addItem = () => {
+        setItems([...items, { service_id: '', title: '', quantity: 1, unit_price: 0 }]);
+    };
+
+    const updateItem = (index: number, field: string, value: any) => {
+        const newItems = [...items];
+        if (field === 'service_id') {
+            const service = availableServices.find(s => s.id === value);
+            newItems[index].service_id = value;
+            if (service) {
+                newItems[index].title = service.title;
+                newItems[index].unit_price = service.price;
+            }
+        } else {
+            (newItems[index] as any)[field] = value;
+        }
+        setItems(newItems);
+    };
+
+    const removeItem = (index: number) => {
+        setItems(items.filter((_, i) => i !== index));
+    };
+
+    const calculateTotal = () => items.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
+
+    const handleSaveBudget = async () => {
+        if (!selectedPatient || items.length === 0 || !clinic) return alert('Preencha os dados.');
+
+        try {
+            await budgetsService.saveBudget({
+                clinic_id: clinic.id,
+                patient_id: selectedPatient,
+                total_value: calculateTotal(),
+                items: items,
+                notes: notes
+            });
+            setIsCreating(false);
+            loadBudgets();
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao salvar orçamento.');
+        }
+    };
+
+    const handleStatusChange = async (id: string, newStatus: string) => {
+        try {
+            await budgetsService.updateMultiStatus(id, newStatus);
+            setBudgets(budgets.map(b => b.id === id ? { ...b, status: newStatus as any } : b));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     return (
-        <div className="p-12 text-center text-slate-400">
-            <span className="material-symbols-outlined text-6xl mb-4">construction</span>
-            <p className="text-lg font-bold text-slate-600">Módulo de Orçamentos em Desenvolvimento</p>
-            <p className="text-sm">Em breve você poderá criar e aprovar orçamentos integrados aos pacientes.</p>
+        <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex justify-between items-center">
+                <h3 className="font-bold text-slate-700">Orçamentos & Tratamentos</h3>
+                <button
+                    onClick={() => isCreating ? setIsCreating(false) : startCreation()}
+                    className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${isCreating ? 'bg-slate-200 text-slate-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                    {isCreating ? 'Cancelar' : 'Novo Orçamento'}
+                </button>
+            </div>
+
+            {isCreating && (
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Paciente</label>
+                            <select
+                                className="w-full p-3 rounded-xl border border-slate-200 bg-white"
+                                value={selectedPatient}
+                                onChange={e => setSelectedPatient(e.target.value)}
+                            >
+                                <option value="">Selecione...</option>
+                                {patients.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Observações</label>
+                            <input
+                                type="text"
+                                className="w-full p-3 rounded-xl border border-slate-200 bg-white"
+                                placeholder="Ex: Válido por 15 dias..."
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl border border-slate-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-bold text-sm text-slate-500">Procedimentos</h4>
+                            <button onClick={addItem} className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                <span className="material-symbols-outlined text-sm">add</span> Adicionar Item
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {items.map((item, idx) => (
+                                <div key={idx} className="flex gap-3 items-center">
+                                    <select
+                                        className="flex-[2] p-2 rounded-lg border border-slate-200 text-sm"
+                                        value={item.service_id}
+                                        onChange={e => updateItem(idx, 'service_id', e.target.value)}
+                                    >
+                                        <option value="">Selecione o serviço...</option>
+                                        {availableServices.map(s => <option key={s.id} value={s.id}>{s.title}</option>)}
+                                    </select>
+                                    <input
+                                        type="text"
+                                        placeholder="Título customizado"
+                                        className="flex-[2] p-2 rounded-lg border border-slate-200 text-sm"
+                                        value={item.title}
+                                        onChange={e => updateItem(idx, 'title', e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        className="w-20 p-2 rounded-lg border border-slate-200 text-sm"
+                                        value={item.quantity}
+                                        onChange={e => updateItem(idx, 'quantity', parseInt(e.target.value))}
+                                        min="1"
+                                    />
+                                    <input
+                                        type="number"
+                                        className="w-24 p-2 rounded-lg border border-slate-200 text-sm"
+                                        value={item.unit_price}
+                                        onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value))}
+                                    />
+                                    <div className="w-24 text-right font-bold text-slate-600 text-sm">
+                                        R$ {(item.quantity * item.unit_price).toFixed(2)}
+                                    </div>
+                                    <button onClick={() => removeItem(idx)} className="text-red-400 hover:text-red-600">
+                                        <span className="material-symbols-outlined text-lg">delete</span>
+                                    </button>
+                                </div>
+                            ))}
+                            {items.length === 0 && <p className="text-center text-slate-400 text-sm italic py-2">Nenhum item adicionado.</p>}
+                        </div>
+
+                        <div className="mt-6 flex justify-end items-center gap-4">
+                            <div className="text-right">
+                                <span className="block text-xs text-slate-400 uppercase font-bold">Total Estimado</span>
+                                <span className="text-2xl font-black text-slate-900">R$ {calculateTotal().toFixed(2)}</span>
+                            </div>
+                            <button
+                                onClick={handleSaveBudget}
+                                className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all"
+                            >
+                                Salvar Orçamento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Data</th>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Paciente</th>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Valor</th>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                        {budgets.map(b => (
+                            <tr key={b.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-4 text-sm text-slate-600">{new Date(b.created_at).toLocaleDateString()}</td>
+                                <td className="p-4 font-bold text-slate-900">{b.patient?.full_name || 'Desconhecido'}</td>
+                                <td className="p-4 font-mono text-sm text-slate-600">R$ {b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase
+                                        ${b.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            b.status === 'rejected' ? 'bg-red-50 text-red-600' :
+                                                b.status === 'paid' ? 'bg-emerald-100 text-emerald-800' :
+                                                    'bg-slate-100 text-slate-500'}`}>
+                                        {b.status}
+                                    </span>
+                                </td>
+                                <td className="p-4 flex gap-2">
+                                    {b.status === 'draft' && (
+                                        <button onClick={() => handleStatusChange(b.id, 'approved')} className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded hover:bg-green-100">
+                                            Aprovar
+                                        </button>
+                                    )}
+                                    {b.status === 'approved' && (
+                                        <button onClick={() => handleStatusChange(b.id, 'paid')} className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100">
+                                            Pago
+                                        </button>
+                                    )}
+                                    <button className="text-slate-400 hover:text-slate-600">
+                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        {budgets.length === 0 && !isLoading && (
+                            <tr><td colSpan={5} className="p-8 text-center text-slate-400">Nenhum orçamento cadastrado.</td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
