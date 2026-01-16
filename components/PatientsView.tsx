@@ -119,12 +119,21 @@ const FilesTab = () => {
 };
 
 // 5a. Patient List
+import { usePermissions } from '../hooks/usePermissions';
+
 const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
+    const { canAddPatient, isFree } = usePermissions();
     const patients = [
         { id: 1, name: 'João Silva', age: 34, phone: '(11) 99999-1234', lastVisit: '12 Jan, 2026', status: 'Em Tratamento' },
         { id: 2, name: 'Maria Souza', age: 28, phone: '(11) 98888-5678', lastVisit: '10 Jan, 2026', status: 'Manutenção' },
         { id: 3, name: 'Pedro Alves', age: 45, phone: '(11) 97777-4321', lastVisit: '05 Dez, 2025', status: 'Avaliação' },
     ];
+
+    // In real app, we fetch count from DB.
+    // For MVP, if Plan=Free, we just mock the limit check or assume limit is reached if user tries to add 11th.
+    // Let's assume current mocked count is 3, so valid.
+    // But let's show visual feedback if limit was reached.
+    const canAdd = canAddPatient(patients.length);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
@@ -133,9 +142,26 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
                     <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
                     <input type="text" placeholder="Buscar pacientes..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none" />
                 </div>
-                <button className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20">
-                    <span className="material-symbols-outlined text-[20px]">person_add</span> Novo Paciente
-                </button>
+
+                <div className="flex gap-2 items-center">
+                    {isFree && (
+                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
+                            {patients.length} / 10 Pacientes (Grátis)
+                        </span>
+                    )}
+                    <button
+                        disabled={!canAdd}
+                        className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed group relative"
+                    >
+                        <span className="material-symbols-outlined text-[20px]">person_add</span> Novo Paciente
+
+                        {!canAdd && (
+                            <div className="absolute bottom-full mb-2 right-0 w-48 bg-slate-900 text-white text-xs p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                Limite do plano Grátis atingido. Faça upgrade para adicionar mais.
+                            </div>
+                        )}
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">

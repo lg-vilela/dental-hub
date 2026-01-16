@@ -102,8 +102,8 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
                 </div>
             </div>
 
-            <p className="mt-8 text-xs text-slate-400 font-medium">
-                &copy; 2026 Dental Hub. Todos os direitos reservados.
+            <p className="mt-8 text-xs text-slate-400 font-medium text-center">
+                &copy; 2026 Dental Hub. Developed & Maintained by <a href="#" className="font-bold text-slate-500 hover:text-slate-700">Vilela CodeLab</a>.
             </p>
         </div>
     );

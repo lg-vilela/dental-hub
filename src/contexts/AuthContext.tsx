@@ -2,9 +2,25 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 
+// Types for our SaaS Structure
+export interface UserProfile {
+    id: string;
+    clinic_id: string;
+    role: 'admin' | 'dentist' | 'receptionist';
+    full_name: string;
+}
+
+export interface ClinicData {
+    id: string;
+    name: string;
+    plan: 'free' | 'pro' | 'plus';
+}
+
 interface AuthContextType {
     session: Session | null;
     user: User | null;
+    profile: UserProfile | null;
+    clinic: ClinicData | null;
     isAuthenticated: boolean;
     signIn: (email: string) => Promise<{ error: any }>;
     signUp: (email: string, pass: string, meta: any) => Promise<{ error: any }>;
@@ -17,21 +33,77 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [clinic, setClinic] = useState<ClinicData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-        });
+    // Fetch Profile and Clinic Data
+    const fetchProfileData = async (userId: string) => {
+        try {
+            // 1. Get Profile
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
 
-        // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (profileError) {
+                console.warn('Profile fetch error (might be new user):', profileError);
+                // If it's a new user without profile, we might be in the middle of creation.
+                // Or we need to handle "No Profile" state.
+                return;
+            }
+
+            setProfile(profileData as UserProfile);
+
+            // 2. Get Clinic
+            if (profileData?.clinic_id) {
+                const { data: clinicData, error: clinicError } = await supabase
+                    .from('clinics')
+                    .select('*')
+                    .eq('id', profileData.clinic_id)
+                    .single();
+
+                if (!clinicError) {
+                    setClinic(clinicData as ClinicData);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
+
+    useEffect(() => {
+        const loadSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
             setSession(session);
             setUser(session?.user ?? null);
+
+            if (session?.user) {
+                await fetchProfileData(session.user.id);
+            }
             setIsLoading(false);
+        };
+
+        loadSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            setSession(session);
+            setUser(session?.user ?? null);
+
+            if (session?.user) {
+                // If LOGIN event, fetch data
+                if (_event === 'SIGNED_IN') {
+                    setIsLoading(true);
+                    await fetchProfileData(session.user.id);
+                    setIsLoading(false);
+                }
+            } else {
+                setProfile(null);
+                setClinic(null);
+            }
+
+            if (_event === 'INITIAL_SESSION') setIsLoading(false);
         });
 
         return () => subscription.unsubscribe();
@@ -60,27 +132,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Helper wrappers
     const customSignIn = async (email: string, password: string) => {
-        return await supabase.auth.signInWithPassword({ email, password });
+        const res = await supabase.auth.signInWithPassword({ email, password });
+        return res;
     };
 
     const customSignUp = async (email: string, password: string, meta: any) => {
-        return await supabase.auth.signUp({
+        // 1. Create Auth User
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
                 data: meta
+                // Note: Triggers in SQL will handle Profile/Clinic creation OR
+                // we do it manually here if triggers fail/are disabled.
+                // For robustness, let's rely on the Trigger creating the BASIC structure, 
+                // and then we update it with 'meta' details if needed.
+                // For this MVP, let's assume the Trigger 'handle_new_user' does the job.
             }
         });
+
+        // If trigger is NOT enabled (user didn't run SQL), we might need manual fallbacks.
+        // But the prompt asked to generate SQL for it. So we assume SQL is run.
+        return { data, error };
     };
 
     const customSignOut = async () => {
         await supabase.auth.signOut();
+        setProfile(null);
+        setClinic(null);
     };
 
     return (
         <AuthContext.Provider value={{
             session,
             user,
+            profile,
+            clinic,
             isAuthenticated: !!session,
             signIn: customSignIn as any,
             signUp: customSignUp as any,

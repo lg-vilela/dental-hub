@@ -135,35 +135,41 @@ const BudgetsTab = () => {
 };
 
 // 6. Financials Container
+import PremiumFeature from './common/PremiumFeature';
+import { usePermissions } from '../hooks/usePermissions';
+
 const FinancialsView = () => {
+    const { canAccessFinancials } = usePermissions();
     const [activeTab, setActiveTab] = useState<'cashflow' | 'budgets'>('cashflow');
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)]">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>
-                <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
-                    {[
-                        { id: 'cashflow', label: 'Fluxo de Caixa', icon: 'monitoring' },
-                        { id: 'budgets', label: 'Orçamentos', icon: 'receipt_long' },
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                            <span className="hidden sm:inline">{tab.label}</span>
-                        </button>
-                    ))}
+        <PremiumFeature access={canAccessFinancials()} featureName="Módulo Financeiro">
+            <div className="flex flex-col h-[calc(100vh-140px)]">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>
+                    <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
+                        {[
+                            { id: 'cashflow', label: 'Fluxo de Caixa', icon: 'monitoring' },
+                            { id: 'budgets', label: 'Orçamentos', icon: 'receipt_long' },
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    {activeTab === 'cashflow' && <CashFlowTab />}
+                    {activeTab === 'budgets' && <BudgetsTab />}
                 </div>
             </div>
-
-            <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                {activeTab === 'cashflow' && <CashFlowTab />}
-                {activeTab === 'budgets' && <BudgetsTab />}
-            </div>
-        </div>
+        </PremiumFeature>
     );
 };
 
