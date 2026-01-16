@@ -41,13 +41,27 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                 // Success
                 onComplete(formData);
             } catch (err: any) {
-                let msg = err.message || 'Erro ao criar conta. Tente novamente.';
-                console.log('Signup Error:', msg); // Debug log
+                // Robust Error Extraction
+                let msg = '';
+                if (typeof err === 'string') {
+                    msg = err;
+                } else if (err?.message) {
+                    msg = err.message;
+                } else {
+                    msg = 'Erro desconhecido ao processar cadastro.';
+                }
 
-                // Translate specific Supabase errors (Case Insensitive)
-                const lowerMsg = msg.toLowerCase();
+                console.log('Signup Raw Error:', err); // Debug
+                console.log('Signup Extracted Msg:', msg); // Debug
 
-                if (lowerMsg.includes('user already registered') || lowerMsg.includes('email already registered')) {
+                // Translate specific Supabase errors (Case Insensitive & Trimmed)
+                const lowerMsg = msg.toLowerCase().trim();
+
+                if (
+                    lowerMsg.includes('user already registered') ||
+                    lowerMsg.includes('email already registered') ||
+                    lowerMsg === 'user already registered'
+                ) {
                     msg = 'Este e-mail já está cadastrado. Tente fazer login ou use outro e-mail.';
                 } else if (lowerMsg.includes('password should be at least')) {
                     msg = 'A senha deve ter no mínimo 6 caracteres.';
