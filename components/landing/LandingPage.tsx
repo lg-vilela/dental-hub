@@ -214,7 +214,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                         {/* Free */}
                         <div className="p-10 rounded-[40px] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Start</h3>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Plano Free</h3>
                             <p className="text-slate-500 mb-8">Para quem está começando agora.</p>
                             <div className="text-5xl font-black text-slate-900 mb-8">R$ 0<span className="text-lg font-medium text-slate-400 ml-1">/mês</span></div>
                             <button onClick={onStart} className="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 hover:border-[#617FA3] hover:text-[#617FA3] hover:bg-[#617FA3]/5 transition-all mb-8">
@@ -230,7 +230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         {/* Pro - Highlight */}
                         <div className="p-10 rounded-[40px] bg-[#617FA3] text-white shadow-2xl shadow-[#617FA3]/40 relative transform md:scale-110 z-10">
                             <div className="absolute top-0 right-10 bg-white text-[#617FA3] text-xs font-bold px-4 py-2 rounded-b-xl shadow-lg uppercase tracking-wide">Mais Escolhido</div>
-                            <h3 className="text-2xl font-bold mb-2">Clínica Pro</h3>
+                            <h3 className="text-2xl font-bold mb-2">Plano Pro</h3>
                             <p className="text-white/80 mb-8">Tudo para seu consultório voar.</p>
                             <div className="text-6xl font-black mb-8">R$ 97<span className="text-lg font-medium text-white/60 ml-1">/mês</span></div>
                             <button onClick={onStart} className="w-full py-5 rounded-2xl bg-white text-[#617FA3] font-bold hover:shadow-lg hover:scale-105 transition-all mb-8">
@@ -245,7 +245,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
 
                         {/* Max */}
                         <div className="p-10 rounded-[40px] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Scale</h3>
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Plano Plus</h3>
                             <p className="text-slate-500 mb-8">Para redes e franquias.</p>
                             <div className="text-5xl font-black text-slate-900 mb-8">R$ 197<span className="text-lg font-medium text-slate-400 ml-1">/mês</span></div>
                             <button onClick={onStart} className="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 hover:bg-slate-50 transition-all mb-8">
