@@ -238,17 +238,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const customSignOut = async () => {
         console.log("Signing out...");
         setAuthError(null);
+        // setUserMenuOpen(false); // Helper to close menu if passed? No, this is context.
+
         try {
-            await supabase.auth.signOut();
+            // Race against a timeout to ensure we don't hang forever
+            await Promise.race([
+                supabase.auth.signOut(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('SignOut Timeout')), 2000))
+            ]);
         } catch (error) {
-            console.error("Error signing out:", error);
+            console.warn("Sign out forced locally due to error/timeout:", error);
+        } finally {
+            // Always clear local state and redirect
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+            setClinic(null);
+            window.localStorage.clear(); // Extra safety
+            window.location.href = '/';
         }
-        setSession(null);
-        setUser(null);
-        setProfile(null);
-        setClinic(null);
-        // Force reload to ensure clean state
-        window.location.href = '/';
     };
 
     return (
