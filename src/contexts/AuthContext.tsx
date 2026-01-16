@@ -48,9 +48,45 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 .single();
 
             if (profileError) {
-                console.warn('Profile fetch error (might be new user):', profileError);
-                // If it's a new user without profile, we might be in the middle of creation.
-                // Or we need to handle "No Profile" state.
+                console.warn('Profile fetch error:', profileError);
+
+                // Auto-Heal: If profile missing (PGRST116), create one.
+                if (profileError.code === 'PGRST116') {
+                    console.log('Attempting to auto-heal missing profile...');
+                    try {
+                        // 1. Create Default Clinic
+                        const { data: newClinic, error: clinicErr } = await supabase
+                            .from('clinics')
+                            .insert({ name: 'Meu Consultório' })
+                            .select()
+                            .single();
+
+                        if (clinicErr) throw clinicErr;
+
+                        // 2. Create Profile
+                        const { data: newProfile, error: profileCreateErr } = await supabase
+                            .from('profiles')
+                            .insert({
+                                id: userId,
+                                clinic_id: newClinic.id,
+                                role: 'admin',
+                                full_name: 'Admin',
+                                email: (await supabase.auth.getUser()).data.user?.email || 'user@email.com'
+                            })
+                            .select()
+                            .single();
+
+                        if (profileCreateErr) throw profileCreateErr;
+
+                        // 3. Update State
+                        setClinic(newClinic as ClinicData);
+                        setProfile(newProfile as UserProfile);
+                        return;
+
+                    } catch (healingErr) {
+                        console.error('Auto-healing failed:', healingErr);
+                    }
+                }
                 return;
             }
 
