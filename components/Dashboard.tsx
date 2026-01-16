@@ -76,8 +76,8 @@ const Dashboard = () => {
     const metrics = [
         { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: '+12%', icon: 'group', color: 'blue' },
         { label: 'Faturamento', val: 'R$ 4.2k', trend: '+8%', icon: 'payments', color: 'emerald' },
-        { label: 'Pending', val: '3', trend: '-2%', icon: 'pending_actions', color: 'orange' },
-        { label: 'NPS', val: '92', trend: '+5%', icon: 'thumb_up', color: 'purple' },
+        { label: 'Pendências', val: '3', trend: '-2%', icon: 'pending_actions', color: 'orange' },
+        { label: 'Satisfação', val: '4.9/5', trend: '+5%', icon: 'star', color: 'purple' },
     ];
 
     return (
