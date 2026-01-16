@@ -344,6 +344,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         </div>
                     </div>
 
+                </div>
             </footer>
         </div>
     );
