@@ -71,7 +71,11 @@ const CashFlowTab = () => {
             loadData();
         } catch (err: any) {
             console.error(err);
-            showToast('Erro ao salvar: ' + (err.message || 'Erro desconhecido'), 'error');
+            if (err.message && err.message.includes('relation "public.transactions" does not exist')) {
+                showToast('Erro Crítico: Tabela de transações não existe. Contate o suporte ou rode o script SQL.', 'error', 10000);
+            } else {
+                showToast('Erro ao salvar: ' + (err.message || 'Erro desconhecido'), 'error');
+            }
         }
     };
 
