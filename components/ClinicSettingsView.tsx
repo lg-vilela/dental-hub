@@ -55,9 +55,7 @@ const AuditLogsTab = () => {
 
 // 5. Clinic Settings View
 const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
-    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan' | 'schedule' | 'security'>('identity');
-    const [tempName, setTempName] = useState(tenant.name);
-    const [tempColor, setTempColor] = useState(tenant.branding.primaryColor);
+    const [activeTab, setActiveTab] = useState<'schedule' | 'plan' | 'security'>('schedule');
 
     // Schedule Settings State
     const [openingTime, setOpeningTime] = useState(tenant.settings.openingTime);
@@ -66,8 +64,6 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
     const [workingDays, setWorkingDays] = useState(tenant.settings.workingDays);
 
     useEffect(() => {
-        setTempName(tenant.name);
-        setTempColor(tenant.branding.primaryColor);
         setOpeningTime(tenant.settings.openingTime);
         setClosingTime(tenant.settings.closingTime);
         setSlotDuration(tenant.settings.slotDuration);
@@ -76,11 +72,6 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
 
     const handleSave = () => {
         updateConfig({
-            name: tempName,
-            branding: {
-                ...tenant.branding,
-                primaryColor: tempColor
-            },
             settings: {
                 ...tenant.settings,
                 openingTime,
@@ -97,7 +88,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
             <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Configurações da Clínica</h2>
-                    <p className="text-slate-500 text-sm">Gerencie a identidade e planos da sua conta.</p>
+                    <p className="text-slate-500 text-sm">Gerencie horários e planos da sua conta.</p>
                 </div>
                 <button onClick={handleSave} className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
                     <span className="material-symbols-outlined">save</span> Salvar Alterações
@@ -113,8 +104,6 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                         </div>
                         <nav className="flex flex-col p-2">
                             {[
-                                { id: 'identity', label: 'Identidade Visual', icon: 'palette' },
-                                { id: 'branding', label: 'Marca & Logo', icon: 'verified' },
                                 { id: 'schedule', label: 'Agenda & Horários', icon: 'calendar_clock' },
                                 { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
                                 { id: 'security', label: 'Segurança & LGPD', icon: 'shield_lock' },
@@ -134,39 +123,6 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
 
                 {/* Content Area */}
                 <div className="lg:col-span-3 space-y-6">
-                    {/* Identity Tab */}
-                    {activeTab === 'identity' && (
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <div className="p-6 border-b border-slate-100">
-                                <h3 className="text-lg font-bold text-slate-900">Identidade da Clínica</h3>
-                            </div>
-                            <div className="p-8 space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700">Nome da Clínica</label>
-                                    <input
-                                        type="text"
-                                        value={tempName}
-                                        onChange={(e) => setTempName(e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    />
-                                    <p className="text-xs text-slate-400">Este nome aparecerá em relatórios e no topo do menu.</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-slate-700">Cor Primária (Hex)</label>
-                                    <div className="flex gap-4 items-center">
-                                        <div className="size-12 rounded-xl border border-slate-200 shadow-sm" style={{ backgroundColor: tempColor }}></div>
-                                        <input
-                                            type="text"
-                                            value={tempColor}
-                                            onChange={(e) => setTempColor(e.target.value)}
-                                            className="w-40 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-mono uppercase"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Schedule Settings Tab */}
                     {activeTab === 'schedule' && (
                         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -268,15 +224,6 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-
-                    {/* Branding Tab Placeholder */}
-                    {activeTab === 'branding' && (
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-8 flex flex-col items-center justify-center text-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">architecture</span>
-                            <h3 className="text-slate-900 font-bold text-lg">Configurações Avançadas de Marca</h3>
-                            <p className="text-slate-500 max-w-md mt-2">Upload de logo personalizado e fontes estarão disponíveis na próxima atualização.</p>
                         </div>
                     )}
 
