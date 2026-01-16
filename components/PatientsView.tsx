@@ -133,13 +133,16 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchPatients = async () => {
+        console.log("PatientsView: Starting fetch...");
         setIsLoading(true);
         try {
             const data = await patientService.getPatients();
+            console.log("PatientsView: Success, count=", data.length);
             setPatients(data);
         } catch (error) {
-            console.error("Error fetching patients:", error);
+            console.error("PatientsView: Error fetching patients:", error);
         } finally {
+            console.log("PatientsView: Finally block reached. Loading=false");
             setIsLoading(false);
         }
     };
