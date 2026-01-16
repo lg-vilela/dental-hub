@@ -980,14 +980,83 @@ const FilesTab = () => {
     );
 };
 
-// 5. Patient Record Container (Tabs)
-const PatientRecord = () => {
+// 5. Patient Management Components
+
+// 5a. Patient List
+const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
+    const patients = [
+        { id: 1, name: 'João Silva', age: 34, phone: '(11) 99999-1234', lastVisit: '12 Jan, 2026', status: 'Em Tratamento' },
+        { id: 2, name: 'Maria Souza', age: 28, phone: '(11) 98888-5678', lastVisit: '10 Jan, 2026', status: 'Manutenção' },
+        { id: 3, name: 'Pedro Alves', age: 45, phone: '(11) 97777-4321', lastVisit: '05 Dez, 2025', status: 'Avaliação' },
+    ];
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="relative flex-1 max-w-md">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
+                    <input type="text" placeholder="Buscar pacientes..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none" />
+                </div>
+                <button className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20">
+                    <span className="material-symbols-outlined text-[20px]">person_add</span> Novo Paciente
+                </button>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th className="px-6 py-4 font-bold text-slate-500">Paciente</th>
+                            <th className="px-6 py-4 font-bold text-slate-500">Contato</th>
+                            <th className="px-6 py-4 font-bold text-slate-500">Última Visita</th>
+                            <th className="px-6 py-4 font-bold text-slate-500">Status</th>
+                            <th className="px-6 py-4 font-bold text-slate-500">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {patients.map(p => (
+                            <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">{p.name.charAt(0)}</div>
+                                        <div>
+                                            <p className="font-bold text-slate-900">{p.name}</p>
+                                            <p className="text-xs text-slate-400">{p.age} anos</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-slate-600">{p.phone}</td>
+                                <td className="px-6 py-4 text-sm text-slate-600">{p.lastVisit}</td>
+                                <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.status === 'Em Tratamento' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
+                                        {p.status}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <button onClick={() => onSelect(p)} className="text-primary font-bold text-sm hover:underline">Abrir Prontuário</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+// 5b. Patient Detail (Formerly PatientRecord)
+const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }) => {
     const [activeTab, setActiveTab] = useState<'odontogram' | 'anamnesis' | 'evolution' | 'files'>('odontogram');
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)]">
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-4">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">João Silva</span></h2>
+                <div className="flex items-center gap-4">
+                    <button onClick={onBack} className="size-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors">
+                        <span className="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">{patient.name}</span></h2>
+                </div>
                 <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
                     {[
                         { id: 'odontogram', label: 'Odontograma', icon: 'dentistry' },
@@ -1015,6 +1084,28 @@ const PatientRecord = () => {
             </div>
         </div>
     );
+};
+
+// 5c. Patients View Container
+const PatientsView = () => {
+    const [view, setView] = useState<'list' | 'detail'>('list');
+    const [selectedPatient, setSelectedPatient] = useState<any>(null);
+
+    const handleSelect = (p: any) => {
+        setSelectedPatient(p);
+        setView('detail');
+    };
+
+    const handleBack = () => {
+        setSelectedPatient(null);
+        setView('list');
+    };
+
+    if (view === 'detail' && selectedPatient) {
+        return <PatientDetail patient={selectedPatient} onBack={handleBack} />;
+    }
+
+    return <PatientList onSelect={handleSelect} />;
 };
 
 // Financials View
@@ -1577,7 +1668,7 @@ export default function App() {
                     <div className="max-w-[1400px] mx-auto">
                         {activePage === 'dashboard' && <Dashboard openModal={() => setIsModalOpen(true)} setPage={setActivePage} />}
                         {activePage === 'schedule' && <ScheduleView openModal={() => setIsModalOpen(true)} tenant={activeTenant} />}
-                        {activePage === 'patients' && <PatientRecord />}
+                        {activePage === 'patients' && <PatientsView />}
                         {activePage === 'financials' && <FinancialsView />}
                         {activePage === 'settings' && <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />}
                         {activePage === 'inventory' && (
