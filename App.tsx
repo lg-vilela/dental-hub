@@ -23,6 +23,7 @@ function AppContent() {
 
     const [isSetupComplete, setIsSetupComplete] = useState(true);
     const [showLanding, setShowLanding] = useState(true); // Keep Landing as first screen
+    const [isSigningUp, setIsSigningUp] = useState(false); // New state to control signup flow
 
     const [activePage, setActivePage] = useState('dashboard');
     const [isPublicView, setIsPublicView] = useState(false);
@@ -67,6 +68,7 @@ function AppContent() {
         updateTenantConfig({ name: data.clinicName });
         // Assume context handles user creation
         setIsSetupComplete(true);
+        setIsSigningUp(false);
     };
 
     // Render Logic
@@ -78,13 +80,13 @@ function AppContent() {
         if (showLanding) {
             return <LandingPage onStart={() => setShowLanding(false)} onLogin={() => setShowLanding(false)} />;
         }
-        // Pass a dummy onLogin for consistency, but the view should use useAuth
-        return <LoginView onLogin={() => { }} onSignup={() => setIsSetupComplete(false)} />; // Fix logic: LoginView handles auth, if success context updates. Signup click switches to SetupWizard? No, usually Signup is separate.
-        // Wait, current flow: LoginView has "Create Account" button which calls onSignup prop.
-        // If onSignup is called, we should show SetupWizard?
-        // Actually, let's make onSignup switch to a mode where we show SetupWizard.
-        // But SetupWizard is protected? Or is it the signup flow?
-        // User said "Mehore o cadastro... Ao criar uma conta...". SetupWizard IS the signup flow.
+
+        // Show Signup Wizard if requested
+        if (isSigningUp) {
+            return <SetupWizard onComplete={handleSetupComplete} />;
+        }
+
+        return <LoginView onLogin={() => { }} onSignup={() => setIsSigningUp(true)} />;
     }
 
     // Logic: If authenticated but no clinic setup?

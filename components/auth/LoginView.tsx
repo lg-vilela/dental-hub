@@ -88,16 +88,14 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center">
-                        <p className="text-slate-500 text-sm">
-                            Ainda não tem conta?{' '}
-                            <button onClick={() => {
-                                // If using SetupWizard as Signup, we need to switch view in parent.
-                                onSignup();
-                            }} className="font-bold text-primary hover:underline">
-                                Criar Clínica Grátis
-                            </button>
-                        </p>
+                    <div className="mt-8 pt-8 border-t border-slate-100 text-center">
+                        <p className="text-slate-500 text-sm mb-4">Ainda não tem conta?</p>
+                        <button
+                            onClick={() => onSignup()}
+                            className="w-full bg-white border-2 border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
+                        >
+                            Criar Clínica Grátis <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
+                        </button>
                     </div>
                 </div>
             </div>
