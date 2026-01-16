@@ -271,4 +271,10 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                             </button>
                         </div>
                     </div>
-                    export default SetupWizard;
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SetupWizard;
