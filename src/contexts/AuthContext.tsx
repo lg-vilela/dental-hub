@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 }
             } catch (error) {
                 console.error("Auth initialization error:", error);
-            } final {
+            } finally {
                 if (mounted) setIsLoading(false);
             }
         };
