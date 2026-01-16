@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { patientService } from '../../services/patientService';
-import { useAuth } from '../../contexts/AuthContext';
+import { patientService } from '../../src/services/patientService';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 interface AddPatientModalProps {
     isOpen: boolean;
