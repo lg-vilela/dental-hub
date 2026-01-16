@@ -64,6 +64,7 @@ const TeamTab = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [inviteRole, setInviteRole] = useState('dentist');
     const [inviteLink, setInviteLink] = useState('');
+    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
 
     useEffect(() => {
         loadTeam();
@@ -82,33 +83,64 @@ const TeamTab = () => {
 
     const generateInvite = () => {
         if (!clinic) return;
-        // Generate a link that passes metadata to the signup page
-        // Format: /signup?invite_clinic_id=UUID&invite_role=ROLE
-        const baseUrl = window.location.origin; // e.g. http://localhost:5173
+        const baseUrl = window.location.origin;
         const link = `${baseUrl}/signup?invite_clinic_id=${clinic.id}&invite_role=${inviteRole}`;
         setInviteLink(link);
     };
 
     const copyLink = () => {
         navigator.clipboard.writeText(inviteLink);
-        alert('Link copiado! Envie para o membro da equipe.');
+        alert('Link copiado!');
     };
+
+    const roles = [
+        { id: 'dentist', label: 'Dentista' },
+        { id: 'receptionist', label: 'Recepcionista' },
+        { id: 'admin', label: 'Administrador' }
+    ];
+
+    const currentRoleLabel = roles.find(r => r.id === inviteRole)?.label;
 
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-slate-900">Gerenciar Equipe</h3>
-                <div className="flex gap-2">
-                    <select
-                        value={inviteRole}
-                        onChange={(e) => { setInviteRole(e.target.value); setInviteLink(''); }}
-                        className="text-sm border border-slate-200 rounded-lg px-2 py-1 outline-none"
-                    >
-                        <option value="dentist">Dentista</option>
-                        <option value="receptionist">Recepcionista</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                    <button onClick={generateInvite} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
+            <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900">Gerenciar Equipe</h3>
+                    <p className="text-sm text-slate-500">Convide novos membros para sua clínica.</p>
+                </div>
+
+                <div className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    {/* Custom Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                            className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-lg text-sm font-bold text-slate-700 hover:border-slate-300 transition-all min-w-[140px] justify-between"
+                        >
+                            {currentRoleLabel}
+                            <span className="material-symbols-outlined text-slate-400 text-[18px]">expand_more</span>
+                        </button>
+
+                        {isRoleDropdownOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsRoleDropdownOpen(false)}></div>
+                                <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl z-20 py-1 animate-in fade-in zoom-in-95 duration-200">
+                                    {roles.map(r => (
+                                        <button
+                                            key={r.id}
+                                            onClick={() => { setInviteRole(r.id); setInviteLink(''); setIsRoleDropdownOpen(false); }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors flex items-center justify-between ${inviteRole === r.id ? 'text-primary bg-primary/5' : 'text-slate-600'}`}
+                                        >
+                                            {r.label}
+                                            {inviteRole === r.id && <span className="material-symbols-outlined text-[16px]">check</span>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <button onClick={generateInvite} className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">link</span>
                         Gerar Convite
                     </button>
                 </div>
@@ -116,12 +148,21 @@ const TeamTab = () => {
 
             {/* Invite Link Area */}
             {inviteLink && (
-                <div className="p-4 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
-                    <div>
-                        <p className="text-xs font-bold text-blue-800 uppercase mb-1">Link de Convite ({inviteRole === 'dentist' ? 'Dentista' : inviteRole === 'receptionist' ? 'Recepcionista' : 'Admin'})</p>
-                        <p className="text-sm text-blue-600 font-mono break-all">{inviteLink}</p>
+                <div className="p-6 bg-primary/5 border-b border-primary/10 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-2">
+                    <div className="flex-1">
+                        <p className="text-xs font-bold text-primary uppercase mb-2 flex items-center gap-2">
+                            <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
+                            Link Ativo para {currentRoleLabel}
+                        </p>
+                        <div className="flex items-center gap-3 bg-white border border-primary/20 rounded-lg p-3">
+                            <span className="material-symbols-outlined text-primary">link</span>
+                            <p className="text-sm text-slate-600 font-mono truncate select-all">{inviteLink}</p>
+                        </div>
                     </div>
-                    <button onClick={copyLink} className="text-blue-700 font-bold text-sm hover:underline">Copiar</button>
+                    <button onClick={copyLink} className="bg-white text-primary border border-primary/20 hover:bg-primary hover:text-white px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-sm">
+                        <span className="material-symbols-outlined">content_copy</span>
+                        Copiar Link
+                    </button>
                 </div>
             )}
 
@@ -129,41 +170,64 @@ const TeamTab = () => {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
                         <tr>
-                            <th className="px-6 py-3 font-bold">Nome</th>
-                            <th className="px-6 py-3 font-bold">Email</th>
-                            <th className="px-6 py-3 font-bold">Cargo</th>
-                            <th className="px-6 py-3 font-bold">Status</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Membro</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Email</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Cargo</th>
+                            <th className="px-6 py-4 font-bold uppercase text-xs tracking-wider">Status</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {isLoading ? (
-                            <tr><td colSpan={4} className="p-6 text-center text-slate-400">Carregando equipe...</td></tr>
+                            [1, 2, 3].map(i => (
+                                <tr key={i}>
+                                    <td className="px-6 py-4"><div className="h-4 w-32 bg-slate-100 rounded animate-pulse"></div></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-48 bg-slate-100 rounded animate-pulse"></div></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-20 bg-slate-100 rounded animate-pulse"></div></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-16 bg-slate-100 rounded animate-pulse"></div></td>
+                                </tr>
+                            ))
+                        ) : members.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="p-12 text-center">
+                                    <div className="flex flex-col items-center justify-center text-slate-400">
+                                        <span className="material-symbols-outlined text-4xl mb-2 opacity-50">group_off</span>
+                                        <p className="font-medium">Nenhum membro encontrado.</p>
+                                    </div>
+                                </td>
+                            </tr>
                         ) : members.map((m) => (
-                            <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 py-3 font-bold text-slate-900 flex items-center gap-2">
-                                    <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                            <tr key={m.id} className="hover:bg-slate-50/50 transition-colors group">
+                                <td className="px-6 py-4 font-bold text-slate-900 flex items-center gap-3">
+                                    <div className="size-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 flex items-center justify-center text-sm shadow-inner">
                                         {m.full_name[0]}
                                     </div>
                                     {m.full_name}
                                 </td>
-                                <td className="px-6 py-3 text-slate-600">{m.email || 'Email oculto'}</td>
-                                <td className="px-6 py-3">
-                                    <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${m.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                            m.role === 'dentist' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-orange-100 text-orange-700'
+                                <td className="px-6 py-4 text-slate-600 font-medium">{m.email || 'Email oculto'}</td>
+                                <td className="px-6 py-4">
+                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${m.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                            m.role === 'dentist' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                'bg-orange-50 text-orange-700 border-orange-100'
                                         }`}>
+                                        {m.role === 'admin' && <span className="material-symbols-outlined text-[14px]">shield_person</span>}
+                                        {m.role === 'dentist' && <span className="material-symbols-outlined text-[14px]">dentistry</span>}
+                                        {m.role === 'receptionist' && <span className="material-symbols-outlined text-[14px]">support_agent</span>}
                                         {m.role === 'dentist' ? 'Dentista' : m.role === 'receptionist' ? 'Recepção' : 'Admin'}
                                     </span>
                                 </td>
-                                <td className="px-6 py-3 text-slate-400 text-xs">Ativo</td>
+                                <td className="px-6 py-4 text-slate-400 text-xs font-bold flex items-center gap-2">
+                                    <span className="size-2 rounded-full bg-green-500"></span>
+                                    Ativo
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            <div className="p-6 bg-slate-50 border-t border-slate-100">
-                <p className="text-xs text-slate-500 text-center">
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
+                <p className="text-xs text-slate-500 font-medium bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                    <span className="material-symbols-outlined text-[14px] align-middle mr-1">inventory_2</span>
                     Limite do Plano: <span className="font-bold text-slate-900">{members.length} / {clinic?.plan === 'pro' ? '10' : clinic?.plan === 'plus' ? '∞' : '1'}</span> usuários.
                 </p>
             </div>
