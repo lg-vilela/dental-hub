@@ -700,153 +700,155 @@ const ScheduleView = ({ openModal, tenant }: { openModal: () => void; tenant: Te
     );
 };
 
-// Patient Record (Odontogram)
+// Types for the Odontogram
+type ToothCondition = 'healthy' | 'caries' | 'restoration' | 'crown' | 'missing' | 'implant';
 
-// A simplified Tooth component using SVG
-const Tooth: React.FC<{ num: number; top?: boolean; condition?: string; onClick?: () => void }> = ({ num, top, condition, onClick }) => (
-    <div onClick={onClick} className={`flex flex-col items-center gap-1 cursor-pointer group w-8`}>
-        {!top && <span className="text-[10px] font-bold text-slate-400 group-hover:text-primary">{num}</span>}
-        <div className={`relative w-full h-10 bg-white border ${condition ? 'border-2 border-' + (condition === 'Cárie' ? 'red-500' : condition === 'Coroa' ? 'yellow-400' : 'blue-500') : 'border-slate-300'} ${top ? 'rounded-b-lg' : 'rounded-t-lg'} hover:border-primary transition-colors overflow-hidden`}>
-            {/* Simulate conditions */}
-            {condition === 'Cárie' && <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center"><div className="size-2 bg-red-500 rounded-full"></div></div>}
-            {condition === 'Coroa' && <div className="absolute inset-0 border-2 border-yellow-400 bg-yellow-100/50"></div>}
-            {condition === 'Restauração' && <div className="absolute inset-0 bg-blue-500/10"><div className="w-full h-1/2 bg-blue-500/30"></div></div>}
-            {condition === 'Ausente' && <div className="absolute inset-0 flex items-center justify-center"><span className="material-symbols-outlined text-slate-300 text-lg">close</span></div>}
+interface ToothState {
+    id: number;
+    condition: ToothCondition;
+    notes?: string;
+}
 
-            {/* Default seeds for demo if no interaction yet */}
-            {!condition && num === 3 && <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center"><div className="size-2 bg-red-500 rounded-full"></div></div>}
-            {!condition && num === 30 && <div className="absolute inset-0 border-2 border-yellow-400 bg-yellow-100/50"></div>}
-            {!condition && num === 18 && <div className="absolute inset-0 flex items-center justify-center"><span className="material-symbols-outlined text-slate-300 text-lg">close</span></div>}
-        </div>
-        {top && <span className="text-[10px] font-bold text-slate-400 group-hover:text-primary">{num}</span>}
-    </div>
-);
+// SVG Paths for a generic Molar (simplified for MVP)
+const ToothSVG: React.FC<{ num: number; condition?: ToothCondition; onClick: () => void }> = ({ num, condition, onClick }) => {
+    // Determine color based on condition
+    let fillColor = 'fill-white';
+    let strokeColor = 'stroke-slate-300';
 
-const PatientRecord = () => {
-    const [selectedTool, setSelectedTool] = useState<string | null>(null);
-    const [toothConditions, setToothConditions] = useState<{ [key: number]: string }>({});
-    const [zoom, setZoom] = useState(1);
-    const [history, setHistory] = useState([
-        { date: '01 Nov, 2023', tooth: 30, proc: 'Coroa - Porcelana sobre Metal', status: 'Em Andamento', color: 'yellow' },
-        { date: '12 Out, 2023', tooth: 14, proc: 'Resina Composta', status: 'Concluído', color: 'teal' },
-    ]);
-
-    const handleToothClick = (num: number) => {
-        if (selectedTool) {
-            if (selectedTool === 'Limpar') {
-                const newConditions = { ...toothConditions };
-                delete newConditions[num];
-                setToothConditions(newConditions);
-            } else {
-                setToothConditions(prev => ({
-                    ...prev,
-                    [num]: selectedTool
-                }));
-            }
-        } else {
-            alert(`Dente ${num} selecionado. Selecione uma condição à direita para aplicar.`);
-        }
-    };
-
-    const addHistory = () => {
-        setHistory(prev => [{ date: 'Hoje', tooth: 0, proc: 'Nova Consulta', status: 'Pendente', color: 'slate' }, ...prev]);
-    };
+    switch (condition) {
+        case 'caries': fillColor = 'fill-red-400'; break;
+        case 'restoration': fillColor = 'fill-blue-400'; break;
+        case 'crown': fillColor = 'fill-amber-300'; break;
+        case 'missing': fillColor = 'fill-slate-100 opacity-20'; break;
+        case 'implant': fillColor = 'fill-purple-300'; break;
+    }
 
     return (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-[calc(100vh-140px)]">
-            {/* Odontogram */}
-            <div className="xl:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                    <div className="flex items-center gap-4">
-                        <h3 className="font-bold text-slate-900">Odontograma</h3>
-                        <div className="flex bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-                            <button onClick={() => setZoom(1)} className={`px-2 py-1 text-xs font-bold rounded ${zoom === 1 ? 'bg-slate-100 text-slate-900' : 'text-slate-500'}`}>1x</button>
-                            <button onClick={() => setZoom(1.2)} className={`px-2 py-1 text-xs font-bold rounded ${zoom === 1.2 ? 'bg-slate-100 text-slate-900' : 'text-slate-500'}`}>1.2x</button>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button className="flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-primary transition-colors bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm" onClick={() => window.print()}>
-                            <span className="material-symbols-outlined text-[16px]">print</span> Imprimir
-                        </button>
-                    </div>
-                </div>
+        <div onClick={onClick} className="flex flex-col items-center gap-1 cursor-pointer group transition-transform hover:scale-110">
+            <span className="text-xs font-bold text-slate-400 select-none">{num}</span>
+            <svg width="40" height="60" viewBox="0 0 40 60" className={`drop-shadow-sm transition-all ${fillColor} ${strokeColor} stroke-2`}>
+                {/* Crown */}
+                <path d="M5 15 Q 10 5, 20 5 Q 30 5, 35 15 L 35 35 Q 30 45, 20 45 Q 10 45, 5 35 Z" />
+                {/* Root (Visual only) */}
+                <path d="M10 45 L 15 55 L 20 45 L 25 55 L 30 45" fill="none" className="stroke-slate-300 opacity-50" />
+            </svg>
+            {condition && condition !== 'healthy' && (
+                <div className={`size-2 rounded-full mt-1 ${fillColor.replace('fill-', 'bg-')}`}></div>
+            )}
+        </div>
+    );
+};
 
-                <div className="flex-1 bg-slate-50/50 p-8 flex items-center justify-center overflow-auto relative">
-                    <div className={`flex flex-col gap-8 transition-transform duration-300 scale-[${zoom}]`}>
-                        {/* Top Arch */}
-                        <div className="flex gap-1">
-                            {Array.from({ length: 16 }).map((_, i) => (
-                                <Tooth key={i} num={18 - i} top={true} condition={toothConditions[18 - i]} onClick={() => handleToothClick(18 - i)} />
-                            ))}
-                        </div>
-                        {/* Bottom Arch */}
-                        <div className="flex gap-1">
-                            {Array.from({ length: 16 }).map((_, i) => (
-                                <Tooth key={i + 16} num={48 - i} condition={toothConditions[48 - i]} onClick={() => handleToothClick(48 - i)} />
-                            ))}
-                        </div>
-                    </div>
+// 5. Patient Record View (Enhanced with Odontogram)
+const PatientRecord = () => {
+    const [selectedTool, setSelectedTool] = useState<ToothCondition | 'clear'>('healthy');
+    const [teeth, setTeeth] = useState<Record<number, ToothState>>({});
 
-                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur p-3 rounded-lg border border-slate-200 text-xs text-slate-500 shadow-sm">
-                        <p>Use as ferramentas à direita para marcar condições.</p>
-                    </div>
+    // Adult dentition (11-18, 21-28, 31-38, 41-48)
+    const upperRight = [18, 17, 16, 15, 14, 13, 12, 11];
+    const upperLeft = [21, 22, 23, 24, 25, 26, 27, 28];
+    const lowerLeft = [31, 32, 33, 34, 35, 36, 37, 38].reverse();
+    const lowerRight = [41, 42, 43, 44, 45, 46, 47, 48].reverse();
+
+    const handleToothClick = (id: number) => {
+        if (selectedTool === 'clear') {
+            const newTeeth = { ...teeth };
+            delete newTeeth[id];
+            setTeeth(newTeeth);
+            return;
+        }
+
+        if (selectedTool === 'healthy') {
+            // Just unmark for now
+            const newTeeth = { ...teeth };
+            delete newTeeth[id];
+            setTeeth(newTeeth);
+            return;
+        }
+
+        setTeeth(prev => ({
+            ...prev,
+            [id]: { id, condition: selectedTool }
+        }));
+    };
+
+    const tools: { id: ToothCondition | 'clear', label: string, color: string, icon: string }[] = [
+        { id: 'caries', label: 'Cárie', color: 'bg-red-500', icon: 'coronavirus' },
+        { id: 'restoration', label: 'Restauração', color: 'bg-blue-500', icon: 'build_circle' },
+        { id: 'crown', label: 'Coroa', color: 'bg-amber-400', icon: 'diamond' },
+        { id: 'implant', label: 'Implante', color: 'bg-purple-500', icon: 'hardware' },
+        { id: 'missing', label: 'Ausente', color: 'bg-slate-300', icon: 'cancel' },
+        { id: 'clear', label: 'Limpar', color: 'bg-white border text-slate-500', icon: 'backspace' },
+    ];
+
+    return (
+        <div className="flex flex-col h-[calc(100vh-140px)]">
+            {/* Header / Tabs Placeholder */}
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">João Silva</span></h2>
+                <div className="flex gap-2">
+                    <button className="px-4 py-2 bg-slate-900 text-white rounded-lg font-bold text-sm">Odontograma</button>
+                    <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-50">Anamnese</button>
+                    <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-bold text-sm hover:bg-slate-50">Arquivos</button>
                 </div>
             </div>
 
-            {/* Controls & History */}
-            <div className="flex flex-col gap-6 h-full overflow-hidden">
-                {/* Tools */}
-                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-                    <h3 className="text-sm font-bold text-slate-900 mb-3">Ferramentas de Diagnóstico</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                        {['Cárie', 'Restauração', 'Coroa', 'Ausente', 'Limpar'].map((tool) => (
-                            <button
-                                key={tool}
-                                onClick={() => setSelectedTool(tool === selectedTool ? null : tool)}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-bold transition-all
-                   ${selectedTool === tool
-                                        ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
-                                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-primary/50'}`}
-                            >
-                                <div className={`size-3 rounded-full ${tool === 'Cárie' ? 'bg-red-500' :
-                                    tool === 'Coroa' ? 'bg-yellow-400' :
-                                        tool === 'Restauração' ? 'bg-blue-500' :
-                                            tool === 'Ausente' ? 'bg-black' : 'border border-slate-400'
-                                    }`}></div>
-                                {tool}
-                            </button>
-                        ))}
+            {/* Odontogram Toolbar */}
+            <div className="bg-white p-4 border border-slate-200 rounded-2xl flex justify-center gap-4 shadow-sm z-10 mb-6">
+                {tools.map(tool => (
+                    <button
+                        key={tool.id}
+                        onClick={() => setSelectedTool(tool.id)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all w-24 gap-2 ${selectedTool === tool.id ? 'bg-slate-900 text-white shadow-lg scale-105' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+                    >
+                        <div className={`size-8 rounded-full flex items-center justify-center ${tool.id === 'clear' ? '' : tool.color} ${tool.id === 'clear' || selectedTool === tool.id ? '' : 'bg-opacity-20 text-' + tool.color.split('-')[1] + '-600'}`}>
+                            {tool.id === 'clear' && <span className="material-symbols-outlined">backspace</span>}
+                            {tool.id !== 'clear' && <div className={`size-3 rounded-full bg-white`}></div>}
+                        </div>
+                        <span className="text-xs font-bold">{tool.label}</span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Canvas */}
+            <div className="flex-1 bg-slate-100/50 p-10 overflow-auto flex items-center justify-center relative rounded-3xl border border-slate-200">
+                <div className="bg-white p-12 rounded-[3rem] shadow-xl border border-slate-200/60 relative scale-90 sm:scale-100">
+                    {/* Crosshair / Midline */}
+                    <div className="absolute top-1/2 left-0 w-full h-px bg-slate-100"></div>
+                    <div className="absolute top-0 left-1/2 h-full w-px bg-slate-100"></div>
+
+                    {/* Upper Arch */}
+                    <div className="flex gap-12 mb-12 relative z-10">
+                        <div className="flex gap-2">
+                            {upperRight.map(id => <ToothSVG key={id} num={id} condition={teeth[id]?.condition} onClick={() => handleToothClick(id)} />)}
+                        </div>
+                        <div className="flex gap-2">
+                            {upperLeft.map(id => <ToothSVG key={id} num={id} condition={teeth[id]?.condition} onClick={() => handleToothClick(id)} />)}
+                        </div>
+                    </div>
+
+                    {/* Lower Arch */}
+                    <div className="flex gap-12 relative z-10">
+                        <div className="flex gap-2">
+                            {lowerRight.map(id => <ToothSVG key={id} num={id} condition={teeth[id]?.condition} onClick={() => handleToothClick(id)} />)}
+                        </div>
+                        <div className="flex gap-2">
+                            {lowerLeft.map(id => <ToothSVG key={id} num={id} condition={teeth[id]?.condition} onClick={() => handleToothClick(id)} />)}
+                        </div>
                     </div>
                 </div>
 
-                {/* Treatment History */}
-                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden">
-                    <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                        <h3 className="text-sm font-bold text-slate-900">Histórico de Tratamento</h3>
-                        <button onClick={addHistory} className="text-primary hover:bg-primary/10 p-1 rounded transition-colors"><span className="material-symbols-outlined">add</span></button>
-                    </div>
-                    <div className="overflow-y-auto p-0">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50 border-b border-slate-100 sticky top-0">
-                                <tr>
-                                    <th className="px-6 py-3 text-xs font-bold text-slate-500">Data</th>
-                                    <th className="px-6 py-3 text-xs font-bold text-slate-500">Dente</th>
-                                    <th className="px-6 py-3 text-xs font-bold text-slate-500">Proc.</th>
-                                    <th className="px-6 py-3 text-xs font-bold text-slate-500">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {history.map((row, i) => (
-                                    <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-4 text-xs font-bold text-slate-600">{row.date}</td>
-                                        <td className="px-6 py-4 font-bold">{row.tooth > 0 ? row.tooth : '-'}</td>
-                                        <td className="px-6 py-4 text-xs text-slate-600 truncate max-w-[120px]" title={row.proc}>{row.proc}</td>
-                                        <td className="px-6 py-4"><span className={`bg-${row.color}-100 text-${row.color}-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider`}>{row.status}</span></td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="absolute bottom-6 left-6 bg-white p-4 rounded-xl border border-slate-200 shadow-lg max-w-xs animate-in slide-in-from-left-4">
+                    <h4 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">info</span>
+                        Resumo
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                        {Object.keys(teeth).length === 0
+                            ? "Nenhum procedimento marcado."
+                            : `${Object.keys(teeth).length} dente(s) com alterações registradas.`
+                        }
+                    </p>
                 </div>
             </div>
         </div>
