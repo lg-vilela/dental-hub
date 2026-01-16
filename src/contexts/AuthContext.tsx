@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             if (profileError) {
                 console.warn('Profile fetch error:', profileError);
-                setAuthError(`Profile Error: ${profileError.message} (${profileError.code})`);
+                setAuthError(`Erro no Perfil: ${profileError.message} (${profileError.code})`);
 
                 // Auto-Heal: If profile missing (PGRST116), create one.
                 if (profileError.code === 'PGRST116') {
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                     } catch (healingErr) {
                         console.error('Auto-healing failed:', healingErr);
-                        setAuthError(`Auto-healing failed: ${healingErr.message || healingErr}`);
+                        setAuthError(`Falha na recuperação automática: ${healingErr.message || healingErr}`);
                     }
                 }
                 return;

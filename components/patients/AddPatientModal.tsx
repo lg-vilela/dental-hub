@@ -33,7 +33,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClos
             // My service signature for 'createPatientWithClinicId' expects { clinic_id, ... }
             // So we must provide it.
 
-            if (!clinic?.id) throw new Error("Clinic ID not found. Relogin.");
+            if (!clinic?.id) throw new Error("ID da Clínica não encontrado. Por favor, faça login novamente.");
 
             await patientService.createPatientWithClinicId({
                 clinic_id: clinic.id,
