@@ -1,135 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { financialService, Transaction } from '../src/services/financialService';
+import { useAuth } from '../src/contexts/AuthContext';
 
 // 6a. Cash Flow Dashboard
 const CashFlowTab = () => {
-    // Mock Data
-    const kpis = [
-        { label: 'Receita Mensal', value: 'R$ 48.500', trend: '+12%', color: 'text-green-600', bg: 'bg-green-50' },
-        { label: 'Despesas', value: 'R$ 12.200', trend: '-5%', color: 'text-red-600', bg: 'bg-red-50' },
-        { label: 'Lucro Líquido', value: 'R$ 36.300', trend: '+18%', color: 'text-blue-600', bg: 'bg-blue-50' },
-    ];
+    const { clinic } = useAuth();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [stats, setStats] = useState({ income: 0, expense: 0, balance: 0 });
+    const [isLoading, setIsLoading] = useState(true);
+    const [showAddForm, setShowAddForm] = useState(false);
 
-    const chartData = [
-        { month: 'Set', in: 65, out: 40 },
-        { month: 'Out', in: 59, out: 30 },
-        { month: 'Nov', in: 80, out: 50 },
-        { month: 'Dez', in: 81, out: 40 },
-        { month: 'Jan', in: 56, out: 30 },
-        { month: 'Fev', in: 95, out: 20 },
-    ];
+    // Quick Add Form State
+    const [newTrx, setNewTrx] = useState({
+        description: '',
+        amount: '',
+        type: 'income' as 'income' | 'expense',
+        category: 'Outros',
+        date: new Date().toISOString().split('T')[0]
+    });
 
-    const transactions = [
-        { desc: 'Pagamento - João Silva', cat: 'Tratamento', date: 'Hoje, 09:00', val: '+ R$ 450,00', type: 'in' },
-        { desc: 'Dental Cremer', cat: 'Materiais', date: 'Ontem', val: '- R$ 1.290,00', type: 'out' },
-        { desc: 'Pagamento - Maria Souza', cat: 'Ortodontia', date: 'Ontem', val: '+ R$ 200,00', type: 'in' },
-        { desc: 'Aluguel Sala 04', cat: 'Infraestrutura', date: '01 Fev', val: '- R$ 2.500,00', type: 'out' },
-    ];
+    const loadData = async () => {
+        setIsLoading(true);
+        try {
+            const data = await financialService.getDashboardStats();
+            setStats({
+                income: data.income,
+                expense: data.expense,
+                balance: data.balance
+            });
+            // We can get full list too if needed, getDashboardStats returns recent.
+            // Let's rely on dashboard stats logic which fetches all.
+            // Wait, getDashboardStats calls getTransactions inside.
+            // Let's just use getTransactions directly for the list to be sure.
+            const all = await financialService.getTransactions();
+            setTransactions(all);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const handleAdd = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!clinic) return;
+        try {
+            await financialService.createTransaction({
+                clinic_id: clinic.id,
+                description: newTrx.description,
+                amount: parseFloat(newTrx.amount),
+                type: newTrx.type,
+                category: newTrx.category,
+                date: newTrx.date
+            });
+            setShowAddForm(false);
+            setNewTrx({ ...newTrx, description: '', amount: '' });
+            loadData();
+        } catch (err) {
+            alert('Erro ao adicionar transação');
+        }
+    };
+
+    const formatMoney = (val: number) => {
+        return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
 
     return (
         <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
-            {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {kpis.map((k, i) => (
-                    <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
-                        <span className="text-sm font-bold text-slate-500">{k.label}</span>
-                        <div className="flex items-end justify-between">
-                            <span className="text-3xl font-bold text-slate-900">{k.value}</span>
-                            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${k.bg} ${k.color}`}>{k.trend}</span>
-                        </div>
-                    </div>
-                ))}
+            {/* Action Bar */}
+            <div className="flex justify-between items-center">
+                <h3 className="font-bold text-slate-700">Visão Geral</h3>
+                <button onClick={() => setShowAddForm(!showAddForm)} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 transition-colors">
+                    {showAddForm ? 'Cancelar' : 'Nova Transação'}
+                </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-96">
-                {/* Chart Area */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="font-bold text-slate-900 mb-6">Fluxo Financeiro (6 Meses)</h3>
-                    <div className="flex-1 flex items-end justify-between gap-4 px-4 pb-2">
-                        {chartData.map((d, i) => (
-                            <div key={i} className="flex flex-col items-center gap-2 flex-1 h-full justify-end group cursor-pointer">
-                                <div className="w-full max-w-[40px] flex gap-1 items-end h-[80%] relative">
-                                    <div style={{ height: `${d.in}%` }} className="flex-1 bg-slate-900 rounded-t-sm group-hover:bg-primary transition-colors"></div>
-                                    <div style={{ height: `${d.out}%` }} className="flex-1 bg-slate-200 rounded-t-sm"></div>
-                                </div>
-                                <span className="text-xs font-bold text-slate-400">{d.month}</span>
-                            </div>
-                        ))}
+            {/* Quick Add Form */}
+            {showAddForm && (
+                <form onSubmit={handleAdd} className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Descrição</label>
+                        <input required type="text" className="w-full px-3 py-2 border rounded-lg" value={newTrx.description} onChange={e => setNewTrx({ ...newTrx, description: e.target.value })} placeholder="Ex: Pagamento Consulta" />
                     </div>
-                </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Valor</label>
+                        <input required type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg" value={newTrx.amount} onChange={e => setNewTrx({ ...newTrx, amount: e.target.value })} placeholder="0.00" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
+                        <select className="w-full px-3 py-2 border rounded-lg" value={newTrx.type} onChange={e => setNewTrx({ ...newTrx, type: e.target.value as any })}>
+                            <option value="income">Receita (+)</option>
+                            <option value="expense">Despesa (-)</option>
+                        </select>
+                    </div>
+                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 h-[42px]">Salvar</button>
+                </form>
+            )}
 
-                {/* Transactions */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                    <h3 className="font-bold text-slate-900 mb-4">Transações Recentes</h3>
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                        {transactions.map((t, i) => (
-                            <div key={i} className="flex items-center justify-between group">
+            {/* KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                    <span className="text-sm font-bold text-slate-500">Receita Total</span>
+                    <span className="text-3xl font-bold text-green-600">{formatMoney(stats.income)}</span>
+                </div>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                    <span className="text-sm font-bold text-slate-500">Despesas</span>
+                    <span className="text-3xl font-bold text-red-600">{formatMoney(stats.expense)}</span>
+                </div>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                    <span className="text-sm font-bold text-slate-500">Balanço</span>
+                    <span className={`text-3xl font-bold ${stats.balance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>{formatMoney(stats.balance)}</span>
+                </div>
+            </div>
+
+            {/* Transactions List */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                <h3 className="font-bold text-slate-900 mb-4">Histórico de Transações</h3>
+                <div className="flex-1 overflow-y-auto space-y-4 max-h-[400px]">
+                    {isLoading ? (
+                        <p className="text-center text-slate-400">Carregando...</p>
+                    ) : transactions.length === 0 ? (
+                        <p className="text-center text-slate-400 py-8">Nenhuma transação registrada.</p>
+                    ) : (
+                        transactions.map((t) => (
+                            <div key={t.id} className="flex items-center justify-between group p-2 hover:bg-slate-50 rounded-lg transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className={`size-8 rounded-full flex items-center justify-center ${t.type === 'in' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                        <span className="material-symbols-outlined text-sm">{t.type === 'in' ? 'arrow_downward' : 'arrow_upward'}</span>
+                                    <div className={`size-8 rounded-full flex items-center justify-center ${t.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        <span className="material-symbols-outlined text-sm">{t.type === 'income' ? 'arrow_downward' : 'arrow_upward'}</span>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">{t.desc}</p>
-                                        <p className="text-xs text-slate-400">{t.cat} • {t.date}</p>
+                                        <p className="text-sm font-bold text-slate-900">{t.description}</p>
+                                        <p className="text-xs text-slate-400">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <span className={`text-sm font-bold ${t.type === 'in' ? 'text-green-600' : 'text-slate-900'}`}>{t.val}</span>
+                                <span className={`text-sm font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-900'}`}>
+                                    {t.type === 'income' ? '+' : '-'} {formatMoney(t.amount)}
+                                </span>
                             </div>
-                        ))}
-                    </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-// 6b. Budget / Treatment Plans
+// 6b. Budget / Treatment Plans (Still Mocked or Hidden for now? Let's hide it to avoid confusion or keep as "Coming Soon")
 const BudgetsTab = () => {
-    const budgets = [
-        { id: 1023, patient: 'Beatriz Costa', items: ['Implante Unitário', 'Coroa Porcelana'], total: 'R$ 3.500,00', status: 'Aprovado', date: 'Hoje' },
-        { id: 1022, patient: 'Pedro Alves', items: ['Restauração Molar', 'Limpeza Profunda'], total: 'R$ 650,00', status: 'Pendente', date: 'Ontem' },
-        { id: 1021, patient: 'João Silva', items: ['Clareamento Dental', 'Kit Home Care'], total: 'R$ 1.200,00', status: 'Rejeitado', date: '12 Fev' },
-    ];
-
     return (
-        <div className="p-8 space-y-6 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex justify-between items-center">
-                <div className="flex gap-4">
-                    <div className="bg-slate-100 rounded-lg p-1 flex">
-                        <button className="px-3 py-1.5 bg-white shadow-sm rounded-md text-xs font-bold text-slate-900">Todos</button>
-                        <button className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/50 rounded-md">Pendentes</button>
-                        <button className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/50 rounded-md">Aprovados</button>
-                    </div>
-                </div>
-                <button className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:shadow-md">
-                    <span className="material-symbols-outlined text-[18px]">add</span> Novo Orçamento
-                </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-                {budgets.map((b) => (
-                    <div key={b.id} className="bg-white border border-slate-200 rounded-xl p-5 hover:border-primary/30 transition-colors flex items-center justify-between group">
-                        <div className="flex gap-4 items-center">
-                            <div className="bg-slate-50 p-3 rounded-lg text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                <span className="material-symbols-outlined">request_quote</span>
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-bold text-slate-900">#{b.id} - {b.patient}</h4>
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${b.status === 'Aprovado' ? 'bg-green-100 text-green-700' :
-                                        b.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
-                                            'bg-yellow-100 text-yellow-700'
-                                        }`}>{b.status}</span>
-                                </div>
-                                <p className="text-sm text-slate-500">{b.items.join(', ')}</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-lg font-bold text-slate-900">{b.total}</p>
-                            <p className="text-xs text-slate-400">{b.date}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+        <div className="p-12 text-center text-slate-400">
+            <span className="material-symbols-outlined text-6xl mb-4">construction</span>
+            <p className="text-lg font-bold text-slate-600">Módulo de Orçamentos em Desenvolvimento</p>
+            <p className="text-sm">Em breve você poderá criar e aprovar orçamentos integrados aos pacientes.</p>
         </div>
     );
 };
@@ -143,7 +169,7 @@ const FinancialsView = () => {
     const [activeTab, setActiveTab] = useState<'cashflow' | 'budgets'>('cashflow');
 
     return (
-        <PremiumFeature access={canAccessFinancials()} featureName="Módulo Financeiro">
+        <PremiumFeature access={canAccessFinancials} featureName="Módulo Financeiro">
             <div className="flex flex-col h-[calc(100vh-140px)]">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>

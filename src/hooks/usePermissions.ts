@@ -12,7 +12,7 @@ export const usePermissions = () => {
             maxPatients: 5,
             maxDentists: 1,
             hasWhatsApp: false,
-            hasFinancials: false,
+            hasFinancials: true,
             hasInventory: false,
             hasBranding: false,
             hasMultiUnit: false
