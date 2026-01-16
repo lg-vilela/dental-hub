@@ -182,6 +182,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const customSignOut = async () => {
         await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
         setProfile(null);
         setClinic(null);
     };
