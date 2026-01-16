@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TenantConfig } from './types';
 import { initialTenants } from './mockData';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 // Components
 import Sidebar from './components/Sidebar';

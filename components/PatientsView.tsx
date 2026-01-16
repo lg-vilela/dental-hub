@@ -119,7 +119,7 @@ const FilesTab = () => {
 };
 
 // 5a. Patient List
-import { usePermissions } from '../hooks/usePermissions';
+import { usePermissions } from '../src/hooks/usePermissions';
 
 const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
     const { canAddPatient, isFree } = usePermissions();

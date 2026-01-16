@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePermissions } from '../hooks/usePermissions';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 interface PremiumFeatureProps {
     children: React.ReactNode;

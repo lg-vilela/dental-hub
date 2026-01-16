@@ -4,7 +4,7 @@ interface SetupWizardProps {
     onComplete: (data: any) => void;
 }
 
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
     const { signUp } = useAuth();

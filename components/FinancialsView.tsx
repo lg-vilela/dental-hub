@@ -136,7 +136,7 @@ const BudgetsTab = () => {
 
 // 6. Financials Container
 import PremiumFeature from './common/PremiumFeature';
-import { usePermissions } from '../hooks/usePermissions';
+import { usePermissions } from '../src/hooks/usePermissions';
 
 const FinancialsView = () => {
     const { canAccessFinancials } = usePermissions();

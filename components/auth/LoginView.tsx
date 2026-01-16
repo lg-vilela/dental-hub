@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../src/contexts/AuthContext';
 
 interface LoginViewProps {
     onLogin: (email: string) => void;
