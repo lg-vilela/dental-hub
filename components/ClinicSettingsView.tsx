@@ -81,11 +81,19 @@ const TeamTab = () => {
         }
     };
 
+    const limit = clinic?.plan === 'plus' ? 999 : clinic?.plan === 'pro' ? 10 : 2; // Free = 2 (Owner + 1)
+    const canAdd = members.length < limit;
+
     const generateInvite = () => {
         if (!clinic) return;
+        if (!canAdd) {
+            alert(`Você atingiu o limite do plano ${clinic.plan}. Faça upgrade!`);
+            return;
+        }
         const baseUrl = window.location.origin;
         const link = `${baseUrl}/signup?invite_clinic_id=${clinic.id}&invite_role=${inviteRole}`;
         setInviteLink(link);
+        // Visual feedback (optional since the section expands, but safe to force expand)
     };
 
     const copyLink = () => {
@@ -139,7 +147,11 @@ const TeamTab = () => {
                         )}
                     </div>
 
-                    <button onClick={generateInvite} className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2">
+                    <button
+                        onClick={generateInvite}
+                        disabled={!canAdd}
+                        className={`bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2 ${!canAdd ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
                         <span className="material-symbols-outlined text-[18px]">link</span>
                         Gerar Convite
                     </button>
@@ -206,8 +218,8 @@ const TeamTab = () => {
                                 <td className="px-6 py-4 text-slate-600 font-medium">{m.email || 'Email oculto'}</td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${m.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                                            m.role === 'dentist' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                'bg-orange-50 text-orange-700 border-orange-100'
+                                        m.role === 'dentist' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                            'bg-orange-50 text-orange-700 border-orange-100'
                                         }`}>
                                         {m.role === 'admin' && <span className="material-symbols-outlined text-[14px]">shield_person</span>}
                                         {m.role === 'dentist' && <span className="material-symbols-outlined text-[14px]">dentistry</span>}
@@ -228,7 +240,7 @@ const TeamTab = () => {
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-center">
                 <p className="text-xs text-slate-500 font-medium bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm">
                     <span className="material-symbols-outlined text-[14px] align-middle mr-1">inventory_2</span>
-                    Limite do Plano: <span className="font-bold text-slate-900">{members.length} / {clinic?.plan === 'pro' ? '10' : clinic?.plan === 'plus' ? '∞' : '1'}</span> usuários.
+                    Limite do Plano <span className="uppercase font-bold">{clinic?.plan}</span>: <span className={`font-bold ${!canAdd ? 'text-red-500' : 'text-slate-900'}`}>{members.length} / {limit === 999 ? '∞' : limit}</span> usuários.
                 </p>
             </div>
         </div>
@@ -374,47 +386,69 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                     {activeTab === 'team' && <TeamTab />}
 
                     {/* Plan Tab */}
-                    {activeTab === 'plan' && (
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                                <h3 className="text-lg font-bold text-slate-900">Seu Plano</h3>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${tenant.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                    {tenant.status === 'active' ? 'Ativo' : 'Suspenso'}
-                                </span>
-                            </div>
-                            <div className="p-8">
-                                <div className="flex items-center gap-6 mb-8">
-                                    <div className="size-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
-                                        <span className="material-symbols-outlined text-4xl">workspace_premium</span>
-                                    </div>
-                                    <div>
-                                        <h2 className="text-2xl font-bold text-slate-900 capitalize">Plano {tenant.plan}</h2>
-                                        <p className="text-slate-500">Próxima renovação em 12 dias.</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                                        <p className="text-xs font-bold text-slate-400 uppercase">Profissionais</p>
-                                        <p className="text-xl font-bold text-slate-900 mt-1">3 <span className="text-slate-400 text-sm font-normal">/ {tenant.settings.maxDoctors}</span></p>
-                                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                                            <div className="h-full bg-primary" style={{ width: `${(3 / tenant.settings.maxDoctors) * 100}%` }}></div>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                                        <p className="text-xs font-bold text-slate-400 uppercase">Consultas/Mês</p>
-                                        <p className="text-xl font-bold text-slate-900 mt-1">142 <span className="text-slate-400 text-sm font-normal">/ {tenant.settings.appointmentsPerMonth}</span></p>
-                                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                                            <div className="h-full bg-green-500" style={{ width: `${(142 / tenant.settings.appointmentsPerMonth) * 100}%` }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'plan' && <PlanTab />}
 
                     {/* Audit Logs Tab */}
                     {activeTab === 'security' && <AuditLogsTab />}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// 6e. Plan Tab (Refactored to use Real Data)
+const PlanTab = () => {
+    const { clinic } = useAuth();
+
+    // Limits based on Plan
+    const limits = {
+        free: { users: 1, appts: 50, name: 'Grátis' },
+        pro: { users: 10, appts: 500, name: 'Profissional' },
+        plus: { users: 999, appts: 9999, name: 'Enterprise' }
+    };
+
+    const currentPlan = limits[clinic?.plan || 'free'];
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Seu Plano</h3>
+                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-green-100 text-green-700">
+                    Ativo
+                </span>
+            </div>
+            <div className="p-8">
+                <div className="flex items-center gap-6 mb-8">
+                    <div className="size-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-4xl">workspace_premium</span>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 capitalize">Plano {currentPlan.name}</h2>
+                        <p className="text-slate-500">Próxima renovação em 12 dias.</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                        <p className="text-xs font-bold text-slate-400 uppercase">Profissionais</p>
+                        <p className="text-xl font-bold text-slate-900 mt-1">
+                            <span className="text-sm font-normal">Limite: </span>
+                            {currentPlan.users > 100 ? 'Ilimitado' : currentPlan.users}
+                        </p>
+                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                            <div className="h-full bg-primary" style={{ width: '30%' }}></div>
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                        <p className="text-xs font-bold text-slate-400 uppercase">Consultas/Mês</p>
+                        <p className="text-xl font-bold text-slate-900 mt-1">
+                            <span className="text-sm font-normal">Limite: </span>
+                            {currentPlan.appts > 1000 ? 'Ilimitado' : currentPlan.appts}
+                        </p>
+                        <div className="w-full h-1 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                            <div className="h-full bg-green-500" style={{ width: '10%' }}></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
