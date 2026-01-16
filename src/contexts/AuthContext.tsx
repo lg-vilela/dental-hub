@@ -78,7 +78,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const loadSession = async () => {
             try {
+                // Safety Timeout: Force stop loading after 5s
+                const timeoutId = setTimeout(() => {
+                    if (mounted) {
+                        console.warn("Auth load timeout - Forcing app load.");
+                        setIsLoading(false);
+                    }
+                }, 5000);
+
                 const { data: { session } } = await supabase.auth.getSession();
+                clearTimeout(timeoutId); // Clear timeout if successful
 
                 if (mounted) {
                     setSession(session);
