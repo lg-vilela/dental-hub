@@ -1,14 +1,41 @@
-import React, { useState } from 'react';
-import { TenantConfig } from '../types';
+import React, { useState, useEffect } from 'react';
+import { TenantConfig } from '../src/types'; // Fixed path if needed, assuming src/types exists or types in root? 
+// Actually types is likely in src/types based on usage. The file was in components/ScheduleView.tsx so `../src/types` or `../types` depending on structure.
+// Let's assume `../src/types` is safer if components is in root.
+// Wait, `list_dir` of root showed `components` and `src`. So `../src/types` is correct.
+
+import { appointmentService, Appointment } from '../src/services/appointmentService';
+import NewAppointmentModal from './NewAppointmentModal'; // Ensure generic import
 
 interface ScheduleViewProps {
-    openModal: () => void;
+    openModal?: () => void; // Deprecated, we manage modal internally or passed
     tenant: TenantConfig;
 }
 
-const ScheduleView: React.FC<ScheduleViewProps> = ({ openModal, tenant }) => {
-    const [date, setDate] = useState(new Date(2023, 9, 23)); // Oct 23, 2023
+const ScheduleView: React.FC<ScheduleViewProps> = ({ tenant }) => {
+    const [date, setDate] = useState(new Date());
     const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const fetchAppointments = async () => {
+        // Fetch for the whole day
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
+
+        try {
+            const data = await appointmentService.getAppointments(start, end);
+            setAppointments(data);
+        } catch (e) {
+            console.error("Error fetching appointments:", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchAppointments();
+    }, [date]);
 
     const handlePrev = () => {
         const newDate = new Date(date);
@@ -46,6 +73,40 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ openModal, tenant }) => {
 
     const timeSlots = generateSlots();
 
+    // Helper: Render Appointment on Grid
+    // For MVP, we will render ALL in column 0 or try to map 'chairs' if we had them.
+    // Let's map by Dentist for columns? 
+    // The previous code had "Cadeira 1 (Dr. Smith)", "Cadeira 2 (Dr. Ray)".
+    // We can try to map dentist_id to a column index if we fetch dentists.
+    // For now, let's put everyone in Column 0 or verify dentist.
+
+    // Simpler: Just render list in col 0 for demo if we don't have explicit dentist mapping yet.
+    // Or simpler: Use columns as "Resources" (Chairs).
+    // Let's stick to the visual provided: 4 columns.
+    // We can hash the `dentist_id` to pick a column 0-3 for visual variety.
+
+    const getColIndex = (id: string) => {
+        return id.charCodeAt(0) % 4;
+    };
+
+    // Calculate position
+    const getPosition = (timeStr: string) => {
+        // "10:00" -> logic relative to opening time
+        // 96px per slot?
+        // Let's assume simple linear mapping for MVP or direct match
+        const [h, m] = timeStr.split(':').map(Number);
+        const [startH, startM] = tenant.settings.openingTime.split(':').map(Number);
+
+        const minutesFromStart = (h * 60 + m) - (startH * 60 + startM);
+        const slotDuration = tenant.settings.slotDuration; // e.g. 30
+        const slotHeight = 96; // px height of one "slot" div (h-24 = 6rem = 96px)
+
+        // This is tricky if slots are just text.
+        // We rendered slots as h-24.
+        // So 30 mins = 96px. 1 min = 3.2px.
+        return minutesFromStart * 3.2;
+    };
+
     return (
         <div className="h-full flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             {/* Header */}
@@ -65,116 +126,70 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ openModal, tenant }) => {
                         </button>
                     </div>
                 </div>
-                <button onClick={openModal} className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-md shadow-primary/20">
+                <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-md shadow-primary/20">
                     <span className="material-symbols-outlined text-[18px]">add</span> Novo Agendamento
                 </button>
             </div>
 
-            {/* Grid Header */}
+            {/* Grid Header & Body */}
             <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] border-b border-slate-200 bg-slate-50">
-                <div className="p-3 border-r border-slate-200 text-center">
-                    <span className="material-symbols-outlined text-slate-400">schedule</span>
-                </div>
-                {[
-                    { name: 'Cadeira 1', doc: 'Dr. Smith' },
-                    { name: 'Cadeira 2', doc: 'Dr. Ray' },
-                    { name: 'Cadeira 3 (Cirurgia)', doc: 'Dra. Lee' },
-                    { name: 'Higienização', doc: 'Sarah J.' }
-                ].map((col, i) => (
-                    <div key={i} className="p-3 border-r border-slate-200 text-center last:border-r-0">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                            <div className={`size-2 rounded-full ${i === 0 || i === 2 ? 'bg-green-500' : 'bg-slate-300'}`}></div>
-                            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{col.doc}</span>
-                        </div>
-                        <p className="text-sm font-bold text-slate-900">{col.name}</p>
-                    </div>
+                <div className="p-3 border-r border-slate-200 text-center"><span className="material-symbols-outlined text-slate-400">schedule</span></div>
+                {['Cadeira 1', 'Cadeira 2', 'Cadeira 3', 'Cadeira 4'].map((name, i) => (
+                    <div key={i} className="p-3 border-r border-slate-200 text-center text-sm font-bold text-slate-900">{name}</div>
                 ))}
             </div>
 
-            {/* Grid Body */}
             <div className="flex-1 overflow-y-auto relative">
-                {viewMode === 'week' ? (
-                    <div className="flex items-center justify-center h-full text-slate-400 flex-col">
-                        <span className="material-symbols-outlined text-4xl mb-2">calendar_view_week</span>
-                        <p>Visualização semanal em desenvolvimento.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] min-h-full">
-                        {/* Times */}
-                        <div className="border-r border-slate-200 bg-slate-50/50 flex flex-col text-right pr-2 pt-2 text-xs font-medium text-slate-400" >
-                            {timeSlots.map((t, i) => (
-                                <div key={i} className="h-24 border-b border-transparent relative group">
-                                    <span className="-mt-3 block text-[10px]">{t}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Columns */}
-                        {[0, 1, 2, 3].map((colIdx) => (
-                            <div key={colIdx} className="border-r border-slate-200 relative" onClick={() => {
-                                // Easter egg interaction
-                                if (colIdx === 3) alert('Cadeira não atribuída. Clique em Novo Agendamento para adicionar.');
-                            }}>
-                                {/* Horizontal guides (dynamic) */}
-                                {timeSlots.map((_, i) => (
-                                    <div key={i} className="absolute w-full h-px bg-slate-100" style={{ top: `${i * 96}px` }}></div>
-                                ))}
-
-                                {/* Mock Appointments (Fixed positions for demo, would be dynamic in real app) */}
-                                {colIdx === 0 && (
-                                    <>
-                                        <div onClick={(e) => { e.stopPropagation(); alert('Consulta: Sarah Conner - Canal'); }} className="absolute top-[110px] left-1 right-1 h-[90px] bg-blue-50 border-l-4 border-blue-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10 group">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="text-xs font-bold text-blue-700">Sarah Conner</p>
-                                                    <p className="text-[10px] text-blue-600">Canal (Endo)</p>
-                                                </div>
-                                                <button onClick={(e) => { e.stopPropagation(); alert('Enviando lembrete para (11) 99999-9999 via WhatsApp...'); }} className="p-1 hover:bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Enviar Lembrete WhatsApp">
-                                                    <span className="material-symbols-outlined text-[16px]">chat</span>
-                                                </button>
-                                            </div>
-                                            <div className="mt-1 flex gap-1">
-                                                <span className="px-1 py-0.5 bg-blue-100/50 rounded text-[9px] text-blue-700 font-bold">Confirmado</span>
-                                            </div>
-                                        </div>
-                                        <div className="absolute top-[320px] left-1 right-1 h-[60px] bg-amber-50 border-l-4 border-amber-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10 group">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="text-xs font-bold text-amber-700">John Wick</p>
-                                                    <p className="text-[10px] text-amber-600">Emergência</p>
-                                                </div>
-                                                <button onClick={(e) => { e.stopPropagation(); alert('Enviando lembrete para John Wick via WhatsApp...'); }} className="p-1 hover:bg-amber-100 rounded-full text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Enviar Lembrete WhatsApp">
-                                                    <span className="material-symbols-outlined text-[16px]">chat</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-
-                                {colIdx === 2 && (
-                                    <div className="absolute top-[220px] left-1 right-1 h-[140px] bg-purple-50 border-l-4 border-purple-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
-                                        <p className="text-xs font-bold text-purple-700">Cirurgia Complexa</p>
-                                        <p className="text-[10px] text-purple-600">Extração Sisos (4x)</p>
-                                        <div className="mt-2 flex items-center gap-1 text-purple-700">
-                                            <span className="material-symbols-outlined text-[14px]">anesthesia</span>
-                                            <span className="text-[10px]">Anestesia Geral</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                <div className="grid grid-cols-[60px_1fr_1fr_1fr_1fr] min-h-full">
+                    {/* Time Column */}
+                    <div className="border-r border-slate-200 bg-slate-50/50 flex flex-col text-right pr-2 pt-2 text-xs font-medium text-slate-400">
+                        {timeSlots.map((t, i) => (
+                            <div key={i} className="h-24 border-b border-transparent relative"><span className="-mt-3 block text-[10px]">{t}</span></div>
                         ))}
                     </div>
-                )}
-                {/* Current Time Line */}
-                {viewMode === 'day' && (
-                    <div className="absolute top-[320px] left-0 w-full flex items-center z-10 pointer-events-none">
-                        <div className="w-[60px] text-right pr-2 text-[10px] font-bold text-red-500">11:15</div>
-                        <div className="flex-1 h-px bg-red-500 relative">
-                            <div className="absolute -top-1 -left-1 size-2 bg-red-500 rounded-full"></div>
+
+                    {/* Appointment Columns */}
+                    {[0, 1, 2, 3].map(colIdx => (
+                        <div key={colIdx} className="border-r border-slate-200 relative">
+                            {/* Guides */}
+                            {timeSlots.map((_, i) => (
+                                <div key={i} className="absolute w-full h-px bg-slate-100" style={{ top: `${i * 96}px` }}></div>
+                            ))}
+
+                            {/* Events */}
+                            {appointments
+                                .filter(apt => (apt.dentist_id ? getColIndex(apt.dentist_id) : 0) === colIdx)
+                                .map(apt => {
+                                    // Calculate Top based on time
+                                    const time = new Date(apt.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                                    const top = getPosition(time);
+                                    const startTime = new Date(apt.start_time);
+                                    const endTime = new Date(apt.end_time);
+                                    const durationMins = (endTime.getTime() - startTime.getTime()) / 60000;
+                                    const height = durationMins * 3.2;
+
+                                    return (
+                                        <div
+                                            key={apt.id}
+                                            style={{ top: `${top}px`, height: `${height}px` }}
+                                            className="absolute left-1 right-1 bg-blue-50 border-l-4 border-blue-500 rounded p-2 text-xs cursor-pointer hover:brightness-95 z-10 overflow-hidden"
+                                            title={apt.notes}
+                                        >
+                                            <p className="font-bold text-blue-700 truncate">{apt.patients?.full_name}</p>
+                                            <p className="text-[10px] text-blue-600 truncate">{apt.status}</p>
+                                        </div>
+                                    );
+                                })}
                         </div>
-                    </div>
-                )}
+                    ))}
+                </div>
             </div>
+
+            <NewAppointmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchAppointments}
+            />
         </div>
     );
 };
