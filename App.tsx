@@ -18,7 +18,7 @@ import SetupWizard from './components/auth/SetupWizard';
 import LandingPage from './components/landing/LandingPage';
 
 function AppContent() {
-    const { isAuthenticated, isLoading, user } = useAuth();
+    const { isAuthenticated, isLoading, user, signOut } = useAuth();
     // Auth State handled by Context now
 
     const [isSetupComplete, setIsSetupComplete] = useState(true);
@@ -188,7 +188,7 @@ function AppContent() {
 
                                     <div className="my-2 border-t border-slate-100"></div>
 
-                                    <button onClick={() => useAuth().signOut()} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-bold flex items-center gap-3">
+                                    <button onClick={() => signOut()} className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-bold flex items-center gap-3">
                                         <span className="material-symbols-outlined text-[20px]">logout</span> Sair do Sistema
                                     </button>
                                 </div>
