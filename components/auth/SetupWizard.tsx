@@ -42,11 +42,14 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                 onComplete(formData);
             } catch (err: any) {
                 let msg = err.message || 'Erro ao criar conta. Tente novamente.';
+                console.log('Signup Error:', msg); // Debug log
 
-                // Translate specific Supabase errors
-                if (msg.includes('User already registered') || msg.includes('already registered')) {
+                // Translate specific Supabase errors (Case Insensitive)
+                const lowerMsg = msg.toLowerCase();
+
+                if (lowerMsg.includes('user already registered') || lowerMsg.includes('email already registered')) {
                     msg = 'Este e-mail já está cadastrado. Tente fazer login ou use outro e-mail.';
-                } else if (msg.includes('Password should be at least')) {
+                } else if (lowerMsg.includes('password should be at least')) {
                     msg = 'A senha deve ter no mínimo 6 caracteres.';
                 }
 
