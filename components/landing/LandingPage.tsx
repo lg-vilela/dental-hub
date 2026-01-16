@@ -13,278 +13,280 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-['Manrope'] selection:bg-[#617FA3] selection:text-white">
-            {/* Navbar */}
-            <nav className="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-                    <div className="flex items-center gap-2.5">
-                        <div className="size-9 bg-[#617FA3] rounded-lg flex items-center justify-center text-white shadow-lg shadow-[#617FA3]/20">
-                            <span className="material-symbols-outlined text-[22px]">dentistry</span>
+        <div className="min-h-screen bg-slate-50 font-['Manrope'] selection:bg-[#617FA3] selection:text-white">
+            {/* Navbar - Glassmorphism */}
+            <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm transition-all duration-300">
+                <div className="w-full max-w-[1400px] mx-auto px-6 h-20 flex justify-between items-center">
+                    <div className="flex items-center gap-2.5 group cursor-pointer hover:opacity-80 transition-opacity">
+                        <div className="size-10 bg-gradient-to-br from-[#617FA3] to-[#4A6280] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#617FA3]/20 group-hover:scale-110 transition-transform duration-300">
+                            <span className="material-symbols-outlined text-[24px]">dentistry</span>
                         </div>
-                        <span className="font-extrabold text-xl text-slate-900 tracking-tight">Dental Hub</span>
+                        <span className="font-extrabold text-2xl text-slate-800 tracking-tight">Dental Hub</span>
                     </div>
-                    <div className="flex items-center gap-6">
-                        <button onClick={onLogin} className="text-sm font-bold text-slate-600 hover:text-[#617FA3] transition-colors">
+                    <div className="flex items-center gap-4">
+                        <button onClick={onLogin} className="text-sm font-bold text-slate-600 hover:text-[#617FA3] px-4 py-2 rounded-full hover:bg-slate-50 transition-all">
                             Entrar
                         </button>
-                        <button onClick={onStart} className="bg-[#617FA3] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-[#4A6280] transition-all shadow-lg shadow-[#617FA3]/25 hover:shadow-[#617FA3]/40 hover:-translate-y-0.5">
+                        <button onClick={onStart} className="bg-[#617FA3] text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-[#4A6280] hover:shadow-xl hover:shadow-[#617FA3]/30 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2">
                             Começar Grátis
+                            <span className="material-symbols-outlined text-sm">arrow_forward</span>
                         </button>
                     </div>
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section className="pt-32 pb-24 px-6 overflow-hidden">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F0F4F8] text-[#4A6280] text-xs font-bold uppercase tracking-wider">
-                            <span className="flex size-2 bg-[#617FA3] rounded-full animate-pulse"></span>
-                            Novo: Gestão Financeira 2.0
+            {/* Hero Section - Full Width & Modern Gradients */}
+            <section className="pt-32 pb-32 px-6 relative overflow-hidden bg-gradient-to-b from-white to-slate-50">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#617FA3]/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-200/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3"></div>
+
+                <div className="w-full max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
+                    <div className="space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
+                        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-slate-100 shadow-sm text-[#4A6280] text-sm font-bold tracking-wide hover:shadow-md transition-shadow cursor-default">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#617FA3] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#617FA3]"></span>
+                            </span>
+                            Novo: Módulo Financeiro 2.0
                         </div>
-                        <h1 className="text-5xl sm:text-6xl font-extrabold text-slate-900 leading-[1.1] tracking-tight">
+                        <h1 className="text-6xl sm:text-7xl font-extrabold text-slate-900 leading-[1.05] tracking-tight">
                             A plataforma que <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#617FA3] to-[#829AB5]">sua clínica merece</span>.
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#617FA3] via-[#829AB5] to-[#4A6280]">sua clínica merece</span>.
                         </h1>
-                        <p className="text-lg text-slate-500 max-w-lg leading-relaxed font-medium">
-                            Centralize agenda, prontuários e financeiro em um único lugar. Simples, moderno e feito para ver sua clínica crescer.
+                        <p className="text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+                            Gestão completa, sem complicações. Centralize agenda, prontuários e financeiro em um único lugar bonito e intuitivo.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                            <button onClick={onStart} className="px-8 py-4 bg-[#617FA3] text-white rounded-full font-bold text-lg hover:bg-[#4A6280] transition-all shadow-xl shadow-[#617FA3]/30 flex items-center justify-center gap-2 group hover:-translate-y-1">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                            <button onClick={onStart} className="px-10 py-5 bg-[#617FA3] text-white rounded-full font-bold text-lg hover:bg-[#4A6280] transition-all shadow-xl shadow-[#617FA3]/30 flex items-center justify-center gap-2 group hover:-translate-y-1 hover:scale-105 active:scale-95 duration-300">
                                 Criar Conta Gratuita
                                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                             </button>
                         </div>
+                        <div className="pt-4 flex items-center gap-6">
+                            <div className="flex -space-x-4">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className="size-12 rounded-full border-4 border-white overflow-hidden shadow-sm hover:-translate-y-2 transition-transform duration-300 z-0 hover:z-10">
+                                        <img src={`https://picsum.photos/50/50?random=${i + 20}`} className="w-full h-full object-cover" alt="" />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-col">
+                                <div className="flex text-yellow-400 text-lg">
+                                    {'★★★★★'.split('').map((s, i) => <span key={i}>{s}</span>)}
+                                </div>
+                                <p className="text-slate-600 font-bold text-sm">+500 dentistas confiam</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="relative animate-in fade-in zoom-in duration-1000 delay-200 hidden lg:block">
-                        <div className="absolute -top-20 -right-20 size-96 bg-[#617FA3]/10 rounded-full blur-3xl"></div>
-                        <div className="relative z-10 bg-white p-2 rounded-2xl shadow-2xl border border-slate-100 rotate-1 hover:rotate-0 transition-transform duration-700">
+                    <div className="relative animate-in fade-in zoom-in duration-1000 delay-200 hidden lg:block perspective-1000">
+                        <div className="relative z-10 bg-white p-3 rounded-3xl shadow-2xl border border-slate-100 transform rotate-y-6 hover:rotate-y-0 hover:scale-[1.02] transition-all duration-700 ease-out">
                             <img
                                 src="https://raw.githubusercontent.com/lg-vilela/dental-saas-assets/main/dashboard-preview_mockup.png"
-                                onError={(e) => e.currentTarget.src = 'https://placehold.co/800x600/f1f5f9/617FA3?text=Dental+Hub+Dashboard'}
+                                onError={(e) => e.currentTarget.src = 'https://placehold.co/1200x800/f8fafc/617FA3?text=Dental+Hub+Dashboard+HD'}
                                 alt="Dashboard Preview"
-                                className="rounded-xl border border-slate-100"
+                                className="rounded-2xl border border-slate-100 shadow-inner w-full"
                             />
+                            {/* Floating Card Animation */}
+                            <div className="absolute -left-12 top-24 bg-white/90 backdrop-blur-md p-5 rounded-2xl shadow-xl border border-white/50 animate-bounce-slow flex items-center gap-4">
+                                <div className="size-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                                    <span className="material-symbols-outlined text-2xl">check</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Produtividade</p>
+                                    <p className="font-bold text-slate-900 text-lg">+ 140%</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Section: Is it for me? (Metric Cards) */}
-            <section className="py-20 bg-white border-t border-slate-50">
-                <div className="max-w-7xl mx-auto px-6 text-center">
-                    <div className="inline-block p-3 rounded-full bg-[#EBF1F5] mb-6">
-                        <span className="material-symbols-outlined text-[#617FA3]">bolt</span>
-                    </div>
-                    <h2 className="text-4xl font-bold text-slate-900 mb-4">Será que faz sentido pra mim?</h2>
-                    <p className="text-slate-500 mb-16">Se você tem essas características, o Dental Hub foi feito pensando em você.</p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                        <div className="p-6">
-                            <h3 className="text-5xl font-extrabold text-[#009B82] mb-4">40+</h3>
-                            <p className="font-bold text-slate-800">Quero aumentar minha taxa de aceitação</p>
-                        </div>
-                        <div className="p-6 border-x border-slate-100">
-                            <h3 className="text-5xl font-extrabold text-[#009B82] mb-4">600%</h3>
-                            <p className="font-bold text-slate-800">Perco muito tempo explicando orçamentos</p>
-                        </div>
-                        <div className="p-6">
-                            <h3 className="text-5xl font-extrabold text-[#009B82] mb-4">4k+</h3>
-                            <p className="font-bold text-slate-800">Quero me diferenciar da concorrência</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Section: How it works (Steps) */}
-            <section className="py-24 bg-[#F8FAFC]">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <span className="px-4 py-1.5 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase">Como Funciona</span>
-                        <h2 className="text-3xl font-bold text-slate-900 mt-6">Do orçamento ao tratamento aceito <span className="text-[#009B82]">em minutos</span></h2>
+            {/* Is it for me? - Dynamic Cards */}
+            <section className="py-32 bg-white">
+                <div className="w-full max-w-[1400px] mx-auto px-6">
+                    <div className="text-center mb-20">
+                        <span className="px-5 py-2 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase tracking-wider">Público Alvo</span>
+                        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 mb-4">Será que faz sentido pra mim?</h2>
+                        <p className="text-xl text-slate-500 max-w-2xl mx-auto">Desenvolvemos o Dental Hub para profissionais que buscam excelência.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-                        {/* Connecting Line (Desktop) */}
-                        <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-0.5 bg-[#009B82]/30 -z-0"></div>
-
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[
-                            { step: 1, icon: 'person_add', title: 'Cadastre o Tratamento', desc: 'Preencha etapas, procedimentos e valores' },
-                            { step: 2, icon: 'visibility', title: 'Apresente Visualmente', desc: 'Mostre timeline interativa ao paciente na consulta' },
-                            { step: 3, icon: 'ios_share', title: 'Compartilhe o link', desc: 'Compartilhe o link do tratamento com o paciente' },
-                            { step: 4, icon: 'send', title: 'Paciente Acessa o link', desc: 'O paciente pode acessar o link 24/7 no celular' }
-                        ].map((s) => (
-                            <div key={s.step} className="text-center relative bg-[#F8FAFC] z-10">
-                                <div className="size-8 rounded-full bg-[#009B82] text-white flex items-center justify-center font-bold mx-auto mb-6">
-                                    {s.step}
+                            { val: '40+', label: 'Aumento na Aceitação', sub: 'Transforme avaliações em tratamentos fechados com orçamentos visuais.', icon: 'trending_up' },
+                            { val: '600%', label: 'Mais Produtividade', sub: ' Automatize confirmações e lembretes para focar no atendimento.', icon: 'rocket_launch' },
+                            { val: '4k+', label: 'Economia Mensal', sub: 'Reduza faltas e otimize o uso dos seus materiais e horários.', icon: 'savings' }
+                        ].map((item, i) => (
+                            <div key={i} className="group p-10 rounded-[32px] bg-slate-50 border border-slate-100 hover:bg-white hover:border-[#617FA3]/30 hover:shadow-2xl hover:shadow-[#617FA3]/10 transition-all duration-500 cursor-default">
+                                <div className="size-16 rounded-2xl bg-white flex items-center justify-center text-[#617FA3] shadow-md mb-8 group-hover:scale-110 group-hover:bg-[#617FA3] group-hover:text-white transition-all duration-300">
+                                    <span className="material-symbols-outlined text-3xl">{item.icon}</span>
                                 </div>
-                                <div className="size-20 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-[#617FA3] mx-auto mb-6">
-                                    <span className="material-symbols-outlined text-3xl">{s.icon}</span>
-                                </div>
-                                <h3 className="font-bold text-lg text-slate-900 mb-2">{s.title}</h3>
-                                <p className="text-sm text-slate-500 leading-relaxed max-w-[200px] mx-auto">{s.desc}</p>
+                                <h3 className="text-6xl font-extrabold text-[#617FA3] mb-4 tracking-tighter">{item.val}</h3>
+                                <h4 className="text-xl font-bold text-slate-900 mb-3">{item.label}</h4>
+                                <p className="text-slate-500 leading-relaxed group-hover:text-slate-600">{item.sub}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Section: Comparison Table */}
-            <section className="py-24 bg-white">
-                <div className="max-w-5xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <span className="px-4 py-1.5 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase">Comparativo</span>
-                        <h2 className="text-3xl font-bold text-slate-900 mt-6">Dental Hub vs Métodos Tradicionais</h2>
+            {/* Steps - How it Works */}
+            <section className="py-32 bg-[#0F172A] text-white relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div className="absolute -top-[300px] -right-[300px] w-[800px] h-[800px] bg-[#617FA3]/20 rounded-full blur-[120px]"></div>
+
+                <div className="w-full max-w-[1400px] mx-auto px-6 relative z-10">
+                    <div className="text-center mb-24">
+                        <span className="px-5 py-2 rounded-full bg-white/10 text-white font-bold text-sm uppercase backdrop-blur-md border border-white/20">Simplicidade</span>
+                        <h2 className="text-4xl md:text-5xl font-extrabold mt-6">Do orçamento ao aceite <span className="text-[#617FA3]">em minutos</span></h2>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12 relative">
+                        {/* Line */}
+                        <div className="hidden md:block absolute top-[40px] left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#617FA3]/50 to-transparent"></div>
+
+                        {[
+                            { step: 1, title: 'Cadastro Rápido', desc: 'Lance o tratamento em segundos.' },
+                            { step: 2, title: 'Apresentação Visual', desc: 'Mostre o "Antes e Depois" estimado.' },
+                            { step: 3, title: 'Link Inteligente', desc: 'Envie o orçamento via WhatsApp.' },
+                            { step: 4, title: 'Aprovação Digital', desc: 'Paciente aprova no próprio celular.' }
+                        ].map((s) => (
+                            <div key={s.step} className="relative text-center group">
+                                <div className="size-20 mx-auto bg-[#1E293B] rounded-2xl border border-[#617FA3]/30 flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-[#617FA3]/10 mb-8 z-10 relative group-hover:scale-110 group-hover:border-[#617FA3] transition-all duration-300">
+                                    {s.step}
+                                </div>
+                                <h3 className="text-xl font-bold mb-3 group-hover:text-[#617FA3] transition-colors">{s.title}</h3>
+                                <p className="text-slate-400 leading-relaxed">{s.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Comparison Table */}
+            <section className="py-32 bg-white">
+                <div className="w-full max-w-[1200px] mx-auto px-6">
+                    <div className="text-center mb-20 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <span className="px-5 py-2 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase tracking-wider">Comparativo</span>
+                        <h2 className="text-4xl font-extrabold text-slate-900 mt-6">Dental Hub vs O resto</h2>
+                    </div>
+
+                    <div className="overflow-hidden rounded-[40px] border border-slate-200 shadow-2xl shadow-slate-200/50">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr>
-                                    <th className="p-4 border-b border-transparent"></th>
-                                    <th className="p-4 text-center font-bold text-slate-500 text-sm">Manual<br /><span className="text-xs font-normal">(PDF/PowerPoint)</span></th>
-                                    <th className="p-4 text-center font-bold text-slate-500 text-sm">Software Gestão<br /><span className="text-xs font-normal">(Tradicional)</span></th>
-                                    <th className="p-4 text-center bg-[#E6F5F3] rounded-t-2xl border-b-2 border-[#009B82] font-bold text-[#009B82]">Dental Hub<br /><span className="text-xs bg-[#009B82] text-white px-2 py-0.5 rounded-full">Recomendado</span></th>
+                                <tr className="bg-slate-50">
+                                    <th className="p-8 border-b border-slate-200"></th>
+                                    <th className="p-8 text-center border-b border-slate-200 opacity-50 grayscale">Métodos Antigos</th>
+                                    <th className="p-8 text-center bg-[#617FA3] text-white font-bold text-lg border-b border-[#4A6280] relative">
+                                        Dental Hub
+                                        <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-bl-xl uppercase tracking-wider">Líder</div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                <tr>
-                                    <td className="p-6 font-bold text-slate-900">Tempo de criação</td>
-                                    <td className="p-6 text-center text-slate-500">30-60 min</td>
-                                    <td className="p-6 text-center text-slate-500">15-20 min</td>
-                                    <td className="p-6 text-center font-bold text-[#009B82] bg-[#Fafffd] border-x border-[#E6F5F3]">5 min</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-6 font-bold text-slate-900">Portal do paciente</td>
-                                    <td className="p-6 text-center text-slate-300"><span className="material-symbols-outlined">close</span></td>
-                                    <td className="p-6 text-center text-slate-300"><span className="material-symbols-outlined">close</span></td>
-                                    <td className="p-6 text-center text-[#009B82] bg-[#Fafffd] border-x border-[#E6F5F3]"><span className="material-symbols-outlined">check</span></td>
-                                </tr>
-                                <tr>
-                                    <td className="p-6 font-bold text-slate-900">Taxa de aceitação média</td>
-                                    <td className="p-6 text-center text-slate-500">40%</td>
-                                    <td className="p-6 text-center text-slate-500">50%</td>
-                                    <td className="p-6 text-center font-bold text-[#009B82] bg-[#Fafffd] border-x border-[#E6F5F3]">75%</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-6 font-bold text-slate-900">Notificações automáticas</td>
-                                    <td className="p-6 text-center text-slate-300"><span className="material-symbols-outlined">close</span></td>
-                                    <td className="p-6 text-center text-slate-300"><span className="material-symbols-outlined">close</span></td>
-                                    <td className="p-6 text-center text-[#009B82] bg-[#Fafffd] border-x border-[#E6F5F3] rounded-b-2xl"><span className="material-symbols-outlined">check</span></td>
-                                </tr>
+                                {[
+                                    { label: 'Tempo de Criação', old: '45 min', new: '3 min' },
+                                    { label: 'Experiência Visual', old: 'Nenhuma', new: 'Imersiva 3D' },
+                                    { label: 'Taxa de Aceitação', old: 'Baixa (~30%)', new: 'Alta (~85%)' },
+                                    { label: 'Custo-benefício', old: 'Caro/Complexo', new: 'Simples' },
+                                    { label: 'Suporte', old: 'Email (48h)', new: 'WhatsApp (Agora)' }
+                                ].map((row, i) => (
+                                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="p-8 font-bold text-slate-700">{row.label}</td>
+                                        <td className="p-8 text-center text-slate-400 font-medium">{row.old}</td>
+                                        <td className="p-8 text-center font-extrabold text-[#617FA3] bg-[#617FA3]/5">{row.new}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
-            {/* Section: Pricing */}
-            <section className="py-24 bg-[#F8FAFC]">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center max-w-2xl mx-auto mb-16">
-                        <span className="px-4 py-1.5 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase">Preços</span>
-                        <h2 className="text-4xl font-bold text-slate-900 mt-6 mb-4">Planos Transparentes. <span className="text-[#009B82]">Sem Pegadinhas.</span></h2>
-                        <p className="text-slate-500">Cancele quando quiser.</p>
+            {/* Pricing Cards - Highlighted & Modern */}
+            <section className="py-32 bg-[#F8FAFC]">
+                <div className="w-full max-w-[1400px] mx-auto px-6">
+                    <div className="text-center max-w-3xl mx-auto mb-20">
+                        <span className="px-5 py-2 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase tracking-wider">Planos Flexíveis</span>
+                        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 mb-6">Investimento que se paga <br />na <span className="text-[#617FA3]">primeira semana</span>.</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                        {/* Free - Grátis */}
-                        <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all">
-                            <div className="size-10 bg-[#E6F5F3] rounded-full flex items-center justify-center text-[#009B82] mb-4">
-                                <span className="material-symbols-outlined">bolt</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-[#009B82] mb-1">Plano Free</h3>
-                            <p className="text-sm text-slate-500 mb-6">Para testar a plataforma</p>
-                            <div className="mb-8">
-                                <span className="text-4xl font-extrabold text-slate-900">Grátis</span>
-                            </div>
-                            <ul className="space-y-3 mb-8">
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> 5 pacientes ativos</li>
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> Suporte por email</li>
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> 1 usuário</li>
-                            </ul>
-                            <button onClick={onStart} className="w-full py-3 rounded-full bg-[#009B82] text-white font-bold hover:bg-[#007A65] transition-all">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                        {/* Free */}
+                        <div className="p-10 rounded-[40px] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Start</h3>
+                            <p className="text-slate-500 mb-8">Para quem está começando agora.</p>
+                            <div className="text-5xl font-black text-slate-900 mb-8">R$ 0<span className="text-lg font-medium text-slate-400 ml-1">/mês</span></div>
+                            <button onClick={onStart} className="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 hover:border-[#617FA3] hover:text-[#617FA3] hover:bg-[#617FA3]/5 transition-all mb-8">
                                 Começar Grátis
                             </button>
+                            <ul className="space-y-4">
+                                {['1 Dentista', '5 Pacientes/mês', 'Agenda Básica'].map(f => (
+                                    <li key={f} className="flex items-center gap-3 text-sm text-slate-600"><span className="material-symbols-outlined text-[#617FA3]">check</span> {f}</li>
+                                ))}
+                            </ul>
                         </div>
 
-                        {/* Pro - R$ 97 */}
-                        <div className="p-8 rounded-3xl bg-[#009B82] text-white shadow-2xl relative transform md:-translate-y-4">
-                            <div className="absolute top-0 right-0 left-0 -mt-4 flex justify-center">
-                                <span className="bg-white text-[#009B82] text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide border border-[#009B82]">Mais Popular</span>
-                            </div>
-                            <div className="size-10 bg-white/20 rounded-full flex items-center justify-center text-white mb-4">
-                                <span className="material-symbols-outlined">layers</span>
-                            </div>
-                            <h3 className="text-lg font-bold mb-1">Plano Pro</h3>
-                            <p className="text-sm text-white/80 mb-6">Para consultório com 1 dentista</p>
-                            <div className="mb-8 flex items-baseline gap-1">
-                                <span className="text-5xl font-extrabold">R$ 97</span>
-                                <span className="text-white/70">/mês</span>
-                            </div>
-                            <ul className="space-y-3 mb-8">
-                                <li className="text-sm text-white flex items-center gap-2"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Pacientes Ilimitados</li>
-                                <li className="text-sm text-white flex items-center gap-2"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Portal do Paciente</li>
-                                <li className="text-sm text-white flex items-center gap-2"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Templates Padrão</li>
-                                <li className="text-sm text-white flex items-center gap-2"><span className="material-symbols-outlined text-white text-sm">check_circle</span> Dashboard Análise</li>
-                                <li className="text-sm text-white flex items-center gap-2"><span className="material-symbols-outlined text-white text-sm">check_circle</span> 2 usuários</li>
-                            </ul>
-                            <button onClick={onStart} className="w-full py-3 rounded-full bg-white text-[#009B82] font-bold hover:bg-slate-50 transition-all">
-                                Iniciar Teste
+                        {/* Pro - Highlight */}
+                        <div className="p-10 rounded-[40px] bg-[#617FA3] text-white shadow-2xl shadow-[#617FA3]/40 relative transform md:scale-110 z-10">
+                            <div className="absolute top-0 right-10 bg-white text-[#617FA3] text-xs font-bold px-4 py-2 rounded-b-xl shadow-lg uppercase tracking-wide">Mais Escolhido</div>
+                            <h3 className="text-2xl font-bold mb-2">Clínica Pro</h3>
+                            <p className="text-white/80 mb-8">Tudo para seu consultório voar.</p>
+                            <div className="text-6xl font-black mb-8">R$ 97<span className="text-lg font-medium text-white/60 ml-1">/mês</span></div>
+                            <button onClick={onStart} className="w-full py-5 rounded-2xl bg-white text-[#617FA3] font-bold hover:shadow-lg hover:scale-105 transition-all mb-8">
+                                Testar por 14 dias
                             </button>
+                            <ul className="space-y-4">
+                                {['Pacientes Ilimitados', 'Confirmação WhatsApp', 'Financeiro Completo', 'Portal do Paciente', 'Suporte Prioritário'].map(f => (
+                                    <li key={f} className="flex items-center gap-3 text-sm font-medium"><span className="material-symbols-outlined shrink-0 text-white">check_circle</span> {f}</li>
+                                ))}
+                            </ul>
                         </div>
 
-                        {/* Max - R$ 197 */}
-                        <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm hover:shadow-xl transition-all">
-                            <div className="size-10 bg-[#E6F5F3] rounded-full flex items-center justify-center text-[#009B82] mb-4">
-                                <span className="material-symbols-outlined">stars</span>
-                            </div>
-                            <h3 className="text-lg font-bold text-[#009B82] mb-1">Plano Max</h3>
-                            <p className="text-sm text-slate-500 mb-6">Para clínicas</p>
-                            <div className="mb-8 flex items-baseline gap-1">
-                                <span className="text-5xl font-extrabold text-slate-900">R$ 197</span>
-                                <span className="text-slate-500">/mês</span>
-                            </div>
-                            <ul className="space-y-3 mb-8">
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> Tudo do Pro</li>
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> Templates Personalizados</li>
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> Suporte via WhatsApp</li>
-                                <li className="text-sm text-slate-600 flex items-center gap-2"><span className="material-symbols-outlined text-[#009B82] text-sm">check_circle</span> Usuários Ilimitados</li>
-                            </ul>
-                            <button onClick={onStart} className="w-full py-3 rounded-full bg-[#009B82] text-white font-bold hover:bg-[#007A65] transition-all">
-                                Iniciar Teste
+                        {/* Max */}
+                        <div className="p-10 rounded-[40px] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                            <h3 className="text-2xl font-bold text-slate-900 mb-2">Scale</h3>
+                            <p className="text-slate-500 mb-8">Para redes e franquias.</p>
+                            <div className="text-5xl font-black text-slate-900 mb-8">R$ 197<span className="text-lg font-medium text-slate-400 ml-1">/mês</span></div>
+                            <button onClick={onStart} className="w-full py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 hover:bg-slate-50 transition-all mb-8">
+                                Falar com Consultor
                             </button>
+                            <ul className="space-y-4">
+                                {['Múltiplas Unidades', 'Gestão de Estoque', 'API e Integrações', 'Gerente de Conta'].map(f => (
+                                    <li key={f} className="flex items-center gap-3 text-sm text-slate-600"><span className="material-symbols-outlined text-[#617FA3]">check</span> {f}</li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Section: FAQ */}
+            {/* FAQ Accordion */}
             <section className="py-24 bg-white">
                 <div className="max-w-3xl mx-auto px-6">
-                    <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">Dúvidas Frequentes</h2>
+                    <h2 className="text-3xl font-extrabold text-center text-slate-900 mb-12">Perguntas Frequentes</h2>
                     <div className="space-y-4">
                         {[
                             { q: 'O que é o Dental Hub?', a: 'É uma plataforma completa para gestão, vendas e relacionamento com pacientes.' },
                             { q: 'Como o Dental Hub aumenta minha taxa de aceitação?', a: 'Através de apresentações visuais e interativas dos tratamentos que encantam o paciente.' },
-                            { q: 'Preciso de conhecimento técnico para usar?', a: 'Não! O sistema foi desenhado para ser intuitivo e fácil de usar, como um app de celular.' },
-                            { q: 'O paciente tem acesso ao plano de tratamento?', a: 'Sim, você pode compartilhar um link exclusivo onde ele visualiza o orçamento e a timeline.' },
-                            { q: 'Posso personalizar os templates?', a: 'Sim, no plano Max você tem total liberdade para criar seus próprios templates.' }
+                            { q: 'Posso cancelar a qualquer momento?', a: 'Sim! Não temos fidelidade. Você pode cancelar sua assinatura quando quiser direto no painel.' },
+                            { q: 'Preciso instalar algo?', a: 'Não. O Dental Hub é 100% online e funciona em qualquer navegador, computador ou celular.' }
                         ].map((faq, i) => (
-                            <div key={i} className="border border-slate-200 rounded-2xl overflow-hidden hover:border-[#617FA3] transition-colors">
+                            <div key={i} className={`border rounded-2xl overflow-hidden transition-all duration-300 ${openFaq === i ? 'border-[#617FA3] shadow-lg shadow-[#617FA3]/10' : 'border-slate-200 hover:border-slate-300'}`}>
                                 <button
                                     onClick={() => toggleFaq(i)}
-                                    className="w-full p-6 text-left flex justify-between items-center font-bold text-slate-800 bg-white hover:bg-slate-50"
+                                    className="w-full p-6 text-left flex justify-between items-center font-bold text-slate-800 bg-white"
                                 >
                                     {faq.q}
-                                    <span className={`material-symbols-outlined transition-transform text-[#617FA3] ${openFaq === i ? 'rotate-180' : ''}`}>expand_more</span>
+                                    <span className={`material-symbols-outlined transition-transform duration-300 text-[#617FA3] ${openFaq === i ? 'rotate-180' : ''}`}>keyboard_arrow_down</span>
                                 </button>
-                                {openFaq === i && (
-                                    <div className="p-6 pt-0 text-slate-600 leading-relaxed bg-slate-50 border-t border-slate-100">
-                                        {faq.a}
+                                <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${openFaq === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+                                    <div className="overflow-hidden">
+                                        <div className="p-6 pt-0 text-slate-500 leading-relaxed bg-white">
+                                            {faq.a}
+                                        </div>
                                     </div>
-                                )}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -292,31 +294,42 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-50 pt-20 pb-10 border-t border-slate-200">
-                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-                    <div className="col-span-1 md:col-span-2 space-y-4">
-                        <div className="flex items-center gap-2.5">
-                            <div className="size-8 bg-[#617FA3] rounded-lg flex items-center justify-center text-white">
-                                <span className="material-symbols-outlined text-lg">dentistry</span>
+            <footer className="bg-slate-900 pt-24 pb-12 border-t border-slate-800 text-slate-400">
+                <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                    <div className="col-span-1 md:col-span-2 space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 bg-[#617FA3] rounded-xl flex items-center justify-center text-white">
+                                <span className="material-symbols-outlined text-2xl">dentistry</span>
                             </div>
-                            <span className="font-extrabold text-xl text-slate-900">Dental Hub</span>
+                            <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
-                        <p className="text-slate-500 max-w-xs leading-relaxed">
-                            Simplificando a gestão odontológica para que você possa focar no que importa: o sorriso do seu paciente.
+                        <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
+                            Tecnologia de ponta para dentistas que não aceitam o "mais do mesmo".
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold text-slate-900 mb-6">Plataforma</h4>
-                        <ul className="space-y-3 text-sm text-slate-500">
-                            <li className="hover:text-[#617FA3] cursor-pointer">Agenda Inteligente</li>
-                            <li className="hover:text-[#617FA3] cursor-pointer">Prontuário Eletrônico</li>
-                            <li className="hover:text-[#617FA3] cursor-pointer">Financeiro</li>
-                            <li className="hover:text-[#617FA3] cursor-pointer">Estoque</li>
+                        <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
+                        <ul className="space-y-4 text-base">
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Consultórios</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Redes</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Funcionalidades</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-white mb-8 text-lg">Empresa</h4>
+                        <ul className="space-y-4 text-base">
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Sobre Nós</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Blog</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Contato</li>
                         </ul>
                     </div>
                 </div>
-                <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
-                    <p>&copy; 2026 Dental Hub. Todos os direitos reservados.</p>
+                <div className="max-w-[1400px] mx-auto px-6 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
+                    <p>&copy; 2026 Dental Hub. Feito com 💙 para dentistas.</p>
+                    <div className="flex gap-8">
+                        <a href="#" className="hover:text-white transition-colors">Termos</a>
+                        <a href="#" className="hover:text-white transition-colors">Privacidade</a>
+                    </div>
                 </div>
             </footer>
         </div>
