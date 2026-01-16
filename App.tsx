@@ -658,16 +658,30 @@ const ScheduleView = ({ openModal, tenant }: { openModal: () => void; tenant: Te
                                 {/* Mock Appointments (Fixed positions for demo, would be dynamic in real app) */}
                                 {colIdx === 0 && (
                                     <>
-                                        <div onClick={(e) => { e.stopPropagation(); alert('Consulta: Sarah Conner - Canal'); }} className="absolute top-[110px] left-1 right-1 h-[90px] bg-blue-50 border-l-4 border-blue-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
-                                            <p className="text-xs font-bold text-blue-700">Sarah Conner</p>
-                                            <p className="text-[10px] text-blue-600">Canal (Endo)</p>
+                                        <div onClick={(e) => { e.stopPropagation(); alert('Consulta: Sarah Conner - Canal'); }} className="absolute top-[110px] left-1 right-1 h-[90px] bg-blue-50 border-l-4 border-blue-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10 group">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-xs font-bold text-blue-700">Sarah Conner</p>
+                                                    <p className="text-[10px] text-blue-600">Canal (Endo)</p>
+                                                </div>
+                                                <button onClick={(e) => { e.stopPropagation(); alert('Enviando lembrete para (11) 99999-9999 via WhatsApp...'); }} className="p-1 hover:bg-blue-100 rounded-full text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Enviar Lembrete WhatsApp">
+                                                    <span className="material-symbols-outlined text-[16px]">chat</span>
+                                                </button>
+                                            </div>
                                             <div className="mt-1 flex gap-1">
-                                                <span className="px-1 py-0.5 bg-white/50 rounded text-[9px] text-blue-700 font-bold">Confirmado</span>
+                                                <span className="px-1 py-0.5 bg-blue-100/50 rounded text-[9px] text-blue-700 font-bold">Confirmado</span>
                                             </div>
                                         </div>
-                                        <div className="absolute top-[320px] left-1 right-1 h-[60px] bg-amber-50 border-l-4 border-amber-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10">
-                                            <p className="text-xs font-bold text-amber-700">John Wick</p>
-                                            <p className="text-[10px] text-amber-600">Emergência</p>
+                                        <div className="absolute top-[320px] left-1 right-1 h-[60px] bg-amber-50 border-l-4 border-amber-500 rounded p-2 cursor-pointer hover:brightness-95 transition-all z-10 group">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-xs font-bold text-amber-700">John Wick</p>
+                                                    <p className="text-[10px] text-amber-600">Emergência</p>
+                                                </div>
+                                                <button onClick={(e) => { e.stopPropagation(); alert('Enviando lembrete para John Wick via WhatsApp...'); }} className="p-1 hover:bg-amber-100 rounded-full text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Enviar Lembrete WhatsApp">
+                                                    <span className="material-symbols-outlined text-[16px]">chat</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -1122,8 +1136,8 @@ const BudgetsTab = () => {
                                 <div className="flex items-center gap-2 mb-1">
                                     <h4 className="font-bold text-slate-900">#{b.id} - {b.patient}</h4>
                                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${b.status === 'Aprovado' ? 'bg-green-100 text-green-700' :
-                                            b.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
-                                                'bg-yellow-100 text-yellow-700'
+                                        b.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
+                                            'bg-yellow-100 text-yellow-700'
                                         }`}>{b.status}</span>
                                 </div>
                                 <p className="text-sm text-slate-500">{b.items.join(', ')}</p>
@@ -1173,9 +1187,61 @@ const FinancialsView = () => {
     );
 };
 
+// 6c. Audit Logs Tab (Phase 6)
+const AuditLogsTab = () => {
+    const logs = [
+        { user: 'Dr. Smith', action: 'Acessou Prontuário (João Silva)', time: 'Hoje, 14:32', ip: '192.168.1.1' },
+        { user: 'Recepção', action: 'Agendou Consulta (Maria Souza)', time: 'Hoje, 10:15', ip: '192.168.1.5' },
+        { user: 'Dr. Smith', action: 'Alterou Configurações da Clínica', time: 'Ontem, 18:40', ip: '192.168.1.1' },
+        { user: 'Sistema', action: 'Backup Automático', time: 'Ontem, 02:00', ip: 'Localhost' },
+    ];
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Segurança e Auditoria</h3>
+                <button className="text-sm font-bold text-primary flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">download</span> Exportar Logs
+                </button>
+            </div>
+            <div className="p-0">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+                        <tr>
+                            <th className="px-6 py-3 font-bold">Usuário</th>
+                            <th className="px-6 py-3 font-bold">Ação</th>
+                            <th className="px-6 py-3 font-bold">Data/Hora</th>
+                            <th className="px-6 py-3 font-bold">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {logs.map((log, i) => (
+                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 py-3 font-medium text-slate-900">{log.user}</td>
+                                <td className="px-6 py-3 text-slate-600">{log.action}</td>
+                                <td className="px-6 py-3 text-slate-500">{log.time}</td>
+                                <td className="px-6 py-3 text-slate-400 font-mono text-xs">{log.ip}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50">
+                <div className="flex items-start gap-3">
+                    <input type="checkbox" id="lgpd" className="mt-1" />
+                    <div>
+                        <label htmlFor="lgpd" className="font-bold text-slate-900 block">Ativar Consultoria LGPD</label>
+                        <p className="text-xs text-slate-500">Ao ativar, o sistema solicitará consentimento dos pacientes para armazenamento de dados sensíveis na ficha de cadastro.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // 5. Clinic Settings View
 const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
-    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan' | 'schedule'>('identity');
+    const [activeTab, setActiveTab] = useState<'identity' | 'branding' | 'plan' | 'schedule' | 'security'>('identity');
     const [tempName, setTempName] = useState(tenant.name);
     const [tempColor, setTempColor] = useState(tenant.branding.primaryColor);
 
@@ -1237,6 +1303,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                                 { id: 'branding', label: 'Marca & Logo', icon: 'verified' },
                                 { id: 'schedule', label: 'Agenda & Horários', icon: 'calendar_clock' },
                                 { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
+                                { id: 'security', label: 'Segurança & LGPD', icon: 'shield_lock' },
                             ].map(item => (
                                 <button
                                     key={item.id}
@@ -1398,6 +1465,9 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                             <p className="text-slate-500 max-w-md mt-2">Upload de logo personalizado e fontes estarão disponíveis na próxima atualização.</p>
                         </div>
                     )}
+
+                    {/* Audit Logs Tab */}
+                    {activeTab === 'security' && <AuditLogsTab />}
                 </div>
             </div>
         </div>

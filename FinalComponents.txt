@@ -1,0 +1,66 @@
+// --- Final Components ---
+
+// 1. Audit Logs Tab (Phase 6)
+const AuditLogsTab = () => {
+    const logs = [
+        { user: 'Dr. Smith', action: 'Acessou Prontuário (João Silva)', time: 'Hoje, 14:32', ip: '192.168.1.1' },
+        { user: 'Recepção', action: 'Agendou Consulta (Maria Souza)', time: 'Hoje, 10:15', ip: '192.168.1.5' },
+        { user: 'Dr. Smith', action: 'Alterou Configurações da Clínica', time: 'Ontem, 18:40', ip: '192.168.1.1' },
+        { user: 'Sistema', action: 'Backup Automático', time: 'Ontem, 02:00', ip: 'Localhost' },
+    ];
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+             <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Segurança e Auditoria</h3>
+                <button className="text-sm font-bold text-primary flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">download</span> Exportar Logs
+                </button>
+            </div>
+            <div className="p-0">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+                        <tr>
+                            <th className="px-6 py-3 font-bold">Usuário</th>
+                            <th className="px-6 py-3 font-bold">Ação</th>
+                            <th className="px-6 py-3 font-bold">Data/Hora</th>
+                            <th className="px-6 py-3 font-bold">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {logs.map((log, i) => (
+                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 py-3 font-medium text-slate-900">{log.user}</td>
+                                <td className="px-6 py-3 text-slate-600">{log.action}</td>
+                                <td className="px-6 py-3 text-slate-500">{log.time}</td>
+                                <td className="px-6 py-3 text-slate-400 font-mono text-xs">{log.ip}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="p-6 border-t border-slate-100 bg-slate-50">
+                <div className="flex items-start gap-3">
+                    <input type="checkbox" id="lgpd" className="mt-1" />
+                    <div>
+                         <label htmlFor="lgpd" className="font-bold text-slate-900 block">Ativar Consultoria LGPD</label>
+                         <p className="text-xs text-slate-500">Ao ativar, o sistema solicitará consentimento dos pacientes para armazenamento de dados sensíveis na ficha de cadastro.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// 2. Schedule Item Status Enhancements (Snippet for reference)
+/*
+   // Inside ScheduleView render loop or component
+   const getStatusColor = (status: string) => {
+       switch(status) {
+           case 'confirmed': return 'bg-green-100 text-green-700 border-green-200';
+           case 'canceled': return 'bg-red-100 text-red-700 border-red-200 decoration-slate-400 line-through';
+           case 'completed': return 'bg-slate-100 text-slate-500 border-slate-200';
+           default: return 'bg-blue-100 text-blue-700 border-blue-200'; // Scheduled
+       }
+   };
+*/
