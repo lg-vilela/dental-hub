@@ -74,39 +74,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
-        const loadSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-            setUser(session?.user ?? null);
+        let mounted = true;
 
-            if (session?.user) {
-                await fetchProfileData(session.user.id);
+        const loadSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (mounted) {
+                    setSession(session);
+                    setUser(session?.user ?? null);
+                    if (session?.user) {
+                        await fetchProfileData(session.user.id);
+                    }
+                }
+            } catch (error) {
+                console.error("Auth initialization error:", error);
+            } final {
+                if (mounted) setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
         loadSession();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!mounted) return;
+
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
                 // If LOGIN event, fetch data
                 if (_event === 'SIGNED_IN') {
-                    setIsLoading(true);
+                    // Don't set loading true here if we are just recovering session, 
+                    // only for explicit sign-ins if needed, but safe to keep.
                     await fetchProfileData(session.user.id);
-                    setIsLoading(false);
                 }
             } else {
                 setProfile(null);
                 setClinic(null);
             }
 
-            if (_event === 'INITIAL_SESSION') setIsLoading(false);
+            // Should ensure loading is false after any auth event handling
+            setIsLoading(false);
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const signIn = async (email: string) => {
