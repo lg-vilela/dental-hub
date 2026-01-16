@@ -53,9 +53,127 @@ const AuditLogsTab = () => {
     );
 };
 
+// 6d. Team Tab
+import { profileService } from '../src/services/profileService';
+import { UserProfile } from '../src/contexts/AuthContext';
+import { useAuth } from '../src/contexts/AuthContext';
+
+const TeamTab = () => {
+    const { clinic } = useAuth();
+    const [members, setMembers] = useState<UserProfile[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [inviteRole, setInviteRole] = useState('dentist');
+    const [inviteLink, setInviteLink] = useState('');
+
+    useEffect(() => {
+        loadTeam();
+    }, []);
+
+    const loadTeam = async () => {
+        try {
+            const data = await profileService.getTeamMembers();
+            setMembers(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const generateInvite = () => {
+        if (!clinic) return;
+        // Generate a link that passes metadata to the signup page
+        // Format: /signup?invite_clinic_id=UUID&invite_role=ROLE
+        const baseUrl = window.location.origin; // e.g. http://localhost:5173
+        const link = `${baseUrl}/signup?invite_clinic_id=${clinic.id}&invite_role=${inviteRole}`;
+        setInviteLink(link);
+    };
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(inviteLink);
+        alert('Link copiado! Envie para o membro da equipe.');
+    };
+
+    return (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Gerenciar Equipe</h3>
+                <div className="flex gap-2">
+                    <select
+                        value={inviteRole}
+                        onChange={(e) => { setInviteRole(e.target.value); setInviteLink(''); }}
+                        className="text-sm border border-slate-200 rounded-lg px-2 py-1 outline-none"
+                    >
+                        <option value="dentist">Dentista</option>
+                        <option value="receptionist">Recepcionista</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                    <button onClick={generateInvite} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
+                        Gerar Convite
+                    </button>
+                </div>
+            </div>
+
+            {/* Invite Link Area */}
+            {inviteLink && (
+                <div className="p-4 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs font-bold text-blue-800 uppercase mb-1">Link de Convite ({inviteRole === 'dentist' ? 'Dentista' : inviteRole === 'receptionist' ? 'Recepcionista' : 'Admin'})</p>
+                        <p className="text-sm text-blue-600 font-mono break-all">{inviteLink}</p>
+                    </div>
+                    <button onClick={copyLink} className="text-blue-700 font-bold text-sm hover:underline">Copiar</button>
+                </div>
+            )}
+
+            <div className="p-0">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-100 text-slate-500">
+                        <tr>
+                            <th className="px-6 py-3 font-bold">Nome</th>
+                            <th className="px-6 py-3 font-bold">Email</th>
+                            <th className="px-6 py-3 font-bold">Cargo</th>
+                            <th className="px-6 py-3 font-bold">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {isLoading ? (
+                            <tr><td colSpan={4} className="p-6 text-center text-slate-400">Carregando equipe...</td></tr>
+                        ) : members.map((m) => (
+                            <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 py-3 font-bold text-slate-900 flex items-center gap-2">
+                                    <div className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs">
+                                        {m.full_name[0]}
+                                    </div>
+                                    {m.full_name}
+                                </td>
+                                <td className="px-6 py-3 text-slate-600">{m.email || 'Email oculto'}</td>
+                                <td className="px-6 py-3">
+                                    <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${m.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                            m.role === 'dentist' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-orange-100 text-orange-700'
+                                        }`}>
+                                        {m.role === 'dentist' ? 'Dentista' : m.role === 'receptionist' ? 'Recepção' : 'Admin'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-3 text-slate-400 text-xs">Ativo</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="p-6 bg-slate-50 border-t border-slate-100">
+                <p className="text-xs text-slate-500 text-center">
+                    Limite do Plano: <span className="font-bold text-slate-900">{members.length} / {clinic?.plan === 'pro' ? '10' : clinic?.plan === 'plus' ? '∞' : '1'}</span> usuários.
+                </p>
+            </div>
+        </div>
+    );
+};
+
 // 5. Clinic Settings View
 const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
-    const [activeTab, setActiveTab] = useState<'schedule' | 'plan' | 'security'>('schedule');
+    const [activeTab, setActiveTab] = useState<'schedule' | 'plan' | 'security' | 'team'>('schedule');
 
     // Schedule Settings State
     const [openingTime, setOpeningTime] = useState(tenant.settings.openingTime);
@@ -105,6 +223,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                         <nav className="flex flex-col p-2">
                             {[
                                 { id: 'schedule', label: 'Agenda & Horários', icon: 'calendar_clock' },
+                                { id: 'team', label: 'Membros da Equipe', icon: 'group' },
                                 { id: 'plan', label: 'Plano & Limites', icon: 'workspace_premium' },
                                 { id: 'security', label: 'Segurança & LGPD', icon: 'shield_lock' },
                             ].map(item => (
@@ -186,6 +305,9 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                             </div>
                         </div>
                     )}
+
+                    {/* Team Tab */}
+                    {activeTab === 'team' && <TeamTab />}
 
                     {/* Plan Tab */}
                     {activeTab === 'plan' && (
