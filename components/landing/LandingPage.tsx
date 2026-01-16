@@ -18,9 +18,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
             <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm transition-all duration-300">
                 <div className="w-full max-w-[1400px] mx-auto px-6 h-20 flex justify-between items-center">
                     <div className="flex items-center gap-2.5 group cursor-pointer hover:opacity-80 transition-opacity">
-                        <div className="size-10 bg-gradient-to-br from-[#617FA3] to-[#4A6280] rounded-xl flex items-center justify-center text-white shadow-lg shadow-[#617FA3]/20 group-hover:scale-110 transition-transform duration-300">
-                            <span className="material-symbols-outlined text-[24px]">dentistry</span>
-                        </div>
+                        <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-10 w-auto object-contain group-hover:scale-110 transition-transform duration-300" />
                         <span className="font-extrabold text-2xl text-slate-800 tracking-tight">Dental Hub</span>
                     </div>
                     <div className="flex items-center gap-4">
@@ -309,9 +307,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                 <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
                     <div className="col-span-1 md:col-span-2 space-y-6">
                         <div className="flex items-center gap-3">
-                            <div className="size-10 bg-[#617FA3] rounded-xl flex items-center justify-center text-white">
-                                <span className="material-symbols-outlined text-2xl">dentistry</span>
-                            </div>
+                            <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-10 w-auto object-contain brightness-0 invert opacity-80" />
                             <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
                         <p className="text-slate-400 max-w-sm leading-relaxed text-lg">

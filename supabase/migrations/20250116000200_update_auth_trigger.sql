@@ -10,9 +10,6 @@ DECLARE
 BEGIN
   -- Check if user has an improved invitation in metadata
   IF new.raw_user_meta_data->>'invite_clinic_id' IS NOT NULL THEN
-    v_clinic_id := (new.raw_user_meta_data->>'invite_invite_clinic_id')::uuid;
-    -- Fix: The key above had a typo in variable assignment logic? 
-    -- Let's run it cleanly:
     v_clinic_id := (new.raw_user_meta_data->>'invite_clinic_id')::uuid;
     v_role := COALESCE(new.raw_user_meta_data->>'invite_role', 'dentist');
     

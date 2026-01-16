@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tenant, activePage, setPage, openPubl
         <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen fixed left-0 top-0 z-20 hidden lg:flex font-['Manrope']">
             {/* Clinic Identity */}
             <div className="h-24 flex items-center px-6 gap-3">
-                <img src="https://i.postimg.cc/7PCPGZjd/logoblack-vilelacodelab.png" alt="Dental Hub" className="h-10 w-auto object-contain" />
+                <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-10 w-auto object-contain" />
                 <div className="flex flex-col justify-center">
                     <h1 className="text-slate-900 text-lg font-extrabold leading-none tracking-tight">Dental Hub</h1>
                     <p className="text-slate-400 text-xs font-semibold mt-1 tracking-wide">Consultório Inteligente</p>

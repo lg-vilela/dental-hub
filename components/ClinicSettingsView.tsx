@@ -85,15 +85,21 @@ const TeamTab = () => {
     const canAdd = members.length < limit;
 
     const generateInvite = () => {
-        if (!clinic) return;
-        if (!canAdd) {
-            alert(`Você atingiu o limite do plano ${clinic.plan}. Faça upgrade!`);
+        if (!clinic) {
+            console.error("Clinic (AuthContext) is missing");
+            alert("Erro: Dados da clínica não carregados. Recarregue a página.");
             return;
         }
+
+        if (!canAdd) {
+            alert(`Você atingiu o limite do plano ${clinic.plan || 'Grátis'}. Faça upgrade!`);
+            return;
+        }
+
+        console.log("Generating invite for clinic:", clinic.id, "Role:", inviteRole);
         const baseUrl = window.location.origin;
         const link = `${baseUrl}/signup?invite_clinic_id=${clinic.id}&invite_role=${inviteRole}`;
         setInviteLink(link);
-        // Visual feedback (optional since the section expands, but safe to force expand)
     };
 
     const copyLink = () => {
@@ -149,8 +155,7 @@ const TeamTab = () => {
 
                     <button
                         onClick={generateInvite}
-                        disabled={!canAdd}
-                        className={`bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2 ${!canAdd ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2 ${!canAdd ? 'opacity-75' : ''}`}
                     >
                         <span className="material-symbols-outlined text-[18px]">link</span>
                         Gerar Convite

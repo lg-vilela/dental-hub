@@ -34,9 +34,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
             <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-500">
                 <div className="p-8 sm:p-12">
                     <div className="text-center mb-10">
-                        <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-6">
-                            <span className="material-symbols-outlined text-4xl">dentistry</span>
-                        </div>
+                        <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-20 w-auto mx-auto mb-6 object-contain" />
                         <h1 className="text-2xl font-bold text-slate-900">Bem-vindo de volta!</h1>
                         <p className="text-slate-500 mt-2">Acesse sua clínica para gerenciar.</p>
                     </div>
