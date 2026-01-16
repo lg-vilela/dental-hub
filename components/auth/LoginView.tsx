@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface LoginViewProps {
     onLogin: (email: string) => void;
@@ -6,18 +7,26 @@ interface LoginViewProps {
 }
 
 const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
+    const { signIn } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+        setError('');
+
+        try {
+            const { error } = await signIn(email, password);
+            if (error) throw error;
+            // onLogin callback might be redundant if App listens to useAuth, 
+            // but we keep it for now if it triggered some transition (though App handles it).
+        } catch (err: any) {
+            setError(err.message || 'Erro ao fazer login. Verifique suas credenciais.');
             setIsLoading(false);
-            onLogin(email);
-        }, 1000);
+        }
     };
 
     return (
@@ -33,6 +42,11 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="p-3 bg-red-50 text-red-600 text-sm font-bold rounded-lg border border-red-100">
+                                {error}
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-slate-700">E-mail</label>
                             <input
@@ -77,7 +91,10 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
                     <div className="mt-8 text-center">
                         <p className="text-slate-500 text-sm">
                             Ainda não tem conta?{' '}
-                            <button onClick={onSignup} className="font-bold text-primary hover:underline">
+                            <button onClick={() => {
+                                // If using SetupWizard as Signup, we need to switch view in parent.
+                                onSignup();
+                            }} className="font-bold text-primary hover:underline">
                                 Criar Clínica Grátis
                             </button>
                         </p>
@@ -86,7 +103,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
             </div>
 
             <p className="mt-8 text-xs text-slate-400 font-medium">
-                &copy; 2026 Dental SaaS. Todos os direitos reservados.
+                &copy; 2026 Dental Hub. Todos os direitos reservados.
             </p>
         </div>
     );

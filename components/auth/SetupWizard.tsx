@@ -4,8 +4,13 @@ interface SetupWizardProps {
     onComplete: (data: any) => void;
 }
 
+import { useAuth } from '../../contexts/AuthContext';
+
 const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
+    const { signUp } = useAuth();
     const [step, setStep] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -15,11 +20,28 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         goal: ''
     });
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (step < 4) {
             setStep(step + 1);
         } else {
-            onComplete(formData);
+            // Finalize - Create Account
+            setIsLoading(true);
+            setError('');
+            try {
+                const { error } = await signUp(formData.email, formData.password, {
+                    name: formData.name,
+                    clinicName: formData.clinicName,
+                    type: formData.type,
+                    goal: formData.goal
+                });
+
+                if (error) throw error;
+                // Success
+                onComplete(formData);
+            } catch (err: any) {
+                setError(err.message || 'Erro ao criar conta. Tente novamente.');
+                setIsLoading(false);
+            }
         }
     };
 
@@ -145,16 +167,28 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                         </div>
                     )}
 
-                    <div className="mt-10 flex justify-end">
+                    <div className="mt-10 flex flex-col items-end gap-4">
+                        {error && (
+                            <div className="text-red-600 text-sm font-bold bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+                                {error}
+                            </div>
+                        )}
                         <button
                             onClick={handleNext}
                             disabled={
                                 (step === 1 && (!formData.name || !formData.email || !formData.password)) ||
-                                (step === 2 && !formData.clinicName)
+                                (step === 2 && !formData.clinicName) ||
+                                isLoading
                             }
                             className="bg-primary text-white text-lg font-bold py-4 px-10 rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20"
                         >
-                            {step === 4 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                            {isLoading ? (
+                                <div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : (
+                                <>
+                                    {step === 4 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
