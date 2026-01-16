@@ -7,13 +7,16 @@ interface SetupWizardProps {
 const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
         clinicName: '',
         type: '',
         goal: ''
     });
 
     const handleNext = () => {
-        if (step < 3) {
+        if (step < 4) {
             setStep(step + 1);
         } else {
             onComplete(formData);
@@ -28,17 +31,60 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                     <div className="absolute top-0 right-0 size-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
                     <div className="relative z-10">
                         <div className="flex justify-between items-center mb-4">
-                            <div className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold backdrop-blur-sm">Passo {step} de 3</div>
+                            <div className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold backdrop-blur-sm">Passo {step} de 4</div>
                             <span className="material-symbols-outlined text-white/50">rocket_launch</span>
                         </div>
-                        <h1 className="text-3xl font-bold">Vamos configurar sua clínica</h1>
-                        <p className="text-slate-400 mt-2">Levará menos de 1 minuto.</p>
+                        <h1 className="text-3xl font-bold">
+                            {step === 1 ? 'Crie sua conta' : 'Vamos configurar sua clínica'}
+                        </h1>
+                        <p className="text-slate-400 mt-2">
+                            {step === 1 ? 'Dados para acesso administrativo.' : 'Levará menos de 1 minuto.'}
+                        </p>
                     </div>
                 </div>
 
                 <div className="p-8 sm:p-12">
-                    {/* Step 1: Name */}
+                    {/* Step 1: User Data */}
                     {step === 1 && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-bold text-slate-700 block mb-1">Nome Completo</label>
+                                    <input
+                                        type="text"
+                                        autoFocus
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        placeholder="Dr. João Silva"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-bold text-slate-700 block mb-1">E-mail Corporativo</label>
+                                    <input
+                                        type="email"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        placeholder="contato@suaclinica.com"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-bold text-slate-700 block mb-1">Senha de Acesso</label>
+                                    <input
+                                        type="password"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        placeholder="Mínimo 8 caracteres"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 2: Name */}
+                    {step === 2 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             <div className="space-y-4">
                                 <label className="text-lg font-bold text-slate-900 block">Qual o nome da sua clínica ou consultório?</label>
@@ -49,13 +95,14 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                                     placeholder="Ex: Sorriso Radiante"
                                     value={formData.clinicName}
                                     onChange={(e) => setFormData({ ...formData, clinicName: e.target.value })}
+                                    onKeyDown={(e) => e.key === 'Enter' && formData.clinicName && handleNext()}
                                 />
                             </div>
                         </div>
                     )}
 
-                    {/* Step 2: Type */}
-                    {step === 2 && (
+                    {/* Step 3: Type */}
+                    {step === 3 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             <label className="text-lg font-bold text-slate-900 block">Como você se identifica?</label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -72,8 +119,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                         </div>
                     )}
 
-                    {/* Step 3: Goal */}
-                    {step === 3 && (
+                    {/* Step 4: Goal */}
+                    {step === 4 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             <label className="text-lg font-bold text-slate-900 block">Qual seu principal objetivo?</label>
                             <div className="space-y-3">
@@ -101,10 +148,13 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                     <div className="mt-10 flex justify-end">
                         <button
                             onClick={handleNext}
-                            disabled={step === 1 && !formData.clinicName}
+                            disabled={
+                                (step === 1 && (!formData.name || !formData.email || !formData.password)) ||
+                                (step === 2 && !formData.clinicName)
+                            }
                             className="bg-primary text-white text-lg font-bold py-4 px-10 rounded-2xl hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-xl shadow-primary/20"
                         >
-                            {step === 3 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                            {step === 4 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
                         </button>
                     </div>
                 </div>
