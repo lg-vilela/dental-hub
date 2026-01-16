@@ -31,7 +31,7 @@ export const financialService = {
             .single();
 
         if (error) throw error;
-        return data as Transaction[];
+        return data as Transaction;
     },
 
     async getDashboardStats() {

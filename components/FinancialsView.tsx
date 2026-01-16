@@ -50,7 +50,7 @@ const CashFlowTab = () => {
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!clinic) return;
+        if (!clinic) return alert('Clínica não encontrada.');
         try {
             await financialService.createTransaction({
                 clinic_id: clinic.id,
@@ -63,8 +63,9 @@ const CashFlowTab = () => {
             setShowAddForm(false);
             setNewTrx({ ...newTrx, description: '', amount: '' });
             loadData();
-        } catch (err) {
-            alert('Erro ao adicionar transação');
+        } catch (err: any) {
+            console.error(err);
+            alert('Erro ao adicionar transação: ' + (err.message || 'Erro deconhecido'));
         }
     };
 
