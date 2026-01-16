@@ -72,19 +72,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                             </button>
                         </div>
-                        <div className="pt-4 flex items-center gap-6">
-                            <div className="flex -space-x-4">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="size-12 rounded-full border-4 border-white overflow-hidden shadow-sm hover:-translate-y-2 transition-transform duration-300 z-0 hover:z-10">
-                                        <img src={`https://picsum.photos/50/50?random=${i + 20}`} className="w-full h-full object-cover" alt="" />
-                                    </div>
-                                ))}
+                        <div className="pt-8 flex items-center divide-x divide-slate-200">
+                            <div className="pr-6">
+                                <p className="text-3xl font-extrabold text-[#617FA3]">75%+</p>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Taxa de aceitação</p>
                             </div>
-                            <div className="flex flex-col">
+                            <div className="px-6">
+                                <p className="text-3xl font-extrabold text-[#617FA3]">-30min</p>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Por consulta</p>
+                            </div>
+                            <div className="pl-6">
                                 <div className="flex text-yellow-400 text-lg">
                                     {'★★★★★'.split('').map((s, i) => <span key={i}>{s}</span>)}
                                 </div>
-                                <p className="text-slate-600 font-bold text-sm">+500 dentistas confiam</p>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Aprovação 4.8/5</p>
                             </div>
                         </div>
                     </div>
