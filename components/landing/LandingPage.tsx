@@ -313,7 +313,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                             </div>
                             <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
-
+                        <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
+                            A solução definitiva para gestão odontológica de alta performance.
+                        </p>
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
