@@ -120,19 +120,40 @@ const FilesTab = () => {
 
 // 5a. Patient List
 import { usePermissions } from '../src/hooks/usePermissions';
+import { patientService, Patient } from '../src/services/patientService';
+import { AddPatientModal } from './patients/AddPatientModal';
+import { useAuth } from '../src/contexts/AuthContext';
 
 const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
     const { canAddPatient, isFree } = usePermissions();
-    const patients = [
-        { id: 1, name: 'João Silva', age: 34, phone: '(11) 99999-1234', lastVisit: '12 Jan, 2026', status: 'Em Tratamento' },
-        { id: 2, name: 'Maria Souza', age: 28, phone: '(11) 98888-5678', lastVisit: '10 Jan, 2026', status: 'Manutenção' },
-        { id: 3, name: 'Pedro Alves', age: 45, phone: '(11) 97777-4321', lastVisit: '05 Dez, 2025', status: 'Avaliação' },
-    ];
+    const { clinic } = useAuth(); // Just to track updates if needed, RLS handles security
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // In real app, we fetch count from DB.
-    // For MVP, if Plan=Free, we just mock the limit check or assume limit is reached if user tries to add 11th.
-    // Let's assume current mocked count is 3, so valid.
-    // But let's show visual feedback if limit was reached.
+    const fetchPatients = async () => {
+        setIsLoading(true);
+        try {
+            const data = await patientService.getPatients();
+            setPatients(data);
+        } catch (error) {
+            console.error("Error fetching patients:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchPatients();
+    }, []);
+
+    const filteredPatients = patients.filter(p =>
+        p.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.phone?.includes(searchTerm) ||
+        p.cpf?.includes(searchTerm)
+    );
+
     const canAdd = canAddPatient(patients.length);
 
     return (
@@ -140,16 +161,23 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                 <div className="relative flex-1 max-w-md">
                     <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
-                    <input type="text" placeholder="Buscar pacientes..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none" />
+                    <input
+                        type="text"
+                        placeholder="Buscar pacientes..."
+                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
                 </div>
 
                 <div className="flex gap-2 items-center">
                     {isFree && (
                         <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
-                            {patients.length} / 10 Pacientes (Grátis)
+                            {patients.length} / 5 Pacientes (Grátis)
                         </span>
                     )}
                     <button
+                        onClick={() => setIsModalOpen(true)}
                         disabled={!canAdd}
                         className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed group relative"
                     >
@@ -170,38 +198,59 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
                         <tr>
                             <th className="px-6 py-4 font-bold text-slate-500">Paciente</th>
                             <th className="px-6 py-4 font-bold text-slate-500">Contato</th>
-                            <th className="px-6 py-4 font-bold text-slate-500">Última Visita</th>
+                            <th className="px-6 py-4 font-bold text-slate-500">Cadastro</th>
                             <th className="px-6 py-4 font-bold text-slate-500">Status</th>
                             <th className="px-6 py-4 font-bold text-slate-500">Ações</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {patients.map(p => (
-                            <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">{p.name.charAt(0)}</div>
-                                        <div>
-                                            <p className="font-bold text-slate-900">{p.name}</p>
-                                            <p className="text-xs text-slate-400">{p.age} anos</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-slate-600">{p.phone}</td>
-                                <td className="px-6 py-4 text-sm text-slate-600">{p.lastVisit}</td>
-                                <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${p.status === 'Em Tratamento' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'}`}>
-                                        {p.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <button onClick={() => onSelect(p)} className="text-primary font-bold text-sm hover:underline">Abrir Prontuário</button>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan={5} className="p-8 text-center text-slate-400">Carregando pacientes...</td>
+                            </tr>
+                        ) : filteredPatients.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="p-8 text-center text-slate-400">
+                                    {searchTerm ? 'Nenhum paciente encontrado para a busca.' : 'Nenhum paciente cadastrado.'}
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            filteredPatients.map(p => (
+                                <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">{p.full_name.charAt(0)}</div>
+                                            <div>
+                                                <p className="font-bold text-slate-900">{p.full_name}</p>
+                                                <p className="text-xs text-slate-400">{p.birth_date ? 'Nasc: ' + new Date(p.birth_date).toLocaleDateString() : 'Idade n/a'}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">
+                                        <div>{p.phone || '-'}</div>
+                                        <div className="text-xs text-slate-400">{p.email}</div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">{new Date(p.created_at).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700`}>
+                                            Ativo
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <button onClick={() => onSelect(p)} className="text-primary font-bold text-sm hover:underline">Abrir Prontuário</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
+
+            <AddPatientModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={fetchPatients}
+            />
         </div>
     );
 };
@@ -217,7 +266,7 @@ const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }
                     <button onClick={onBack} className="size-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
-                    <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">{patient.name}</span></h2>
+                    <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">{patient.full_name || patient.name}</span></h2>
                 </div>
                 <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
                     {[
