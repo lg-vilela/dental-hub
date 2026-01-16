@@ -17,11 +17,12 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         password: '',
         clinicName: '',
         type: '',
-        goal: ''
+        goal: '',
+        plan: 'free' // Default
     });
 
     const handleNext = async () => {
-        if (step < 4) {
+        if (step < 5) {
             setStep(step + 1);
         } else {
             // Finalize - Create Account
@@ -32,7 +33,8 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                     name: formData.name,
                     clinicName: formData.clinicName,
                     type: formData.type,
-                    goal: formData.goal
+                    goal: formData.goal,
+                    plan: formData.plan
                 });
 
                 if (error) throw error;
@@ -53,7 +55,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                     <div className="absolute top-0 right-0 size-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
                     <div className="relative z-10">
                         <div className="flex justify-between items-center mb-4">
-                            <div className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold backdrop-blur-sm">Passo {step} de 4</div>
+                            <div className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold backdrop-blur-sm">Passo {step} de 5</div>
                             <span className="material-symbols-outlined text-white/50">rocket_launch</span>
                         </div>
                         <h1 className="text-3xl font-bold">
@@ -141,8 +143,39 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                         </div>
                     )}
 
-                    {/* Step 4: Goal */}
+                    {/* Step 4: Plan Selection */}
                     {step === 4 && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                            <label className="text-lg font-bold text-slate-900 block">Escolha o plano ideal</label>
+                            <div className="grid grid-cols-1 gap-4">
+                                {[
+                                    { id: 'free', name: 'Grátis', price: 'R$ 0', features: ['5 Pacientes', '1 Dentista'] },
+                                    { id: 'pro', name: 'Pro', price: 'R$ 97', features: ['Ilimitado', 'Financeiro', 'WhatsApp'] },
+                                    { id: 'plus', name: 'Plus', price: 'R$ 197', features: ['Tudo do Pro', 'Estoque', 'Franquias'] }
+                                ].map((p) => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => setFormData({ ...formData, plan: p.id })}
+                                        className={`p-4 rounded-xl border-2 text-left transition-all flex justify-between items-center ${formData.plan === p.id ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-300'}`}
+                                    >
+                                        <div>
+                                            <span className={`font-bold text-lg block ${formData.plan === p.id ? 'text-primary' : 'text-slate-900'}`}>{p.name}</span>
+                                            <span className="text-sm text-slate-500">{p.features.join(' • ')}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="font-black text-xl text-slate-900">{p.price}</span>
+                                            <div className={`size-5 rounded-full border-2 ml-auto mt-1 flex items-center justify-center ${formData.plan === p.id ? 'border-primary bg-primary' : 'border-slate-300'}`}>
+                                                {formData.plan === p.id && <span className="material-symbols-outlined text-white text-[12px] font-bold">check</span>}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 5: Goal */}
+                    {step === 5 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             <label className="text-lg font-bold text-slate-900 block">Qual seu principal objetivo?</label>
                             <div className="space-y-3">
@@ -186,7 +219,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                                 <div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                             ) : (
                                 <>
-                                    {step === 4 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                                    {step === 5 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
                                 </>
                             )}
                         </button>
