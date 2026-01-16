@@ -304,8 +304,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                             <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
                         <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
-                            Tecnologia de ponta para dentistas que não aceitam o "mais do mesmo".
+                            A solução definitiva para gestão odontológica de alta performance.
                         </p>
+                        <div className="pt-6">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Developed by</p>
+                            <img src="https://i.postimg.cc/JhBKhfRB/selo-vilelacodelab.png" alt="Vilela CodeLab" className="w-28 opacity-80 hover:opacity-100 transition-opacity" />
+                        </div>
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
