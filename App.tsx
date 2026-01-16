@@ -1004,110 +1004,170 @@ const PatientRecord = () => {
 };
 
 // Financials View
-const FinancialsView = () => {
-    const [range, setRange] = useState<'6M' | '1A'>('6M');
+// 6. Financial Components
 
-    // Mock data switching
-    const currentData = range === '6M' ? financialData : [
-        { name: 'Jan', income: 18000, expenses: 14000 },
-        { name: 'Fev', income: 22000, expenses: 16000 },
-        { name: 'Mar', income: 25000, expenses: 15500 },
-        { name: 'Abr', income: 21000, expenses: 13000 },
-        ...financialData
+// 6a. Cash Flow Dashboard
+const CashFlowTab = () => {
+    // Mock Data
+    const kpis = [
+        { label: 'Receita Mensal', value: 'R$ 48.500', trend: '+12%', color: 'text-green-600', bg: 'bg-green-50' },
+        { label: 'Despesas', value: 'R$ 12.200', trend: '-5%', color: 'text-red-600', bg: 'bg-red-50' },
+        { label: 'Lucro Líquido', value: 'R$ 36.300', trend: '+18%', color: 'text-blue-600', bg: 'bg-blue-50' },
     ];
 
-    const generateReport = () => {
-        alert('Gerando relatório financeiro em PDF... O download iniciará em breve.');
-    };
+    const chartData = [
+        { month: 'Set', in: 65, out: 40 },
+        { month: 'Out', in: 59, out: 30 },
+        { month: 'Nov', in: 80, out: 50 },
+        { month: 'Dez', in: 81, out: 40 },
+        { month: 'Jan', in: 56, out: 30 },
+        { month: 'Fev', in: 95, out: 20 },
+    ];
+
+    const transactions = [
+        { desc: 'Pagamento - João Silva', cat: 'Tratamento', date: 'Hoje, 09:00', val: '+ R$ 450,00', type: 'in' },
+        { desc: 'Dental Cremer', cat: 'Materiais', date: 'Ontem', val: '- R$ 1.290,00', type: 'out' },
+        { desc: 'Pagamento - Maria Souza', cat: 'Ortodontia', date: 'Ontem', val: '+ R$ 200,00', type: 'in' },
+        { desc: 'Aluguel Sala 04', cat: 'Infraestrutura', date: '01 Fev', val: '- R$ 2.500,00', type: 'out' },
+    ];
 
     return (
-        <div className="space-y-6">
+        <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                {[
-                    { label: 'Receita Total', val: 'R$ 42.500', sub: '+12.5%', icon: 'payments', color: 'slate' },
-                    { label: 'Pendente', val: 'R$ 3.200', sub: '+2.1%', icon: 'pending', color: 'slate' },
-                    { label: 'Despesas', val: 'R$ 12.450', sub: '-5.3%', icon: 'account_balance_wallet', color: 'slate' },
-                    { label: 'Lucro Líquido', val: 'R$ 30.050', sub: '+18.2%', icon: 'savings', color: 'primary', hl: true },
-                ].map((k, i) => (
-                    <div key={i} className={`p-6 rounded-lg border shadow-sm relative overflow-hidden ${k.hl ? 'bg-primary/5 border-primary/20' : 'bg-white border-slate-200'}`}>
-                        <div className="flex justify-between items-start mb-4 relative z-10">
-                            <p className={`${k.hl ? 'text-primary' : 'text-slate-500'} text-xs font-bold uppercase tracking-wide`}>{k.label}</p>
-                            <span className={`material-symbols-outlined ${k.hl ? 'text-primary' : 'text-slate-400'}`}>{k.icon}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {kpis.map((k, i) => (
+                    <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                        <span className="text-sm font-bold text-slate-500">{k.label}</span>
+                        <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold text-slate-900">{k.value}</span>
+                            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${k.bg} ${k.color}`}>{k.trend}</span>
                         </div>
-                        <div className="flex items-end justify-between relative z-10">
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{k.val}</h3>
-                            <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${k.sub.includes('+') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{k.sub}</span>
-                        </div>
-                        {k.hl && <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full -mr-10 -mt-10 blur-xl"></div>}
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Chart */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 className="font-bold text-lg text-slate-900">Fluxo de Caixa</h3>
-                            <p className="text-slate-500 text-sm">Receitas vs Despesas</p>
-                        </div>
-                        <div className="flex bg-slate-100 rounded-lg p-1">
-                            <button onClick={() => setRange('6M')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${range === '6M' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>6 Meses</button>
-                            <button onClick={() => setRange('1A')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${range === '1A' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>1 Ano</button>
-                        </div>
-                    </div>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={currentData}>
-                                <defs>
-                                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#0b8593" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#0b8593" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} tickFormatter={(value) => `R$${value / 1000}k`} />
-                                <Tooltip
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                />
-                                <Area type="monotone" dataKey="income" stroke="#0b8593" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
-                                <Area type="monotone" dataKey="expenses" stroke="#f43f5e" strokeWidth={3} fillOpacity={0} fill="transparent" />
-                            </AreaChart>
-                        </ResponsiveContainer>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-96">
+                {/* Chart Area */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                    <h3 className="font-bold text-slate-900 mb-6">Fluxo Financeiro (6 Meses)</h3>
+                    <div className="flex-1 flex items-end justify-between gap-4 px-4 pb-2">
+                        {chartData.map((d, i) => (
+                            <div key={i} className="flex flex-col items-center gap-2 flex-1 h-full justify-end group cursor-pointer">
+                                <div className="w-full max-w-[40px] flex gap-1 items-end h-[80%] relative">
+                                    <div style={{ height: `${d.in}%` }} className="flex-1 bg-slate-900 rounded-t-sm group-hover:bg-primary transition-colors"></div>
+                                    <div style={{ height: `${d.out}%` }} className="flex-1 bg-slate-200 rounded-t-sm"></div>
+                                </div>
+                                <span className="text-xs font-bold text-slate-400">{d.month}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 {/* Transactions */}
-                <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-lg text-slate-900">Transações Recentes</h3>
-                        <button className="text-primary text-sm font-bold hover:underline" onClick={generateReport}>Ver Tudo</button>
-                    </div>
-                    <div className="overflow-y-auto flex-1">
-                        <table className="w-full text-left">
-                            <tbody className="divide-y divide-slate-100">
-                                <tr>
-                                    <td className="py-3">
-                                        <div className="size-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xs font-bold">SC</div>
-                                        <span className="text-sm font-medium">Sarah Conner</span>
-                                    </td>
-                                    <td className="px-6 py-4"><span className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-bold rounded">Pagamento</span></td>
-                                    <td className="px-6 py-4 text-right font-bold text-slate-900">+R$ 1.250,00</td>
-                                </tr>
-                                <tr>
-                                    <td className="py-3">
-                                        <div className="size-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-xs font-bold">DD</div>
-                                        <span className="text-sm font-medium">Dental Depot</span>
-                                    </td>
-                                    <td className="px-6 py-4"><span className="px-2 py-0.5 bg-orange-50 text-orange-700 text-xs font-bold rounded">Suprimentos</span></td>
-                                    <td className="px-6 py-4 text-right font-bold text-red-600">-R$ 450,00</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+                    <h3 className="font-bold text-slate-900 mb-4">Transações Recentes</h3>
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                        {transactions.map((t, i) => (
+                            <div key={i} className="flex items-center justify-between group">
+                                <div className="flex items-center gap-3">
+                                    <div className={`size-8 rounded-full flex items-center justify-center ${t.type === 'in' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        <span className="material-symbols-outlined text-sm">{t.type === 'in' ? 'arrow_downward' : 'arrow_upward'}</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">{t.desc}</p>
+                                        <p className="text-xs text-slate-400">{t.cat} • {t.date}</p>
+                                    </div>
+                                </div>
+                                <span className={`text-sm font-bold ${t.type === 'in' ? 'text-green-600' : 'text-slate-900'}`}>{t.val}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// 6b. Budget / Treatment Plans
+const BudgetsTab = () => {
+    const budgets = [
+        { id: 1023, patient: 'Beatriz Costa', items: ['Implante Unitário', 'Coroa Porcelana'], total: 'R$ 3.500,00', status: 'Aprovado', date: 'Hoje' },
+        { id: 1022, patient: 'Pedro Alves', items: ['Restauração Molar', 'Limpeza Profunda'], total: 'R$ 650,00', status: 'Pendente', date: 'Ontem' },
+        { id: 1021, patient: 'João Silva', items: ['Clareamento Dental', 'Kit Home Care'], total: 'R$ 1.200,00', status: 'Rejeitado', date: '12 Fev' },
+    ];
+
+    return (
+        <div className="p-8 space-y-6 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex justify-between items-center">
+                <div className="flex gap-4">
+                    <div className="bg-slate-100 rounded-lg p-1 flex">
+                        <button className="px-3 py-1.5 bg-white shadow-sm rounded-md text-xs font-bold text-slate-900">Todos</button>
+                        <button className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/50 rounded-md">Pendentes</button>
+                        <button className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/50 rounded-md">Aprovados</button>
+                    </div>
+                </div>
+                <button className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all hover:shadow-md">
+                    <span className="material-symbols-outlined text-[18px]">add</span> Novo Orçamento
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+                {budgets.map((b) => (
+                    <div key={b.id} className="bg-white border border-slate-200 rounded-xl p-5 hover:border-primary/30 transition-colors flex items-center justify-between group">
+                        <div className="flex gap-4 items-center">
+                            <div className="bg-slate-50 p-3 rounded-lg text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined">request_quote</span>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-bold text-slate-900">#{b.id} - {b.patient}</h4>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${b.status === 'Aprovado' ? 'bg-green-100 text-green-700' :
+                                            b.status === 'Rejeitado' ? 'bg-red-100 text-red-700' :
+                                                'bg-yellow-100 text-yellow-700'
+                                        }`}>{b.status}</span>
+                                </div>
+                                <p className="text-sm text-slate-500">{b.items.join(', ')}</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-lg font-bold text-slate-900">{b.total}</p>
+                            <p className="text-xs text-slate-400">{b.date}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// 6. Financials Container
+const FinancialsView = () => {
+    const [activeTab, setActiveTab] = useState<'cashflow' | 'budgets'>('cashflow');
+
+    return (
+        <div className="flex flex-col h-[calc(100vh-140px)]">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>
+                <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
+                    {[
+                        { id: 'cashflow', label: 'Fluxo de Caixa', icon: 'monitoring' },
+                        { id: 'budgets', label: 'Orçamentos', icon: 'receipt_long' },
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                            <span className="hidden sm:inline">{tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                {activeTab === 'cashflow' && <CashFlowTab />}
+                {activeTab === 'budgets' && <BudgetsTab />}
             </div>
         </div>
     );
