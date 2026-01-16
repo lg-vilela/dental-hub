@@ -236,12 +236,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const customSignOut = async () => {
-        setAuthError(null); // Clear any existing errors on sign out
-        await supabase.auth.signOut();
+        console.log("Signing out...");
+        setAuthError(null);
+        try {
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
         setSession(null);
         setUser(null);
         setProfile(null);
         setClinic(null);
+        // Force reload to ensure clean state
+        window.location.href = '/';
     };
 
     return (
