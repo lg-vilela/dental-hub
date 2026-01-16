@@ -303,9 +303,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                             </div>
                             <span className="font-extrabold text-2xl text-white">Dental Hub</span>
                         </div>
-                        <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
-                            A solução definitiva para gestão odontológica de alta performance.
-                        </p>
+                        <div className="pt-6 flex flex-col gap-4">
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Developed by</p>
+                                <img src="https://i.postimg.cc/02HZYY53/selo-de-desenvolvimento.png" alt="Vilela CodeLab" className="h-8 opacity-80 hover:opacity-100 transition-opacity" />
+                            </div>
+                            <div className="flex gap-3">
+                                <a href="https://wa.me/5511953840339" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-[#25D366] transition-colors shadow-lg shadow-black/20">
+                                    <span className="material-symbols-outlined text-xl">chat</span>
+                                </a>
+                                <a href="https://instagram.com/vilelacodelab" target="_blank" rel="noopener noreferrer" className="size-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:bg-[#E1306C] transition-colors shadow-lg shadow-black/20">
+                                    <span className="material-symbols-outlined text-xl">photo_camera</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
@@ -326,14 +337,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                 </div>
                 <div className="max-w-[1400px] mx-auto px-6 pt-8 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex flex-col md:flex-row items-center gap-6 text-sm text-slate-500">
-                        <p>&copy; 2026 Dental Hub. Todos os direitos reservados.</p>
+                        <p>&copy; 2026 Vilela CodeLab. Todos os direitos reservados.</p>
                         <div className="flex gap-6">
                             <a href="#" className="hover:text-white transition-colors">Termos</a>
                             <a href="#" className="hover:text-white transition-colors">Privacidade</a>
                         </div>
                     </div>
-                    <img src="https://i.postimg.cc/02HZYY53/selo-de-desenvolvimento.png" alt="Desenvolvido por Vilela CodeLab" className="h-10 opacity-70 hover:opacity-100 transition-opacity" />
-                </div>
+
             </footer>
         </div>
     );
