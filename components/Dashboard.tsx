@@ -2,15 +2,63 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../src/contexts/AuthContext';
 import { appointmentsService } from '../src/services/appointmentsService';
+import { remindersService, Reminder } from '../src/services/remindersService';
 
 const Dashboard = () => {
     const { clinic, user, logout } = useAuth(); // Get clinic & user from context
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Reminders State
+    const [reminders, setReminders] = useState<Reminder[]>([]);
+    const [colleagues, setColleagues] = useState<any[]>([]);
+    const [isCreatingReminder, setIsCreatingReminder] = useState(false);
+    const [newReminder, setNewReminder] = useState({ title: '', assigned_to: '', priority: 'medium' });
+
     useEffect(() => {
         loadAppointments();
-    }, []);
+        loadRemindersData();
+    }, [clinic, user]);
+
+    const loadRemindersData = async () => {
+        if (!clinic?.id) return;
+        try {
+            const [rems, cols] = await Promise.all([
+                remindersService.getReminders(),
+                remindersService.getColleagues(clinic.id)
+            ]);
+            setReminders(rems);
+            setColleagues(cols);
+        } catch (error) {
+            console.error('Error loading reminders data:', error);
+        }
+    };
+
+    const handleCreateReminder = async () => {
+        if (!newReminder.title || !newReminder.assigned_to || !clinic?.id || !user?.id) return;
+        try {
+            const created = await remindersService.createReminder(
+                newReminder as any,
+                clinic.id,
+                user.id
+            );
+            setReminders([created, ...reminders]);
+            setNewReminder({ title: '', assigned_to: '', priority: 'medium' });
+            setIsCreatingReminder(false);
+        } catch (error) {
+            console.error('Error creating reminder:', error);
+            alert('Erro ao criar lembrete.');
+        }
+    };
+
+    const updateReminderStatus = async (id: string, status: 'pending' | 'in_progress' | 'done') => {
+        try {
+            await remindersService.updateStatus(id, status);
+            setReminders(reminders.map(r => r.id === id ? { ...r, status } : r));
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    };
 
     const loadAppointments = async () => {
         try {
@@ -171,34 +219,101 @@ const Dashboard = () => {
                     </div>
 
                     {/* Auto Reminders (Static for now) */}
+                    {/* Auto Reminders (Dynamic) */}
                     <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-blue-500">notifications_active</span>
-                            Lembretes Automáticos
-                        </h3>
-                        <div className="space-y-4">
-                            {[
-                                { name: 'Mariana Costa', time: '14:30', status: 'Enviado', type: 'whatsapp' },
-                                { name: 'Carlos Oliveira', time: '15:00', status: 'Pendente', type: 'sms' },
-                                { name: 'Fernanda Lima', time: '16:15', status: 'Lido', type: 'email' }
-                            ].map((r, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`size-8 rounded-full flex items-center justify-center text-white text-xs ${r.type === 'whatsapp' ? 'bg-green-500' : r.type === 'sms' ? 'bg-blue-500' : 'bg-orange-500'}`}>
-                                            <span className="material-symbols-outlined text-[14px]">{r.type === 'whatsapp' ? 'chat' : r.type === 'sms' ? 'sms' : 'mail'}</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-900">{r.name}</p>
-                                            <p className="text-[10px] font-medium text-slate-400">Consulta às {r.time}</p>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-blue-500">task_alt</span>
+                                Tarefas & Lembretes
+                            </h3>
+                            <button
+                                onClick={() => setIsCreatingReminder(!isCreatingReminder)}
+                                className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-blue-600 transition-all"
+                            >
+                                <span className="material-symbols-outlined">{isCreatingReminder ? 'close' : 'add'}</span>
+                            </button>
+                        </div>
+
+                        {/* Create Form */}
+                        {isCreatingReminder && (
+                            <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 animate-in fade-in slide-in-from-top-2">
+                                <input
+                                    type="text"
+                                    placeholder="Título da tarefa..."
+                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 mb-2"
+                                    value={newReminder.title}
+                                    onChange={e => setNewReminder({ ...newReminder, title: e.target.value })}
+                                />
+                                <div className="flex gap-2">
+                                    <select
+                                        className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                        value={newReminder.assigned_to}
+                                        onChange={e => setNewReminder({ ...newReminder, assigned_to: e.target.value })}
+                                    >
+                                        <option value="">Atribuir a...</option>
+                                        {colleagues.map((c: any) => <option key={c.id} value={c.id}>{c.full_name}</option>)}
+                                    </select>
+                                    <select
+                                        className="w-24 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                        value={newReminder.priority}
+                                        onChange={e => setNewReminder({ ...newReminder, priority: e.target.value as any })}
+                                    >
+                                        <option value="low">Baixa</option>
+                                        <option value="medium">Média</option>
+                                        <option value="high">Alta</option>
+                                    </select>
+                                    <button
+                                        onClick={handleCreateReminder}
+                                        className="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-all"
+                                    >
+                                        Salvar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            {reminders.length > 0 ? reminders.map((r, i) => (
+                                <div key={i} className="group p-3 rounded-xl bg-white border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <p className={`text-sm font-semibold ${r.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                                            {r.title}
+                                        </p>
+                                        <div className="flex items-center gap-1">
+                                            <span className={`size-2 rounded-full ${r.priority === 'high' ? 'bg-red-500' : r.priority === 'medium' ? 'bg-orange-500' : 'bg-blue-500'}`}></span>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md border border-slate-100">{r.status}</span>
+
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="size-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500" title={r.assignee?.full_name}>
+                                                {r.assignee?.full_name?.substring(0, 2).toUpperCase() || 'UN'}
+                                            </div>
+                                            <span className="text-[10px] text-slate-400">
+                                                {new Date(r.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+
+                                        <select
+                                            value={r.status}
+                                            onChange={(e) => updateReminderStatus(r.id, e.target.value as any)}
+                                            className={`text-[10px] font-bold px-2 py-1 rounded-md border appearance-none cursor-pointer text-center min-w-[80px]
+                                                ${r.status === 'done' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                    r.status === 'in_progress' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                        'bg-slate-50 text-slate-500 border-slate-100'}`}
+                                        >
+                                            <option value="pending">Pendente</option>
+                                            <option value="in_progress">Em Andamento</option>
+                                            <option value="done">Concluído</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="text-center py-8 text-slate-400">
+                                    <p className="text-xs">Nenhuma tarefa pendente.</p>
+                                </div>
+                            )}
                         </div>
-                        <button className="w-full mt-4 text-xs font-bold text-slate-500 hover:text-slate-700 py-2 border border-dashed border-slate-300 rounded-xl hover:bg-slate-50 transition-all">
-                            Configurar Mensagens
-                        </button>
                     </div>
                 </div>
             </div>
