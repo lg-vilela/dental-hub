@@ -57,9 +57,11 @@ const AuditLogsTab = () => {
 import { profileService } from '../src/services/profileService';
 import { UserProfile } from '../src/contexts/AuthContext';
 import { useAuth } from '../src/contexts/AuthContext';
+import { useToast } from '../src/contexts/ToastContext';
 
 const TeamTab = () => {
     const { clinic } = useAuth();
+    const { showToast } = useToast();
     const [members, setMembers] = useState<UserProfile[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [inviteRole, setInviteRole] = useState('dentist');
@@ -87,12 +89,12 @@ const TeamTab = () => {
     const generateInvite = () => {
         if (!clinic) {
             console.error("Clinic (AuthContext) is missing");
-            alert("Erro: Dados da clínica não carregados. Recarregue a página.");
+            showToast("Erro: Dados da clínica não carregados. Recarregue a página.", 'error');
             return;
         }
 
         if (!canAdd) {
-            alert(`Você atingiu o limite do plano ${clinic.plan || 'Grátis'}. Faça upgrade!`);
+            showToast(`Você atingiu o limite do plano ${clinic.plan || 'Grátis'}. Faça upgrade!`, 'error');
             return;
         }
 
@@ -104,7 +106,7 @@ const TeamTab = () => {
 
     const copyLink = () => {
         navigator.clipboard.writeText(inviteLink);
-        alert('Link copiado!');
+        showToast('Link copiado para a área de transferência!', 'success');
     };
 
     const roles = [
@@ -256,6 +258,8 @@ const TeamTab = () => {
 import { servicesService, Service } from '../src/services/servicesService';
 
 const ServicesTab = () => {
+    const { clinic } = useAuth();
+    const { showToast } = useToast();
     const [services, setServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -277,20 +281,25 @@ const ServicesTab = () => {
     };
 
     const handleSave = async () => {
-        if (!currentService.title) return alert('Nome é obrigatório');
+        if (!currentService.title) return showToast('Nome é obrigatório', 'warning');
+        if (!clinic?.id) return showToast('Erro: Clínica não identificada.', 'error');
 
         try {
+            const serviceData = { ...currentService, clinic_id: clinic.id };
+
             if (currentService.id) {
-                await servicesService.updateService(currentService.id, currentService);
+                await servicesService.updateService(currentService.id, serviceData);
+                showToast('Serviço atualizado com sucesso!', 'success');
             } else {
-                await servicesService.createService(currentService as any);
+                await servicesService.createService(serviceData as any);
+                showToast('Serviço criado com sucesso!', 'success');
             }
             setIsEditing(false);
             setCurrentService({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' });
             loadServices();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Erro ao salvar serviço.');
+            showToast('Erro ao salvar: ' + (error.message || 'Erro desconhecido'), 'error');
         }
     };
 
@@ -298,9 +307,10 @@ const ServicesTab = () => {
         if (!confirm('Excluir este serviço?')) return;
         try {
             await servicesService.deleteService(id);
+            showToast('Serviço excluído.', 'success');
             loadServices();
-        } catch (error) {
-            alert('Erro ao excluir.');
+        } catch (error: any) {
+            showToast('Erro ao excluir: ' + error.message, 'error');
         }
     };
 
