@@ -4,7 +4,7 @@ import { useAuth } from '../src/contexts/AuthContext';
 import { useToast } from '../src/contexts/ToastContext';
 import { appointmentService } from '../src/services/appointmentService';
 import { remindersService, Reminder } from '../src/services/remindersService';
-import { financialService } from '../src/services/financialService';
+import { remindersService, Reminder } from '../src/services/remindersService';
 import { clientService } from '../src/services/clientService';
 
 interface DashboardProps {
@@ -17,7 +17,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
     const { showToast } = useToast();
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [stats, setStats] = useState({ revenue: 0, clients: 0, revenueTrend: '+0%', clientTrend: '+0%' });
+    const [stats, setStats] = useState({ clients: 0, clientTrend: '+0%' });
 
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [colleagues, setColleagues] = useState<any[]>([]);
@@ -32,19 +32,16 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
     const loadRemindersData = async () => {
         if (!clinic?.id) return;
         try {
-            const [rems, cols, finStats, pats] = await Promise.all([
+            const [rems, cols, pats] = await Promise.all([
                 remindersService.getReminders(),
                 remindersService.getColleagues(clinic.id),
-                financialService.getDashboardStats(),
                 clientService.getClients()
             ]);
             setReminders(rems);
             setColleagues(cols);
 
             setStats({
-                revenue: finStats.income,
                 clients: pats.length,
-                revenueTrend: '+12%', // Mock value
                 clientTrend: '+5%' // Mock value
             });
 
@@ -97,9 +94,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
                 setPage('clients');
                 showToast('Clique em "Novo Cliente" na tela de clientes.', 'info');
                 break;
-            case 'Nova Cobrança':
-                setPage('financials');
-                break;
+
             case 'Prontuário/Detalhes':
                 setPage('clients');
                 break;
@@ -114,7 +109,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
 
     const metrics = [
         { label: 'Clientes Hoje', val: appointments.length.toString(), trend: stats.clientTrend, icon: 'group', color: 'blue' },
-        { label: 'Faturamento', val: `R$ ${stats.revenue.toLocaleString('pt-BR', { notation: 'compact' })}`, trend: stats.revenueTrend, icon: 'payments', color: 'emerald' },
+
         { label: 'Pendências', val: reminders.filter(r => r.status !== 'done').length.toString(), trend: 'Active', icon: 'pending_actions', color: 'orange' },
         { label: 'Satisfação', val: '5.0', trend: 'Top', icon: 'star', color: 'purple' },
     ];
@@ -254,7 +249,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
                         <div className="grid grid-cols-2 gap-3 relative z-10">
                             {[
                                 { icon: 'person_add', label: 'Novo Cliente' },
-                                { icon: 'add_card', label: 'Nova Cobrança' },
+
                                 { icon: 'description', label: 'Prontuário/Detalhes' },
                                 { icon: 'send', label: 'Lembrete' }
                             ].map((action, i) => (
