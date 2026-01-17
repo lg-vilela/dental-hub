@@ -483,16 +483,27 @@ const ClinicSettingsView = () => {
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await updateClinicSettings({
-                opening_time: openingTime,
-                closing_time: closingTime,
-                slot_duration: slotDuration,
-                working_days: workingDays
-            });
+            // Create a timeout promise
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Tempo limite excedido. Verifique sua conexão.')), 10000)
+            );
+
+            // Race the update against the timeout
+            await Promise.race([
+                updateClinicSettings({
+                    opening_time: openingTime,
+                    closing_time: closingTime,
+                    slot_duration: slotDuration,
+                    working_days: workingDays
+                }),
+                timeoutPromise
+            ]);
+
             await auditService.logAction('Alterou Configurações da Clínica');
             showToast('Configurações salvas com sucesso!', 'success');
-        } catch (err) {
-            showToast('Erro ao salvar configurações.', 'error');
+        } catch (err: any) {
+            console.error(err);
+            showToast(err.message || 'Erro ao salvar configurações.', 'error');
         } finally {
             setIsSaving(false);
         }
