@@ -5,13 +5,17 @@ import { TenantConfig } from '../types';
 // 6c. Audit Logs Tab (Phase 6)
 import { auditService, AuditLog } from '../src/services/auditService';
 
-const AuditLogsTab = () => {
+// 6c. Audit Logs Tab (Phase 6)
+const AuditLogsTab = ({ onSaveSettings, lgpdActive }: { onSaveSettings: (active: boolean) => void, lgpdActive: boolean }) => {
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [localLgpd, setLocalLgpd] = useState(lgpdActive);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         loadLogs();
-    }, []);
+        setLocalLgpd(lgpdActive);
+    }, [lgpdActive]);
 
     const loadLogs = async () => {
         try {
@@ -23,6 +27,15 @@ const AuditLogsTab = () => {
             setIsLoading(false);
         }
     };
+
+    const handleSaveSecurity = async () => {
+        setIsSaving(true);
+        try {
+            await onSaveSettings(localLgpd);
+        } finally {
+            setIsSaving(false);
+        }
+    }
 
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -61,14 +74,27 @@ const AuditLogsTab = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="p-6 border-t border-slate-100 bg-slate-50">
+            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
                 <div className="flex items-start gap-3">
-                    <input type="checkbox" id="lgpd" className="mt-1" />
+                    <input
+                        type="checkbox"
+                        id="lgpd"
+                        className="mt-1"
+                        checked={localLgpd}
+                        onChange={(e) => setLocalLgpd(e.target.checked)}
+                    />
                     <div>
                         <label htmlFor="lgpd" className="font-bold text-slate-900 block">Ativar Consultoria LGPD</label>
-                        <p className="text-xs text-slate-500">Ao ativar, o sistema solicitará consentimento dos pacientes para armazenamento de dados sensíveis na ficha de cadastro.</p>
+                        <p className="text-xs text-slate-500">Ao ativar, o sistema solicitará consentimento dos pacientes para armazenamento de dados sensíveis.</p>
                     </div>
                 </div>
+                <button
+                    onClick={handleSaveSecurity}
+                    disabled={isSaving}
+                    className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2"
+                >
+                    {isSaving ? 'Salvando...' : 'Salvar Preferências'}
+                </button>
             </div>
         </div>
     );
@@ -470,6 +496,7 @@ const ClinicSettingsView = () => {
     const [slotDuration, setSlotDuration] = useState(30);
     const [workingDays, setWorkingDays] = useState<number[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [lgpdActive, setLgpdActive] = useState(false); // Should come from clinic context in future expansion if persisted
 
     useEffect(() => {
         if (clinic) {
@@ -477,10 +504,11 @@ const ClinicSettingsView = () => {
             setClosingTime(clinic.closing_time || '18:00');
             setSlotDuration(clinic.slot_duration || 30);
             setWorkingDays(clinic.working_days || [1, 2, 3, 4, 5]);
+            setLgpdActive((clinic as any).lgpd_active || false);
         }
     }, [clinic]);
 
-    const handleSave = async () => {
+    const handleSaveSchedule = async () => {
         setIsSaving(true);
         try {
             // Create a timeout promise
@@ -488,7 +516,6 @@ const ClinicSettingsView = () => {
                 setTimeout(() => reject(new Error('Tempo limite excedido. Verifique sua conexão.')), 10000)
             );
 
-            // Race the update against the timeout
             await Promise.race([
                 updateClinicSettings({
                     opening_time: openingTime,
@@ -499,15 +526,28 @@ const ClinicSettingsView = () => {
                 timeoutPromise
             ]);
 
-            await auditService.logAction('Alterou Configurações da Clínica');
-            showToast('Configurações salvas com sucesso!', 'success');
+            await auditService.logAction('Alterou Configuração da Agenda (Horários)');
+            showToast('Agenda atualizada com sucesso!', 'success');
         } catch (err: any) {
             console.error(err);
-            showToast(err.message || 'Erro ao salvar configurações.', 'error');
+            showToast(err.message || 'Erro ao salvar agenda.', 'error');
         } finally {
             setIsSaving(false);
         }
     };
+
+    const handleSaveSecurity = async (active: boolean) => {
+        try {
+            // Assuming we added 'lgpd_active' to our migration but maybe not to local ClinicData type yet.
+            // We can cast for now or update type.
+            await updateClinicSettings({ lgpd_active: active } as any);
+            await auditService.logAction(`Alterou Configuração LGPD para: ${active ? 'Ativo' : 'Inativo'}`);
+            showToast('Configurações de segurança salvas!', 'success');
+        } catch (err: any) {
+            console.error(err);
+            showToast('Erro ao salvar segurança: ' + err.message, 'error');
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -516,21 +556,7 @@ const ClinicSettingsView = () => {
                     <h2 className="text-2xl font-bold text-slate-900">Configurações da Clínica</h2>
                     <p className="text-slate-500 text-sm">Gerencie horários e planos da sua conta.</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-70"
-                >
-                    {isSaving ? (
-                        <>
-                            <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Salvando...
-                        </>
-                    ) : (
-                        <>
-                            <span className="material-symbols-outlined">save</span> Salvar Alterações
-                        </>
-                    )}
-                </button>
+                {/* Global Save Removed as per User Request */}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -566,8 +592,15 @@ const ClinicSettingsView = () => {
                     {/* Schedule Settings Tab */}
                     {activeTab === 'schedule' && (
                         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                            <div className="p-6 border-b border-slate-100">
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                                 <h3 className="text-lg font-bold text-slate-900">Configuração da Agenda</h3>
+                                <button
+                                    onClick={handleSaveSchedule}
+                                    disabled={isSaving}
+                                    className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg font-bold text-sm transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-70"
+                                >
+                                    {isSaving ? 'Salvando...' : 'Salvar Agenda'}
+                                </button>
                             </div>
                             <div className="p-8 space-y-8">
                                 <div className="grid grid-cols-2 gap-6">
@@ -637,7 +670,7 @@ const ClinicSettingsView = () => {
                     {activeTab === 'plan' && <PlanTab />}
 
                     {/* Audit Logs Tab */}
-                    {activeTab === 'security' && <AuditLogsTab />}
+                    {activeTab === 'security' && <AuditLogsTab onSaveSettings={handleSaveSecurity} lgpdActive={!!(clinic as any)?.lgpd_active} />}
                 </div>
             </div>
         </div>
