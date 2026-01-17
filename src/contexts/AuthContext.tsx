@@ -193,7 +193,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const updateClinicSettings = async (settings: Partial<ClinicData>) => {
-        if (!clinic?.id) return;
+        if (!clinic?.id) throw new Error('ID da clínica não encontrado. Tente recarregar a página.');
 
         try {
             const { error } = await supabase

@@ -7,8 +7,13 @@ import { remindersService, Reminder } from '../src/services/remindersService';
 import { financialService } from '../src/services/financialService';
 import { patientService } from '../src/services/patientService';
 
-const Dashboard = () => {
-    const { clinic, user, logout } = useAuth(); // Get clinic & user from context
+interface DashboardProps {
+    setPage: (page: string) => void;
+    openModal: () => void;
+}
+
+const Dashboard = ({ setPage, openModal }: DashboardProps) => {
+    const { clinic, user } = useAuth(); // Get clinic & user from context
     const { showToast } = useToast();
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -31,17 +36,16 @@ const Dashboard = () => {
                 remindersService.getReminders(),
                 remindersService.getColleagues(clinic.id),
                 financialService.getDashboardStats(),
-                patientService.getPatients() // Getting all for total count. For "Patients Today" we can use appointments.length
+                patientService.getPatients()
             ]);
             setReminders(rems);
             setColleagues(cols);
 
-            // Stats Logic
             setStats({
                 revenue: finStats.income,
-                patients: pats.length, // Total patients DB
-                revenueTrend: '+12%', // Mocked for MVP
-                patientTrend: '+5%' // Mocked
+                patients: pats.length,
+                revenueTrend: '+12%', // Mock value
+                patientTrend: '+5%' // Mock value
             });
 
         } catch (error) {
@@ -87,6 +91,27 @@ const Dashboard = () => {
         }
     };
 
+    const handleQuickAction = (action: string) => {
+        switch (action) {
+            case 'Novo Paciente':
+                setPage('patients');
+                showToast('Clique em "Novo Paciente" na tela de pacientes.', 'info');
+                break;
+            case 'Nova Cobrança':
+                setPage('financials');
+                break;
+            case 'Prontuário':
+                setPage('patients');
+                break;
+            case 'Lembrete':
+                setIsCreatingReminder(true);
+                setTimeout(() => {
+                    document.getElementById('reminders-section')?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+                break;
+        }
+    };
+
     const metrics = [
         { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: stats.patientTrend, icon: 'group', color: 'blue' },
         { label: 'Faturamento', val: `R$ ${stats.revenue.toLocaleString('pt-BR', { notation: 'compact' })}`, trend: stats.revenueTrend, icon: 'payments', color: 'emerald' },
@@ -100,7 +125,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-end">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                        Olá, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 capitalize">{user?.name || 'Doutor'}</span> 👋
+                        Olá, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 capitalize">{user?.user_metadata?.name || 'Doutor'}</span> 👋
                     </h2>
                     <p className="text-slate-500 font-medium mt-1">Aqui está o resumo da sua clínica hoje.</p>
                 </div>
@@ -112,7 +137,7 @@ const Dashboard = () => {
                         <span className="material-symbols-outlined">notifications</span>
                     </button>
                     <button
-                        onClick={() => showToast('Para agendar, acesse a aba Agenda no menu lateral.', 'info')}
+                        onClick={() => openModal()}
                         className="px-5 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20 flex items-center gap-2"
                     >
                         <span className="material-symbols-outlined text-[18px]">add</span> Novo Agendamento
@@ -134,7 +159,6 @@ const Dashboard = () => {
                             <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">{m.label}</p>
                             <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{m.val}</h3>
                         </div>
-                        {/* Tech-ish background decoration */}
                         <div className={`absolute -right-6 -bottom-6 size-32 bg-${m.color}-50/50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`}></div>
                     </div>
                 ))}
@@ -180,7 +204,6 @@ const Dashboard = () => {
                                             <td className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">{row.time}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    {/* Foto removida conforme solicitado */}
                                                     <div>
                                                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{row.patientName}</p>
                                                         <p className="text--[10px] font-mono text-slate-400">ID: #P-{row.id.substring(0, 4)}</p>
@@ -235,7 +258,11 @@ const Dashboard = () => {
                                 { icon: 'description', label: 'Prontuário' },
                                 { icon: 'send', label: 'Lembrete' }
                             ].map((action, i) => (
-                                <button key={i} className="bg-white/10 hover:bg-white/20 border border-white/5 hover:border-white/20 p-3 rounded-xl flex flex-col items-center gap-2 transition-all group/btn">
+                                <button
+                                    key={i}
+                                    onClick={() => handleQuickAction(action.label)}
+                                    className="bg-white/10 hover:bg-white/20 border border-white/5 hover:border-white/20 p-3 rounded-xl flex flex-col items-center gap-2 transition-all group/btn"
+                                >
                                     <span className="material-symbols-outlined text-2xl group-hover/btn:scale-110 transition-transform">{action.icon}</span>
                                     <span className="text-[10px] font-bold uppercase tracking-wider">{action.label}</span>
                                 </button>
@@ -243,9 +270,8 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Auto Reminders (Static for now) */}
                     {/* Auto Reminders (Dynamic) */}
-                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700 p-6 shadow-sm transition-colors">
+                    <div id="reminders-section" className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700 p-6 shadow-sm transition-colors">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-blue-500">task_alt</span>
