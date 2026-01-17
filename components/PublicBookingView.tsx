@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { TenantConfig } from '../types';
 import { supabase } from '../src/lib/supabase';
 import { Service } from '../src/services/servicesService';
+import { useAuth } from '../src/contexts/AuthContext';
 
 // 6. Public Booking Wizard
 const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: () => void }) => {
+    const { clinic } = useAuth(); // Use real clinic context if available (Preview Mode)
     const [step, setStep] = useState(1);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [selectedSlot, setSelectedSlot] = useState('');
@@ -22,19 +24,13 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
 
     const loadServices = async () => {
         try {
-            // Fetch services for the current tenant/clinic
-            // Ideally we should filter by tenant_id, but here we assume the user context or public query
-            // Since this is public, we need to query based on the tenant.
-            // But we don't have the tenant's clinic_id capable here easily in this mock structure?
-            // Actually, 'tenant' has 'clinic_id' property in our updated Type?
-            // Let's check 'tenant.clinic_id' or 'tenant.id'.
-            // In App.tsx, we pass 'tenant' which is TenantConfig.
-            // Let's assume tenant.clinic_id exists (we added it in types).
+            // Use real ID if available (Preview), otherwise fallback to tenant prop (Public URL)
+            const targetId = clinic?.id || tenant.clinic_id;
 
             const { data } = await supabase
                 .from('services')
                 .select('*')
-                .eq('clinic_id', tenant.clinic_id)
+                .eq('clinic_id', targetId)
                 .eq('active', true)
                 .order('title');
 
@@ -75,25 +71,48 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
 
         setIsSubmitting(true);
         try {
-            // Calculate Start Time (Date + Slot Time)
             const today = new Date();
             const [hours, minutes] = selectedSlot.split(':').map(Number);
             today.setHours(hours, minutes, 0, 0);
 
-            // Call RPC
-            const { error } = await supabase.rpc('create_public_booking', {
-                p_clinic_id: tenant.clinic_id,
-                p_name: patientName,
-                p_phone: patientPhone,
-                p_service_id: selectedService.id,
-                p_start_time: today.toISOString()
+            // Use real ID if available
+            const targetId = clinic?.id || tenant.clinic_id;
+
+            // Direct Insert: Find/Create Patient
+            let patientId = null;
+            const { data: existingPatient } = await supabase.from('patients').select('id').eq('clinic_id', targetId).eq('phone', patientPhone).single();
+
+            if (existingPatient) {
+                patientId = existingPatient.id;
+            } else {
+                const { data: newPatient, error: patError } = await supabase.from('patients').insert({
+                    clinic_id: targetId,
+                    full_name: patientName,
+                    phone: patientPhone
+                }).select().single();
+
+                if (patError) throw patError;
+                patientId = newPatient.id;
+            }
+
+            // Create Appointment
+            const endTime = new Date(today.getTime() + selectedService.duration_minutes * 60000);
+
+            const { error: apptError } = await supabase.from('appointments').insert({
+                clinic_id: targetId,
+                patient_id: patientId,
+                start_time: today.toISOString(),
+                end_time: endTime.toISOString(),
+                status: 'scheduled',
+                notes: 'Agendamento Agendamento Online via Página Pública'
             });
 
-            if (error) throw error;
+            if (apptError) throw apptError;
+
             setStep(5); // Success step
         } catch (error) {
             console.error(error);
-            alert('Erro ao realizar agendamento. Tente novamente.');
+            alert(`Erro ao realizar agendamento: ${(error as any).message}`);
         } finally {
             setIsSubmitting(false);
         }
@@ -105,10 +124,14 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
             <header className="bg-white border-b border-slate-200 py-4 px-6 fixed w-full top-0 z-50">
                 <div className="max-w-3xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-xl flex items-center justify-center text-white font-bold text-xl" style={{ backgroundColor: tenant.branding.primaryColor }}>
-                            {tenant.branding.logoIcon}
+                        <div className="relative group">
+                            <div className="absolute -inset-2 bg-[#617FA3]/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-9 w-auto object-contain relative z-10" />
                         </div>
-                        <h1 className="font-bold text-slate-900 text-lg">{tenant.name}</h1>
+                        <div className="flex flex-col justify-center">
+                            <h1 className="font-bold text-slate-900 text-lg leading-none">Dental Hub</h1>
+                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-0.5">{tenant.name}</p>
+                        </div>
                     </div>
                     <button onClick={onBack} className="text-sm text-slate-400 hover:text-slate-600 underline">
                         Voltar para Admin
