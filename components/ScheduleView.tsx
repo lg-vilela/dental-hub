@@ -182,4 +182,3 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ tenant }) => {
 };
 
 export default ScheduleView;
-```
