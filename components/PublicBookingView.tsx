@@ -258,6 +258,12 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
                     {/* Step 3: Schedule */}
                     {step === 3 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <button
+                                onClick={() => setStep(1)}
+                                className="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 mx-auto hover:underline transition-all"
+                            >
+                                <span className="material-symbols-outlined text-lg">arrow_back</span> Escolher outro serviço
+                            </button>
                             <div className="text-center mb-4">
                                 <h2 className="text-2xl font-bold text-slate-900">Escolha o horário</h2>
                                 <p className="text-slate-500">Disponibilidade para <strong>{selectedService?.title}</strong>.</p>
@@ -301,6 +307,12 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
                     {/* Step 4: Patient Info */}
                     {step === 4 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+                            <button
+                                onClick={() => setStep(3)}
+                                className="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-2 hover:underline transition-all"
+                            >
+                                <span className="material-symbols-outlined text-lg">arrow_back</span> Escolher outro horário
+                            </button>
                             <div className="text-center mb-6">
                                 <h2 className="text-2xl font-bold text-slate-900">Seus Dados</h2>
                                 <p className="text-slate-500">Para confirmar o agendamento.</p>
