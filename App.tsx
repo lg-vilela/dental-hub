@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { TenantConfig } from './types';
 import { initialTenants } from './mockData';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { DataProvider } from './src/contexts/DataContext';
 import { useTheme } from './src/contexts/ThemeContext';
 
 // Components
@@ -240,7 +241,9 @@ function AppContent() {
 export default function App() {
     return (
         <AuthProvider>
-            <AppContent />
+            <DataProvider>
+                <AppContent />
+            </DataProvider>
         </AuthProvider>
     );
 }

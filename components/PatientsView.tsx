@@ -9,6 +9,7 @@ import { usePermissions } from '../src/hooks/usePermissions';
 import { patientService, Patient } from '../src/services/patientService';
 import { AddPatientModal } from './patients/AddPatientModal';
 import { useAuth } from '../src/contexts/AuthContext';
+import { useData } from '../src/contexts/DataContext';
 
 
 
@@ -296,31 +297,11 @@ const FilesTab = ({ patientId }: { patientId: string }) => {
 
 const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
     const { canAddPatient, isFree } = usePermissions();
-    const { clinic } = useAuth(); // Just to track updates if needed, RLS handles security
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { patients, isLoadingPatients, refreshPatients } = useData(); // Global State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const fetchPatients = async () => {
-        console.log("PatientsView: Starting fetch...");
-        setIsLoading(true);
-        try {
-            const data = await patientService.getPatients();
-            console.log("PatientsView: Success, count=", data.length);
-            setPatients(data);
-        } catch (error) {
-            console.error("PatientsView: Error fetching patients:", error);
-        } finally {
-            console.log("PatientsView: Finally block reached. Loading=false");
-            setIsLoading(false);
-        }
-    };
-
-    React.useEffect(() => {
-        fetchPatients();
-    }, []);
-
+    // Local filter based on Global Data
     const filteredPatients = patients.filter(p =>
         p.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.phone?.includes(searchTerm) ||
@@ -350,12 +331,12 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
                         </span>
                     )}
                     <button
-                        onClick={fetchPatients}
-                        disabled={isLoading}
+                        onClick={refreshPatients}
+                        disabled={isLoadingPatients}
                         className="p-2 text-slate-500 hover:text-primary hover:bg-slate-100 rounded-xl transition-all"
                         title="Recarregar lista"
                     >
-                        <span className={`material-symbols-outlined ${isLoading ? 'animate-spin' : ''}`}>refresh</span>
+                        <span className={`material-symbols-outlined ${isLoadingPatients ? 'animate-spin' : ''}`}>refresh</span>
                     </button>
                     <button
                         onClick={() => setIsModalOpen(true)}
@@ -386,7 +367,7 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {isLoading ? (
+                            {isLoadingPatients ? (
                                 <tr>
                                     <td colSpan={5} className="p-8 text-center text-slate-400">Carregando pacientes...</td>
                                 </tr>
@@ -432,7 +413,7 @@ const PatientList = ({ onSelect }: { onSelect: (p: any) => void }) => {
             <AddPatientModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchPatients}
+                onSuccess={refreshPatients}
             />
         </div>
     );
