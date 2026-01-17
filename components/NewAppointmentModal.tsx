@@ -72,7 +72,7 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
             onClose();
         } catch (error) {
             console.error(error);
-            alert('Erro ao agendar.');
+            alert(`Erro ao agendar: ${(error as any).message || error}`);
         } finally {
             setIsLoading(false);
         }
