@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TenantConfig } from './types';
 import { initialTenants } from './mockData';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import { useTheme } from './src/contexts/ThemeContext';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -19,6 +20,7 @@ import LandingPage from './components/landing/LandingPage';
 
 function AppContent() {
     const { isAuthenticated, isLoading, user, signOut } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     // Auth State handled by Context now
 
     const [isSetupComplete, setIsSetupComplete] = useState(true);
@@ -102,7 +104,7 @@ function AppContent() {
     }
 
     return (
-        <div className="flex h-screen bg-slate-50 text-slate-900">
+        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 transition-colors duration-200">
             {/* Sidebar Navigation */}
             <div className={`fixed inset-0 z-20 bg-slate-900/50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'} print:hidden`} onClick={() => setSidebarOpen(false)}></div>
             <div className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} print:hidden`}>
@@ -110,10 +112,10 @@ function AppContent() {
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 print:h-auto print:overflow-visible">
+            <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900 print:h-auto print:overflow-visible transition-colors duration-200">
 
                 {/* Top Header */}
-                <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 h-16 flex items-center justify-between px-4 lg:px-8 z-10 print:hidden">
+                <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-700/60 h-16 flex items-center justify-between px-4 lg:px-8 z-10 print:hidden transition-colors duration-200">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg">
                             <span className="material-symbols-outlined">menu</span>
@@ -177,10 +179,15 @@ function AppContent() {
 
                             {userMenuOpen === 'user' && (
                                 <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <div className="px-4 py-3 border-b border-slate-50 mb-2">
+                                    <div className="px-4 py-3 border-b border-slate-50 dark:border-slate-700 mb-2">
                                         <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Logado como</p>
-                                        <p className="font-bold text-slate-900 truncate">{user?.email}</p>
+                                        <p className="font-bold text-slate-900 dark:text-slate-200 truncate">{user?.email}</p>
                                     </div>
+
+                                    <button onClick={toggleTheme} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary font-medium flex items-center gap-3 transition-colors">
+                                        <span className="material-symbols-outlined text-[20px]">{theme === 'dark' ? 'light_mode' : 'dark_mode'}</span>
+                                        {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+                                    </button>
 
                                     <button onClick={() => { setActivePage('settings'); setUserMenuOpen(null); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary font-medium flex items-center gap-3">
                                         <span className="material-symbols-outlined text-[20px]">settings</span> Configurações
