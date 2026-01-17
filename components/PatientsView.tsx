@@ -122,30 +122,50 @@ const AnamnesisTab = ({ patientId }: { patientId: string }) => {
 
 
 // 5c. Evolution Timeline
-const EvolutionTab = () => {
-
+// 5c. Evolution Timeline
+const EvolutionTab = ({ patientId }: { patientId: string }) => {
+    const { clinic } = useAuth();
     const { showToast } = useToast();
     const [note, setNote] = useState('');
-    const [events, setEvents] = useState([
-        { date: 'Hoje, 14:30', type: 'proc', title: 'Restauração Dente 14', desc: 'Resina composta A2, 2 faces.', author: 'Dr. Lucas' },
-        { date: '15 Jan, 2026', type: 'note', title: 'Paciente se queixou de dor', desc: 'Sensibilidade térmica no quadrante inferior esquerdo.', author: 'Dra. Ana' },
-        { date: '10 Dez, 2025', type: 'pay', title: 'Pagamento Realizado', desc: 'R$ 450,00 referente à Limpeza.', author: 'Recepção' },
-    ]);
+    const [events, setEvents] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleAddNote = () => {
-        if (!note.trim()) return;
+    useEffect(() => {
+        loadEvolutions();
+    }, [patientId]);
 
-        const newEvent = {
-            date: 'Agora',
-            type: 'note',
-            title: 'Nova Anotação',
-            desc: note,
-            author: 'Você'
-        };
+    const loadEvolutions = async () => {
+        setIsLoading(true);
+        try {
+            const data = await patientService.getEvolutions(patientId);
+            setEvents(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        setEvents([newEvent, ...events]);
-        setNote('');
-        showToast('Evolução registrada com sucesso!', 'success');
+    const handleAddNote = async () => {
+        if (!note.trim() || !clinic?.id) return;
+
+        try {
+            const newEvent = await patientService.createEvolution({
+                patient_id: patientId,
+                clinic_id: clinic.id,
+                title: 'Nova Evolução',
+                description: note,
+                type: 'note',
+                date: new Date().toISOString()
+            });
+
+            setEvents([newEvent, ...events]);
+            setNote('');
+            showToast('Evolução registrada com sucesso!', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao salvar evolução.', 'error');
+        }
     };
 
     return (
@@ -162,17 +182,17 @@ const EvolutionTab = () => {
             </div>
 
             <div className="relative border-l-2 border-slate-100 ml-3 space-y-8">
-                {events.map((e, i) => (
-                    <div key={i} className="pl-8 relative group">
+                {isLoading ? <p className="text-slate-500 pl-8">Carregando evoluções...</p> : events.length === 0 ? <p className="text-slate-400 pl-8">Nenhuma evolução registrada.</p> : events.map((e, i) => (
+                    <div key={e.id || i} className="pl-8 relative group">
                         <div className={`absolute -left-[9px] top-0 size-4 rounded-full border-2 border-white shadow-sm ${e.type === 'proc' ? 'bg-blue-500' : e.type === 'pay' ? 'bg-green-500' : 'bg-slate-400'}`}></div>
                         <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm group-hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-1">
                                 <h4 className="font-bold text-slate-900">{e.title}</h4>
-                                <span className="text-xs font-bold text-slate-400">{e.date}</span>
+                                <span className="text-xs font-bold text-slate-400">{new Date(e.date || e.created_at).toLocaleDateString()} {new Date(e.date || e.created_at).toLocaleTimeString().slice(0, 5)}</span>
                             </div>
-                            <p className="text-slate-600 mb-2">{e.desc}</p>
+                            <p className="text-slate-600 mb-2">{e.description}</p>
                             <div className="text-xs font-medium text-slate-400 flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[14px]">person</span> {e.author}
+                                <span className="material-symbols-outlined text-[14px]">person</span> Dr(a). (Você)
                             </div>
                         </div>
                     </div>
@@ -183,26 +203,89 @@ const EvolutionTab = () => {
 };
 
 // 5d. Files / Media
-const FilesTab = () => {
+// 5d. Files / Media
+const FilesTab = ({ patientId }: { patientId: string }) => {
+    const { clinic } = useAuth();
+    const { showToast } = useToast();
+    const [files, setFiles] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadFiles();
+    }, [patientId]);
+
+    const loadFiles = async () => {
+        setIsLoading(true);
+        try {
+            const data = await patientService.getFiles(patientId);
+            setFiles(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !clinic?.id) return;
+
+        // NOTE: In a real production app, we would upload to Supabase Storage here.
+        // For this version (SQL-only access), we will simulate the storage by creating a record.
+        // We will store a placeholder URL or a data URI if small, but let's stick to metadata for now.
+
+        try {
+            showToast('Fazendo upload...', 'info');
+
+            // Simulating upload delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const newFile = await patientService.createFileRecord({
+                patient_id: patientId,
+                clinic_id: clinic.id,
+                name: file.name,
+                url: '#', // Placeholder, creates a record but no real file download yet without Storage bucket
+                type: file.type,
+                size: file.size
+            });
+
+            setFiles([newFile, ...files]);
+            showToast('Arquivo adicionado com sucesso!', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao salvar arquivo.', 'error');
+        }
+    };
+
     return (
         <div className="p-8 animate-in fade-in slide-in-from-bottom-2">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Upload Placeholder */}
-                <div className="aspect-square bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 hover:border-slate-400 cursor-pointer transition-colors">
+                {/* Upload Button */}
+                <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 hover:border-slate-400 cursor-pointer transition-colors relative">
+                    <input type="file" className="hidden" onChange={handleFileUpload} />
                     <span className="material-symbols-outlined text-4xl mb-2">cloud_upload</span>
-                    <span className="font-bold text-sm">Adicionar Arquivo</span>
-                </div>
+                    <span className="font-bold text-sm text-center px-2">Adicionar Arquivo</span>
+                </label>
 
-                {/* Mock Images */}
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="aspect-square bg-slate-200 rounded-xl relative overflow-hidden group cursor-pointer">
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
-                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                            <p className="text-xs font-bold">Raio-X Panorâmico</p>
-                            <p className="text-[10px] opacity-80">12/01/2024</p>
+                {isLoading ? (
+                    <div className="col-span-3 flex items-center text-slate-400">Carregando arquivos...</div>
+                ) : files.length === 0 ? (
+                    <div className="col-span-3 flex items-center text-slate-400">Nenhum arquivo anexado.</div>
+                ) : (
+                    files.map((file, i) => (
+                        <div key={file.id || i} className="aspect-square bg-slate-100 rounded-xl relative overflow-hidden group cursor-pointer border border-slate-200 hover:border-primary/50 transition-colors">
+                            <div className="flex flex-col items-center justify-center h-full p-4">
+                                <span className="material-symbols-outlined text-4xl text-slate-400 mb-2">
+                                    {file.type.includes('image') ? 'image' : file.type.includes('pdf') ? 'picture_as_pdf' : 'description'}
+                                </span>
+                                <p className="text-xs font-bold text-center text-slate-700 truncate w-full">{file.name}</p>
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-[10px] opacity-80">{new Date(file.created_at).toLocaleDateString()}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
@@ -353,37 +436,45 @@ const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }
 
     return (
         <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-4">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 no-print">
                 <div className="flex items-center gap-4">
                     <button onClick={onBack} className="size-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <h2 className="text-2xl font-bold text-slate-900">Prontuário: <span className="text-slate-500">{patient.full_name || patient.name}</span></h2>
                 </div>
-                <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
-                    {[
-                        { id: 'odontogram', label: 'Odontograma', icon: 'dentistry' },
-                        { id: 'anamnesis', label: 'Anamnese', icon: 'assignment_ind' },
-                        { id: 'evolution', label: 'Evolução', icon: 'history' },
-                        { id: 'files', label: 'Arquivos', icon: 'folder_open' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
-                        >
-                            <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-                            <span className="hidden sm:inline">{tab.label}</span>
-                        </button>
-                    ))}
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => window.print()}
+                        className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined">print</span> <span className="hidden sm:inline">Exportar PDF</span>
+                    </button>
+                    <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
+                        {[
+                            { id: 'odontogram', label: 'Odontograma', icon: 'dentistry' },
+                            { id: 'anamnesis', label: 'Anamnese', icon: 'assignment_ind' },
+                            { id: 'evolution', label: 'Evolução', icon: 'history' },
+                            { id: 'files', label: 'Arquivos', icon: 'folder_open' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col print:border-none print:shadow-none">
                 {activeTab === 'odontogram' && <OdontogramView />}
                 {activeTab === 'anamnesis' && <AnamnesisTab patientId={patient.id} />}
-                {activeTab === 'evolution' && <EvolutionTab />}
-                {activeTab === 'files' && <FilesTab />}
+                {activeTab === 'evolution' && <EvolutionTab patientId={patient.id} />}
+                {activeTab === 'files' && <FilesTab patientId={patient.id} />}
             </div>
         </div>
     );

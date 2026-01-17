@@ -93,5 +93,73 @@ export const patientService = {
             .eq('id', id);
 
         if (error) throw error;
+    },
+
+    // Evolutions
+    async getEvolutions(patientId: string) {
+        const { data, error } = await supabase
+            .from('patient_evolutions')
+            .select('*')
+            .eq('patient_id', patientId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data as Evolution[];
+    },
+
+    async createEvolution(evolution: Omit<Evolution, 'id' | 'created_at'>) {
+        const { data, error } = await supabase
+            .from('patient_evolutions')
+            .insert(evolution)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as Evolution;
+    },
+
+    // Files
+    async getFiles(patientId: string) {
+        const { data, error } = await supabase
+            .from('patient_files')
+            .select('*')
+            .eq('patient_id', patientId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data as PatientFile[];
+    },
+
+    async createFileRecord(file: Omit<PatientFile, 'id' | 'created_at'>) {
+        const { data, error } = await supabase
+            .from('patient_files')
+            .insert(file)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as PatientFile;
     }
 };
+
+export interface Evolution {
+    id: string;
+    patient_id: string;
+    clinic_id: string;
+    title: string;
+    description: string;
+    type: 'note' | 'proc' | 'pay';
+    date: string;
+    created_at: string;
+}
+
+export interface PatientFile {
+    id: string;
+    patient_id: string;
+    clinic_id: string;
+    name: string;
+    url: string;
+    type: string;
+    size?: number;
+    created_at: string;
+}
