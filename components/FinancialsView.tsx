@@ -87,53 +87,53 @@ const CashFlowTab = () => {
         <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
             {/* Action Bar */}
             <div className="flex justify-between items-center">
-                <h3 className="font-bold text-slate-700">Visão Geral</h3>
-                <button onClick={() => setShowAddForm(!showAddForm)} className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 transition-colors">
+                <h3 className="font-bold text-slate-700 dark:text-slate-200">Visão Geral</h3>
+                <button onClick={() => setShowAddForm(!showAddForm)} className="bg-slate-900 dark:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors">
                     {showAddForm ? 'Cancelar' : 'Nova Transação'}
                 </button>
             </div>
 
             {/* Quick Add Form */}
             {showAddForm && (
-                <form onSubmit={handleAdd} className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <form onSubmit={handleAdd} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-5 gap-4 items-end transition-colors">
                     <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 mb-1">Descrição</label>
-                        <input required type="text" className="w-full px-3 py-2 border rounded-lg" value={newTrx.description} onChange={e => setNewTrx({ ...newTrx, description: e.target.value })} placeholder="Ex: Pagamento Consulta" />
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Descrição</label>
+                        <input required type="text" className="w-full px-3 py-2 border dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400" value={newTrx.description} onChange={e => setNewTrx({ ...newTrx, description: e.target.value })} placeholder="Ex: Pagamento Consulta" />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1">Valor</label>
-                        <input required type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg" value={newTrx.amount} onChange={e => setNewTrx({ ...newTrx, amount: e.target.value })} placeholder="0.00" />
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Valor</label>
+                        <input required type="number" step="0.01" className="w-full px-3 py-2 border dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400" value={newTrx.amount} onChange={e => setNewTrx({ ...newTrx, amount: e.target.value })} placeholder="0.00" />
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
-                        <select className="w-full px-3 py-2 border rounded-lg" value={newTrx.type} onChange={e => setNewTrx({ ...newTrx, type: e.target.value as any })}>
+                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tipo</label>
+                        <select className="w-full px-3 py-2 border dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100" value={newTrx.type} onChange={e => setNewTrx({ ...newTrx, type: e.target.value as any })}>
                             <option value="income">Receita (+)</option>
                             <option value="expense">Despesa (-)</option>
                         </select>
                     </div>
-                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 h-[42px]">Salvar</button>
+                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 h-[42px] shadow-sm">Salvar</button>
                 </form>
             )}
 
             {/* KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
-                    <span className="text-sm font-bold text-slate-500">Receita Total</span>
-                    <span className="text-3xl font-bold text-green-600">{formatMoney(stats.income)}</span>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-colors">
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Receita Total</span>
+                    <span className="text-3xl font-bold text-green-600 dark:text-green-500">{formatMoney(stats.income)}</span>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
-                    <span className="text-sm font-bold text-slate-500">Despesas</span>
-                    <span className="text-3xl font-bold text-red-600">{formatMoney(stats.expense)}</span>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-colors">
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Despesas</span>
+                    <span className="text-3xl font-bold text-red-600 dark:text-red-500">{formatMoney(stats.expense)}</span>
                 </div>
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
-                    <span className="text-sm font-bold text-slate-500">Balanço</span>
-                    <span className={`text-3xl font-bold ${stats.balance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>{formatMoney(stats.balance)}</span>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-2 transition-colors">
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Balanço</span>
+                    <span className={`text-3xl font-bold ${stats.balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-red-600 dark:text-red-400'}`}>{formatMoney(stats.balance)}</span>
                 </div>
             </div>
 
             {/* Transactions List */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-                <h3 className="font-bold text-slate-900 mb-4">Histórico de Transações</h3>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col transition-colors">
+                <h3 className="font-bold text-slate-900 dark:text-white mb-4">Histórico de Transações</h3>
                 <div className="flex-1 overflow-y-auto space-y-4 max-h-[400px]">
                     {isLoading ? (
                         <p className="text-center text-slate-400">Carregando...</p>
@@ -141,17 +141,17 @@ const CashFlowTab = () => {
                         <p className="text-center text-slate-400 py-8">Nenhuma transação registrada.</p>
                     ) : (
                         transactions.map((t) => (
-                            <div key={t.id} className="flex items-center justify-between group p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                            <div key={t.id} className="flex items-center justify-between group p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className={`size-8 rounded-full flex items-center justify-center ${t.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                    <div className={`size-8 rounded-full flex items-center justify-center ${t.type === 'income' ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400'}`}>
                                         <span className="material-symbols-outlined text-sm">{t.type === 'income' ? 'arrow_downward' : 'arrow_upward'}</span>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-slate-900">{t.description}</p>
+                                        <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{t.description}</p>
                                         <p className="text-xs text-slate-400">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <span className={`text-sm font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-900'}`}>
+                                <span className={`text-sm font-bold ${t.type === 'income' ? 'text-green-600 dark:text-green-500' : 'text-red-900 dark:text-red-400'}`}>
                                     {t.type === 'income' ? '+' : '-'} {formatMoney(t.amount)}
                                 </span>
                             </div>
@@ -454,7 +454,7 @@ const FinancialsView = () => {
         <PremiumFeature access={canAccessFinancials} featureName="Módulo Financeiro">
             <div className="flex flex-col h-[calc(100vh-140px)]">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900">Financeiro</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Financeiro</h2>
 
                     {/* Debug Info */}
                     {!canAccessFinancials && (
@@ -462,7 +462,7 @@ const FinancialsView = () => {
                             <strong>Debug:</strong> {(useAuth() as any).authError || 'User has no clinic linked.'}
                         </div>
                     )}
-                    <div className="flex bg-white p-1 rounded-xl border border-slate-200 gap-1">
+                    <div className="flex bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 gap-1 transition-colors">
                         {[
                             { id: 'cashflow', label: 'Fluxo de Caixa', icon: 'monitoring' },
                             { id: 'budgets', label: 'Orçamentos', icon: 'receipt_long' },
@@ -470,7 +470,7 @@ const FinancialsView = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                                className={`px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors ${activeTab === tab.id ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
                             >
                                 <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
                                 <span className="hidden sm:inline">{tab.label}</span>
@@ -479,7 +479,7 @@ const FinancialsView = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden flex flex-col transition-colors">
                     {activeTab === 'cashflow' && <CashFlowTab />}
                     {activeTab === 'budgets' && <BudgetsTab />}
                 </div>
