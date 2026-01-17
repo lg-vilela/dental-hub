@@ -61,7 +61,7 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
             await appointmentService.createAppointment({
                 clinic_id: clinic.id,
                 patient_id: formData.patient_id,
-                dentist_id: formData.dentist_id,
+                dentist_id: formData.dentist_id || null, // Fix: Send null if empty string to avoid UUID error
                 start_time: start.toISOString(),
                 end_time: end.toISOString(),
                 status: 'scheduled',
@@ -132,10 +132,12 @@ const NewAppointmentModal: React.FC<NewAppointmentModalProps> = ({ isOpen, onClo
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Dentista</label>
                         <select
+                            required
                             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                             value={formData.dentist_id}
                             onChange={e => setFormData({ ...formData, dentist_id: e.target.value })}
                         >
+                            <option value="">Selecione um dentista...</option>
                             {dentists.map(d => (
                                 <option key={d.id} value={d.id}>{d.full_name || d.email}</option>
                             ))}
