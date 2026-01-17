@@ -1,17 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { patientService, Patient } from '../services/patientService';
+import { clientService, Client } from '../services/clientService'; // Updated import
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
 interface DataContextType {
-    patients: Patient[];
+    clients: Client[]; // Renamed from patients
     appointments: any[];
-    isLoadingPatients: boolean;
+    isLoadingClients: boolean; // Renamed
     isLoadingAppointments: boolean;
-    refreshPatients: () => Promise<void>;
+    refreshClients: () => Promise<void>; // Renamed
     refreshAppointments: () => Promise<void>;
     stats: {
-        patientsCount: number;
+        clientsCount: number; // Renamed
         todayAppointments: number;
     };
 }
@@ -20,40 +20,36 @@ const DataContext = createContext<DataContextType>({} as DataContextType);
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     const { clinic, isAuthenticated } = useAuth();
-    const [patients, setPatients] = useState<Patient[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
     const [appointments, setAppointments] = useState<any[]>([]);
-    const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+    const [isLoadingClients, setIsLoadingClients] = useState(false);
     const [isLoadingAppointments, setIsLoadingAppointments] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated && clinic?.id) {
-            refreshPatients();
+            refreshClients();
             refreshAppointments();
         }
     }, [isAuthenticated, clinic?.id]);
 
-    const refreshPatients = useCallback(async () => {
+    const refreshClients = useCallback(async () => {
         if (!clinic?.id) return;
 
-        // Initial load show spinner, background refresh does not
-        if (patients.length === 0) setIsLoadingPatients(true);
+        // Initial load show spinner
+        if (clients.length === 0) setIsLoadingClients(true);
 
         try {
-            const data = await patientService.getPatients();
-            console.log(`[DataContext] Fetched ${data?.length} patients for clinic ${clinic.id}`);
-
-            // Safety check: specific case where RLS might return [] but no error
-            // If we have patients effectively in memory, and suddenly we get 0, could be a glitch?
-            // Unless user deleted them all. But for now let's trust the DB but log it.
+            const data = await clientService.getClients();
+            // console.log(`[DataContext] Fetched ${data?.length} clients`);
             if (data) {
-                setPatients(data);
+                setClients(data);
             }
         } catch (error) {
-            console.error('[DataContext] Error fetching patients:', error);
+            console.error('[DataContext] Error fetching clients:', error);
         } finally {
-            setIsLoadingPatients(false);
+            setIsLoadingClients(false);
         }
-    }, [clinic?.id, patients.length]);
+    }, [clinic?.id, clients.length]);
 
     const refreshAppointments = useCallback(async () => {
         if (!clinic?.id) return;
@@ -63,12 +59,20 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data, error } = await supabase
                 .from('appointments')
-                .select('*, patient:patients(full_name)')
+                .select('*, client:patients(full_name)') // Rename relation alias if possible, or mapping
+                // Note: DB relation name is likely 'patient' or based on FK.
+                // If table is 'patients', Supabase usually uses 'patients' unless aliased.
+                // Let's use 'patients' for now but map it if needed.
+                // Actually, let's keep it 'patient:patients(full_name)' to avoid breaking DB query if 'client' alias not defined.
+                // But wait, the consuming code might expect 'client'.
+                // Ideally, we select '*, patient:patients(full_name)' and then map it?
+                // Or just alias in query: 'client:patients(full_name)' works if Supabase supports it.
+                // Yes, Supabase/PostgREST supports resource embedding with alias: `patients(full_name)` -> `patient` props.
+                // To rename prop to `client`, use `client:patients(full_name)`.
                 .eq('clinic_id', clinic.id)
-                .order('start_time', { ascending: true }); // optimize limit later
+                .order('start_time', { ascending: true });
 
             if (error) throw error;
-            console.log(`[DataContext] Fetched ${data?.length} appointments`);
             if (data) setAppointments(data);
         } catch (error) {
             console.error('[DataContext] Error fetching appointments:', error);
@@ -78,7 +82,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }, [clinic?.id, appointments.length]);
 
     const stats = {
-        patientsCount: patients.length,
+        clientsCount: clients.length,
         todayAppointments: appointments.filter(a => {
             const date = new Date(a.start_time);
             const today = new Date();
@@ -90,11 +94,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <DataContext.Provider value={{
-            patients,
+            clients,
             appointments,
-            isLoadingPatients,
+            isLoadingClients,
             isLoadingAppointments,
-            refreshPatients,
+            refreshClients,
             refreshAppointments,
             stats
         }}>

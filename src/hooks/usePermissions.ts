@@ -9,8 +9,8 @@ export const usePermissions = () => {
     // Definition of Limits based on the Plan Image
     const limits = {
         free: {
-            maxPatients: 5,
-            maxDentists: 1,
+            maxClients: 5,
+            maxUsers: 1,
             hasWhatsApp: false,
             hasFinancials: true,
             hasInventory: false,
@@ -18,8 +18,8 @@ export const usePermissions = () => {
             hasMultiUnit: false
         },
         pro: {
-            maxPatients: 999999, // Ilimitado
-            maxDentists: 10,     // Assumed generous limit for Pro, since it's "Per Clinic" price
+            maxClients: 999999, // Ilimitado
+            maxUsers: 10,     // Assumed generous limit for Pro, since it's "Per Clinic" price
             hasWhatsApp: true,
             hasFinancials: true,
             hasInventory: false,
@@ -27,8 +27,8 @@ export const usePermissions = () => {
             hasMultiUnit: false
         },
         plus: {
-            maxPatients: 999999, // Ilimitado
-            maxDentists: 999999, // Ilimitado
+            maxClients: 999999, // Ilimitado
+            maxUsers: 999999, // Ilimitado
             hasWhatsApp: true,
             hasFinancials: true,
             hasInventory: true,
@@ -41,12 +41,12 @@ export const usePermissions = () => {
 
     /* Helper Functions for Logic Checks */
 
-    const canAddPatient = (currentCount: number) => {
-        return currentCount < currentLimits.maxPatients;
+    const canAddClient = (currentCount: number) => {
+        return currentCount < currentLimits.maxClients;
     };
 
-    const canAddDentist = (currentCount: number) => {
-        return currentCount < currentLimits.maxDentists;
+    const canAddUser = (currentCount: number) => {
+        return currentCount < currentLimits.maxUsers;
     };
 
     /* Feature Flags */
@@ -67,8 +67,8 @@ export const usePermissions = () => {
     return {
         plan,
         // Methods
-        canAddPatient,
-        canAddDentist,
+        canAddClient,
+        canAddUser,
         // Flags
         canAccessFinancials,
         canUseWhatsApp,

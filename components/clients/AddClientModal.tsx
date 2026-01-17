@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { patientService } from '../../src/services/patientService';
+import { clientService } from '../../src/services/clientService';
 import { useAuth } from '../../src/contexts/AuthContext';
 
-interface AddPatientModalProps {
+interface AddClientModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
 }
 
-export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, onSuccess }) => {
-    const { clinic } = useAuth(); // We need clinic_id, assuming it's available in context
+export const AddClientModal: React.FC<AddClientModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { clinic } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [formData, setFormData] = useState({
@@ -28,14 +28,9 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClos
         setError('');
 
         try {
-            // In a real scenario, we might want to pass clinic_id to the service 
-            // OR the service infers it.
-            // My service signature for 'createPatientWithClinicId' expects { clinic_id, ... }
-            // So we must provide it.
-
             if (!clinic?.id) throw new Error("ID da Clínica não encontrado. Por favor, faça login novamente.");
 
-            await patientService.createPatientWithClinicId({
+            await clientService.createClientWithClinicId({
                 clinic_id: clinic.id,
                 full_name: formData.full_name,
                 phone: formData.phone,
@@ -46,11 +41,10 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClos
 
             onSuccess();
             onClose();
-            // Reset form
             setFormData({ full_name: '', phone: '', cpf: '', email: '', birth_date: '' });
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'Erro ao adicionar paciente.');
+            setError(err.message || 'Erro ao adicionar cliente.');
         } finally {
             setIsLoading(false);
         }
@@ -60,7 +54,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClos
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-slate-900">Novo Paciente</h2>
+                    <h2 className="text-xl font-bold text-slate-900">Novo Cliente</h2>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
                         <span className="material-symbols-outlined">close</span>
                     </button>
@@ -145,7 +139,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClos
                         >
                             {isLoading ? (
                                 <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            ) : 'Salvar Paciente'}
+                            ) : 'Salvar Cliente'}
                         </button>
                     </div>
                 </form>

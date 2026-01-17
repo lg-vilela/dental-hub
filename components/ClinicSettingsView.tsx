@@ -158,8 +158,8 @@ const TeamTab = () => {
     };
 
     const roles = [
-        { id: 'dentist', label: 'Dentista' },
-        { id: 'receptionist', label: 'Recepcionista' },
+        { id: 'dentist', label: 'Profissional' }, // Kept ID for code compatibility
+        { id: 'receptionist', label: 'Recepção/Atendimento' },
         { id: 'admin', label: 'Administrador' }
     ];
 
@@ -170,7 +170,7 @@ const TeamTab = () => {
             <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h3 className="text-lg font-bold text-slate-900">Gerenciar Equipe</h3>
-                    <p className="text-sm text-slate-500">Convide novos membros para sua clínica.</p>
+                    <p className="text-sm text-slate-500">Convide novos membros para sua empresa.</p>
                 </div>
 
                 <div className="flex gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
@@ -279,7 +279,7 @@ const TeamTab = () => {
                                         {m.role === 'admin' && <span className="material-symbols-outlined text-[14px]">shield_person</span>}
                                         {m.role === 'dentist' && <span className="material-symbols-outlined text-[14px]">dentistry</span>}
                                         {m.role === 'receptionist' && <span className="material-symbols-outlined text-[14px]">support_agent</span>}
-                                        {m.role === 'dentist' ? 'Dentista' : m.role === 'receptionist' ? 'Recepção' : 'Admin'}
+                                        {m.role === 'dentist' ? 'Profissional' : m.role === 'receptionist' ? 'Atendimento' : 'Admin'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-slate-400 text-xs font-bold flex items-center gap-2">
@@ -311,7 +311,7 @@ const ServicesTab = () => {
     const [services, setServices] = useState<Service[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentService, setCurrentService] = useState<Partial<Service>>({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' });
+    const [currentService, setCurrentService] = useState<Partial<Service>>({ title: '', price: 0, duration_minutes: 30, icon: 'work' });
 
     useEffect(() => {
         loadServices();
@@ -343,7 +343,7 @@ const ServicesTab = () => {
                 showToast('Serviço criado com sucesso!', 'success');
             }
             setIsEditing(false);
-            setCurrentService({ title: '', price: 0, duration_minutes: 30, icon: 'dentistry' });
+            setCurrentService({ title: '', price: 0, duration_minutes: 30, icon: 'work' });
             loadServices();
         } catch (error: any) {
             console.error(error);
@@ -386,7 +386,7 @@ const ServicesTab = () => {
                                 value={currentService.title}
                                 onChange={e => setCurrentService({ ...currentService, title: e.target.value })}
                                 className="w-full p-3 border border-slate-200 rounded-xl font-bold text-slate-700"
-                                placeholder="Ex: Limpeza Dental"
+                                placeholder="Ex: Consultoria, Manutenção..."
                             />
                         </div>
                         <div>
@@ -412,7 +412,7 @@ const ServicesTab = () => {
                         <div>
                             <label className="block text-xs font-bold text-slate-500 mb-1">Ícone</label>
                             <div className="flex gap-2">
-                                {['dentistry', 'clean_hands', 'medical_services', 'brightness_7', 'emergency'].map(icon => (
+                                {['work', 'verified', 'medical_services', 'build', 'laptop'].map(icon => (
                                     <button
                                         key={icon}
                                         onClick={() => setCurrentService({ ...currentService, icon })}
@@ -553,7 +553,7 @@ const ClinicSettingsView = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Configurações da Clínica</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">Configurações do Negócio</h2>
                     <p className="text-slate-500 text-sm">Gerencie horários e planos da sua conta.</p>
                 </div>
                 {/* Global Save Removed as per User Request */}

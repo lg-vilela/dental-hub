@@ -3,7 +3,7 @@ import { TenantConfig } from './types';
 export const initialTenants: Record<string, TenantConfig> = {
     'clinic_1': {
         clinic_id: 'clinic_1',
-        name: 'Dental Hub',
+        name: 'SaaS Hub',
         subdomain: 'dental-care',
         status: 'active',
         plan: 'pro',
@@ -11,7 +11,7 @@ export const initialTenants: Record<string, TenantConfig> = {
             primaryColor: '#617FA3', // Dental Hub Blue
             primaryDark: '#4A6280',
             primaryLight: '#F0F4F8',
-            logoIcon: 'dentistry',
+            logoIcon: 'work',
             font: 'manrope'
         },
         settings: {
@@ -20,13 +20,13 @@ export const initialTenants: Record<string, TenantConfig> = {
             closingTime: '18:00',
             slotDuration: 30, // 30 min slots
             workingDays: [1, 2, 3, 4, 5], // Mon-Fri
-            maxDoctors: 5,
+            maxUsers: 5,
             appointmentsPerMonth: 200
         }
     },
     'clinic_2': {
         clinic_id: 'clinic_2',
-        name: 'DentalCloud',
+        name: 'TechSolutions',
         subdomain: 'dental-cloud',
         status: 'active',
         plan: 'enterprise',
@@ -34,7 +34,7 @@ export const initialTenants: Record<string, TenantConfig> = {
             primaryColor: '#2997db', // Blue
             primaryDark: '#1e70a3',
             primaryLight: '#e1f5fe',
-            logoIcon: 'medical_services',
+            logoIcon: 'business_center',
             font: 'public'
         },
         settings: {
@@ -43,7 +43,7 @@ export const initialTenants: Record<string, TenantConfig> = {
             closingTime: '20:00',
             slotDuration: 15, // High volume
             workingDays: [1, 2, 3, 4, 5, 6], // Mon-Sat
-            maxDoctors: 15,
+            maxUsers: 15,
             appointmentsPerMonth: 1000
         }
     }

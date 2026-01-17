@@ -39,7 +39,7 @@ const CashFlowTab = () => {
         }
     };
 
-    const [newTrx, setNewTrx] = useState({ description: '', amount: '', type: 'income', category: 'Tratamento', date: new Date().toISOString().split('T')[0] });
+    const [newTrx, setNewTrx] = useState({ description: '', amount: '', type: 'income', category: 'Serviço', date: new Date().toISOString().split('T')[0] });
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -173,10 +173,10 @@ const BudgetsTab = () => {
     const { showToast } = useToast();
 
     // Form State
-    const [patients, setPatients] = useState<any[]>([]);
+    const [clients, setClients] = useState<any[]>([]);
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
 
-    const [selectedPatient, setSelectedPatient] = useState('');
+    const [selectedClient, setSelectedClient] = useState('');
     const [notes, setNotes] = useState('');
     const [items, setItems] = useState<{ service_id: string, title: string, quantity: number, unit_price: number }[]>([]);
 
@@ -200,16 +200,16 @@ const BudgetsTab = () => {
         setIsCreating(true);
         // Load dependencies
         try {
-            // Fetch simplified patients list
-            const { data: pats } = await supabase.from('patients').select('id, full_name').order('full_name');
-            setPatients(pats || []);
+            // Fetch simplified clients list
+            const { data: clts } = await supabase.from('patients').select('id, full_name').order('full_name'); // 'patients' table is source of Clients
+            setClients(clts || []);
 
             const svcs = await servicesService.getServices();
             setAvailableServices(svcs);
 
             // Reset form
             setItems([]);
-            setSelectedPatient('');
+            setSelectedClient('');
             setNotes('');
         } catch (err) {
             console.error(err);
@@ -242,12 +242,12 @@ const BudgetsTab = () => {
     const calculateTotal = () => items.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0);
 
     const handleSaveBudget = async () => {
-        if (!selectedPatient || items.length === 0 || !clinic) return alert('Preencha os dados.');
+        if (!selectedClient || items.length === 0 || !clinic) return alert('Preencha os dados.');
 
         try {
             await budgetsService.saveBudget({
                 clinic_id: clinic.id,
-                patient_id: selectedPatient,
+                patient_id: selectedClient,
                 total_value: calculateTotal(),
                 items: items,
                 notes: notes
@@ -273,7 +273,7 @@ const BudgetsTab = () => {
     return (
         <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex justify-between items-center">
-                <h3 className="font-bold text-slate-700">Orçamentos & Tratamentos</h3>
+                <h3 className="font-bold text-slate-700">Orçamentos & Propostas</h3>
                 <button
                     onClick={() => isCreating ? setIsCreating(false) : startCreation()}
                     className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${isCreating ? 'bg-slate-200 text-slate-700' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
@@ -286,14 +286,14 @@ const BudgetsTab = () => {
                 <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Paciente</label>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">Cliente</label>
                             <select
                                 className="w-full p-3 rounded-xl border border-slate-200 bg-white"
-                                value={selectedPatient}
-                                onChange={e => setSelectedPatient(e.target.value)}
+                                value={selectedClient}
+                                onChange={e => setSelectedClient(e.target.value)}
                             >
                                 <option value="">Selecione...</option>
-                                {patients.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                                {clients.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                             </select>
                         </div>
                         <div>
@@ -379,7 +379,7 @@ const BudgetsTab = () => {
                     <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
                             <th className="p-4 text-xs font-bold text-slate-500 uppercase">Data</th>
-                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Paciente</th>
+                            <th className="p-4 text-xs font-bold text-slate-500 uppercase">Cliente</th>
                             <th className="p-4 text-xs font-bold text-slate-500 uppercase">Valor</th>
                             <th className="p-4 text-xs font-bold text-slate-500 uppercase">Status</th>
                             <th className="p-4 text-xs font-bold text-slate-500 uppercase">Ações</th>

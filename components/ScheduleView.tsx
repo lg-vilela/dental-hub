@@ -107,7 +107,7 @@ const ScheduleView: React.FC<ScheduleViewProps> = ({ tenant }) => {
                         {d.full_name || d.email}
                     </div>
                 )) : (
-                    <div className="p-3 text-center text-slate-400 italic">Nenhum dentista cadastrado</div>
+                    <div className="p-3 text-center text-slate-400 italic">Nenhum profissional cadastrado</div>
                 )}
             </div>
 

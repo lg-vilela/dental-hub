@@ -17,7 +17,7 @@ export interface TenantConfig {
         closingTime: string; // "19:00"
         slotDuration: number; // minutes
         workingDays: number[]; // 0=Sun, 1=Mon
-        maxDoctors: number;
+        maxUsers: number;
         appointmentsPerMonth: number;
     };
 }
@@ -37,4 +37,26 @@ export interface NavItem {
     id: string;
     label: string;
     icon: string;
+}
+// Patient/Client Type definition
+export interface Client {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    cpf: string; // Document
+    address: string;
+    birthDate: string;
+    notes?: string;
+    // Removed medical history
+}
+
+export interface Service {
+    id: string;
+    title: string;
+    description?: string;
+    price: number;
+    duration_minutes: number;
+    icon?: string;
+    active?: boolean;
 }

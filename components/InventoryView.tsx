@@ -253,7 +253,7 @@ const InventoryView = () => {
                                 <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-500">inventory_2</span>
                             </div>
                             <h4 className="text-lg font-bold text-slate-700 dark:text-slate-300">Seu estoque está vazio.</h4>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm mt-2">Comece adicionando materiais para controlar seu laboratório.</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm mt-2">Comece adicionando itens para controlar seu almoxarifado/estoque.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -376,7 +376,7 @@ const InventoryView = () => {
                                         required
                                         type="text"
                                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 dark:text-white"
-                                        placeholder="Ex: Anestésico Lidocaína"
+                                        placeholder="Ex: Teclado sem fio"
                                         value={itemForm.name}
                                         onChange={e => setItemForm({ ...itemForm, name: e.target.value })}
                                     />
@@ -391,10 +391,10 @@ const InventoryView = () => {
                                             onChange={e => setItemForm({ ...itemForm, category: e.target.value })}
                                         >
                                             <option>Material de Consumo</option>
-                                            <option>Medicamentos</option>
-                                            <option>Instrumental</option>
-                                            <option>Descartáveis</option>
-                                            <option>Ortodontia</option>
+                                            <option>Limpeza</option>
+                                            <option>T.I. / Eletrônicos</option>
+                                            <option>Matéria Prima</option>
+                                            <option>Outros</option>
                                         </select>
                                     </div>
                                     <div>
@@ -464,7 +464,7 @@ const InventoryView = () => {
                                         required
                                         type="text"
                                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-700 dark:text-white"
-                                        placeholder="Ex: Dental Cremer"
+                                        placeholder="Ex: Distribuidora Nacional"
                                         value={supplierForm.name}
                                         onChange={e => setSupplierForm({ ...supplierForm, name: e.target.value })}
                                     />
@@ -479,8 +479,8 @@ const InventoryView = () => {
                                         >
                                             <option>Geral</option>
                                             <option>Equipamentos</option>
-                                            <option>Descartáveis</option>
-                                            <option>Laboratório</option>
+                                            <option>Serviços</option>
+                                            <option>Terceirizados</option>
                                             <option>Manutenção</option>
                                         </select>
                                     </div>

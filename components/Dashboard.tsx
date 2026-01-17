@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../src/contexts/AuthContext';
 import { useToast } from '../src/contexts/ToastContext';
-import { appointmentsService } from '../src/services/appointmentsService';
+import { appointmentService } from '../src/services/appointmentService';
 import { remindersService, Reminder } from '../src/services/remindersService';
 import { financialService } from '../src/services/financialService';
-import { patientService } from '../src/services/patientService';
+import { clientService } from '../src/services/clientService';
 
 interface DashboardProps {
     setPage: (page: string) => void;
@@ -17,7 +17,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
     const { showToast } = useToast();
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [stats, setStats] = useState({ revenue: 0, patients: 0, revenueTrend: '+0%', patientTrend: '+0%' });
+    const [stats, setStats] = useState({ revenue: 0, clients: 0, revenueTrend: '+0%', clientTrend: '+0%' });
 
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [colleagues, setColleagues] = useState<any[]>([]);
@@ -36,16 +36,16 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
                 remindersService.getReminders(),
                 remindersService.getColleagues(clinic.id),
                 financialService.getDashboardStats(),
-                patientService.getPatients()
+                clientService.getClients()
             ]);
             setReminders(rems);
             setColleagues(cols);
 
             setStats({
                 revenue: finStats.income,
-                patients: pats.length,
+                clients: pats.length,
                 revenueTrend: '+12%', // Mock value
-                patientTrend: '+5%' // Mock value
+                clientTrend: '+5%' // Mock value
             });
 
         } catch (error) {
@@ -82,7 +82,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
 
     const loadAppointments = async () => {
         try {
-            const data = await appointmentsService.getTodayAppointments();
+            const data = await appointmentService.getTodayAppointments();
             setAppointments(data);
         } catch (error) {
             console.error(error);
@@ -93,15 +93,15 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
 
     const handleQuickAction = (action: string) => {
         switch (action) {
-            case 'Novo Paciente':
-                setPage('patients');
-                showToast('Clique em "Novo Paciente" na tela de pacientes.', 'info');
+            case 'Novo Cliente':
+                setPage('clients');
+                showToast('Clique em "Novo Cliente" na tela de clientes.', 'info');
                 break;
             case 'Nova Cobrança':
                 setPage('financials');
                 break;
-            case 'Prontuário':
-                setPage('patients');
+            case 'Prontuário/Detalhes':
+                setPage('clients');
                 break;
             case 'Lembrete':
                 setIsCreatingReminder(true);
@@ -113,7 +113,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
     };
 
     const metrics = [
-        { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: stats.patientTrend, icon: 'group', color: 'blue' },
+        { label: 'Clientes Hoje', val: appointments.length.toString(), trend: stats.clientTrend, icon: 'group', color: 'blue' },
         { label: 'Faturamento', val: `R$ ${stats.revenue.toLocaleString('pt-BR', { notation: 'compact' })}`, trend: stats.revenueTrend, icon: 'payments', color: 'emerald' },
         { label: 'Pendências', val: reminders.filter(r => r.status !== 'done').length.toString(), trend: 'Active', icon: 'pending_actions', color: 'orange' },
         { label: 'Satisfação', val: '5.0', trend: 'Top', icon: 'star', color: 'purple' },
@@ -190,7 +190,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
                                 <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500">
                                     <tr>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Hora</th>
-                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Paciente</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Cliente</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Procedimento</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Doutor</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Status</th>
@@ -253,9 +253,9 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
 
                         <div className="grid grid-cols-2 gap-3 relative z-10">
                             {[
-                                { icon: 'person_add', label: 'Novo Paciente' },
+                                { icon: 'person_add', label: 'Novo Cliente' },
                                 { icon: 'add_card', label: 'Nova Cobrança' },
-                                { icon: 'description', label: 'Prontuário' },
+                                { icon: 'description', label: 'Prontuário/Detalhes' },
                                 { icon: 'send', label: 'Lembrete' }
                             ].map((action, i) => (
                                 <button

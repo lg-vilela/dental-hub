@@ -18,8 +18,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
             <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm transition-all duration-300">
                 <div className="w-full max-w-[1400px] mx-auto px-6 h-20 flex justify-between items-center">
                     <div className="flex items-center gap-2.5 group cursor-pointer hover:opacity-80 transition-opacity">
-                        <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-10 w-auto object-contain group-hover:scale-110 transition-transform duration-300" />
-                        <span className="font-extrabold text-2xl text-slate-800 tracking-tight">Dental Hub</span>
+                        <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="SaaS Hub" className="h-10 w-auto object-contain group-hover:scale-110 transition-transform duration-300" />
+                        <span className="font-extrabold text-2xl text-slate-800 tracking-tight">SaaS Hub</span>
                     </div>
                     <div className="flex items-center gap-4">
                         {/* Socials */}
@@ -59,10 +59,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         </div>
                         <h1 className="text-6xl sm:text-7xl font-extrabold text-slate-900 leading-[1.05] tracking-tight">
                             A plataforma que <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#617FA3] via-[#829AB5] to-[#4A6280]">sua clínica merece</span>.
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#617FA3] via-[#829AB5] to-[#4A6280]">seu negócio merece</span>.
                         </h1>
                         <p className="text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
-                            Gestão completa, sem complicações. Centralize agenda, prontuários e financeiro em um único lugar bonito e intuitivo.
+                            Gestão completa, sem complicações. Centralize agenda, clientes e financeiro em um único lugar bonito e intuitivo.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                             <button onClick={onStart} className="px-10 py-5 bg-[#617FA3] text-white rounded-full font-bold text-lg hover:bg-[#4A6280] transition-all shadow-xl shadow-[#617FA3]/30 flex items-center justify-center gap-2 group hover:-translate-y-1 hover:scale-105 active:scale-95 duration-300">
@@ -73,11 +73,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <div className="pt-8 flex items-center divide-x divide-slate-200">
                             <div className="pr-6">
                                 <p className="text-3xl font-extrabold text-[#617FA3]">75%+</p>
-                                <p className="text-sm text-slate-500 font-medium mt-1">Taxa de aceitação</p>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Taxa de Conversão</p>
                             </div>
                             <div className="px-6">
                                 <p className="text-3xl font-extrabold text-[#617FA3]">-30min</p>
-                                <p className="text-sm text-slate-500 font-medium mt-1">Por consulta</p>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Por atendimento</p>
                             </div>
                             <div className="pl-6">
                                 <div className="flex text-yellow-400 text-lg">
@@ -92,7 +92,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <div className="relative z-10 bg-white p-3 rounded-3xl shadow-2xl border border-slate-100 transform rotate-y-6 hover:rotate-y-0 hover:scale-[1.02] transition-all duration-700 ease-out">
                             <img
                                 src="https://raw.githubusercontent.com/lg-vilela/dental-saas-assets/main/dashboard-preview_mockup.png"
-                                onError={(e) => e.currentTarget.src = 'https://placehold.co/1200x800/f8fafc/617FA3?text=Dental+Hub+Dashboard+HD'}
+                                onError={(e) => e.currentTarget.src = 'https://placehold.co/1200x800/f8fafc/617FA3?text=SaaS+Hub+Dashboard+HD'}
                                 alt="Dashboard Preview"
                                 className="rounded-2xl border border-slate-100 shadow-inner w-full"
                             />
@@ -117,7 +117,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                     <div className="text-center mb-20">
                         <span className="px-5 py-2 rounded-full bg-[#EBF1F5] text-[#617FA3] font-bold text-sm uppercase tracking-wider">Público Alvo</span>
                         <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 mb-4">Será que faz sentido pra mim?</h2>
-                        <p className="text-xl text-slate-500 max-w-2xl mx-auto">Desenvolvemos o Dental Hub para profissionais que buscam excelência.</p>
+                        <p className="text-xl text-slate-500 max-w-2xl mx-auto">Desenvolvemos o SaaS Hub para empreendedores que buscam excelência.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -147,7 +147,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                 <div className="w-full max-w-[1400px] mx-auto px-6 relative z-10">
                     <div className="text-center mb-24">
                         <span className="px-5 py-2 rounded-full bg-white/10 text-white font-bold text-sm uppercase backdrop-blur-md border border-white/20">Simplicidade</span>
-                        <h2 className="text-4xl md:text-5xl font-extrabold mt-6">Do orçamento ao aceite <span className="text-[#617FA3]">em minutos</span></h2>
+                        <h2 className="text-4xl md:text-5xl font-extrabold mt-6">Do orçamento à venda <span className="text-[#617FA3]">em minutos</span></h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-12 relative">
@@ -155,10 +155,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                         <div className="hidden md:block absolute top-[40px] left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#617FA3]/50 to-transparent"></div>
 
                         {[
-                            { step: 1, title: 'Cadastro Rápido', desc: 'Lance o tratamento em segundos.' },
-                            { step: 2, title: 'Apresentação Visual', desc: 'Mostre o "Antes e Depois" estimado.' },
+                            { step: 1, title: 'Cadastro Rápido', desc: 'Lance o serviço em segundos.' },
+                            { step: 2, title: 'Apresentação Visual', desc: 'Mostre o valor da sua proposta.' },
                             { step: 3, title: 'Link Inteligente', desc: 'Envie o orçamento via WhatsApp.' },
-                            { step: 4, title: 'Aprovação Digital', desc: 'Paciente aprova no próprio celular.' }
+                            { step: 4, title: 'Aprovação Digital', desc: 'Cliente aprova no próprio celular.' }
                         ].map((s) => (
                             <div key={s.step} className="relative text-center group">
                                 <div className="size-20 mx-auto bg-[#1E293B] rounded-2xl border border-[#617FA3]/30 flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-[#617FA3]/10 mb-8 z-10 relative group-hover:scale-110 group-hover:border-[#617FA3] transition-all duration-300">
@@ -187,7 +187,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                                     <th className="p-8 border-b border-slate-200"></th>
                                     <th className="p-8 text-center border-b border-slate-200 opacity-50 grayscale">Métodos Antigos</th>
                                     <th className="p-8 text-center bg-[#617FA3] text-white font-bold text-lg border-b border-[#4A6280] relative">
-                                        Dental Hub
+                                        SaaS Hub
                                         <div className="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-bl-xl uppercase tracking-wider">Líder</div>
                                     </th>
                                 </tr>
@@ -230,7 +230,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                                 Começar Grátis
                             </button>
                             <ul className="space-y-4">
-                                {['1 Dentista', '5 Pacientes/mês', 'Agenda Básica'].map(f => (
+                                {['1 Usuário', '5 Clientes/mês', 'Agenda Básica'].map(f => (
                                     <li key={f} className="flex items-center gap-3 text-sm text-slate-600"><span className="material-symbols-outlined text-[#617FA3]">check</span> {f}</li>
                                 ))}
                             </ul>
@@ -246,7 +246,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                                 Testar por 14 dias
                             </button>
                             <ul className="space-y-4">
-                                {['Pacientes Ilimitados', 'Confirmação WhatsApp', 'Financeiro Completo', 'Portal do Paciente', 'Suporte Prioritário'].map(f => (
+                                {['Clientes Ilimitados', 'Confirmação WhatsApp', 'Financeiro Completo', 'Portal do Cliente', 'Suporte Prioritário'].map(f => (
                                     <li key={f} className="flex items-center gap-3 text-sm font-medium"><span className="material-symbols-outlined shrink-0 text-white">check_circle</span> {f}</li>
                                 ))}
                             </ul>
@@ -276,10 +276,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                     <h2 className="text-3xl font-extrabold text-center text-slate-900 mb-12">Perguntas Frequentes</h2>
                     <div className="space-y-4">
                         {[
-                            { q: 'O que é o Dental Hub?', a: 'É uma plataforma completa para gestão, vendas e relacionamento com pacientes.' },
-                            { q: 'Como o Dental Hub aumenta minha taxa de aceitação?', a: 'Através de apresentações visuais e interativas dos tratamentos que encantam o paciente.' },
+                            { q: 'O que é o SaaS Hub?', a: 'É uma plataforma completa para gestão, vendas e relacionamento com clientes.' },
+                            { q: 'Como aumentar minha taxa de conversão?', a: 'Através de apresentações visuais e interativas dos orçamentos que encantam o cliente.' },
                             { q: 'Posso cancelar a qualquer momento?', a: 'Sim! Não temos fidelidade. Você pode cancelar sua assinatura quando quiser direto no painel.' },
-                            { q: 'Preciso instalar algo?', a: 'Não. O Dental Hub é 100% online e funciona em qualquer navegador, computador ou celular.' }
+                            { q: 'Preciso instalar algo?', a: 'Não. O SaaS Hub é 100% online e funciona em qualquer navegador, computador ou celular.' }
                         ].map((faq, i) => (
                             <div key={i} className={`border rounded-2xl overflow-hidden transition-all duration-300 ${openFaq === i ? 'border-[#617FA3] shadow-lg shadow-[#617FA3]/10' : 'border-slate-200 hover:border-slate-300'}`}>
                                 <button
@@ -308,17 +308,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart, onLogin }) => {
                     <div className="col-span-1 md:col-span-2 space-y-6">
                         <div className="flex items-center gap-3">
                             <img src="https://i.postimg.cc/ydfbFRrP/logo-vilelacodelab-removebg-preview.png" alt="Dental Hub" className="h-10 w-auto object-contain brightness-0 invert opacity-80" />
-                            <span className="font-extrabold text-2xl text-white">Dental Hub</span>
+                            <span className="font-extrabold text-2xl text-white">SaaS Hub</span>
                         </div>
                         <p className="text-slate-400 max-w-sm leading-relaxed text-lg">
-                            A solução definitiva para gestão odontológica de alta performance.
+                            A solução definitiva para gestão de alta performance.
                         </p>
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-8 text-lg">Solução</h4>
                         <ul className="space-y-4 text-base">
-                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Consultórios</li>
-                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Redes</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Profissionais</li>
+                            <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Para Empresas</li>
                             <li className="hover:text-[#617FA3] cursor-pointer transition-colors">Funcionalidades</li>
                         </ul>
                     </div>

@@ -48,7 +48,7 @@ const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ appointment
                     <span className="material-symbols-outlined">close</span>
                 </button>
 
-                <h3 className="text-lg font-bold text-slate-900 mb-1">{appointment.patients?.full_name}</h3>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">{(appointment as any).patients?.full_name || 'Cliente'}</h3>
                 <p className="text-slate-500 text-sm mb-6">
                     {new Date(appointment.start_time).toLocaleDateString()} às {new Date(appointment.start_time).toLocaleTimeString().slice(0, 5)}
                 </p>

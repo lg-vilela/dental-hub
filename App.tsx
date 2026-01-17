@@ -10,7 +10,7 @@ import { useTheme } from './src/contexts/ThemeContext';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import ScheduleView from './components/ScheduleView';
-import PatientsView from './components/PatientsView';
+import ClientsView from './components/ClientsView';
 import FinancialsView from './components/FinancialsView';
 import ClinicSettingsView from './components/ClinicSettingsView';
 import InventoryView from './components/InventoryView';
@@ -215,8 +215,8 @@ function AppContent() {
                             <div className={activePage === 'schedule' ? 'block' : 'hidden'}>
                                 <ScheduleView openModal={() => setIsModalOpen(true)} tenant={activeTenant} />
                             </div>
-                            <div className={activePage === 'patients' ? 'block' : 'hidden'}>
-                                <PatientsView />
+                            <div className={activePage === 'clients' ? 'block' : 'hidden'}>
+                                <ClientsView />
                             </div>
                             <div className={activePage === 'financials' ? 'block' : 'hidden'}>
                                 <FinancialsView />
