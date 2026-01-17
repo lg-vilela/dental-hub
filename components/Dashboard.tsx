@@ -4,12 +4,15 @@ import { useAuth } from '../src/contexts/AuthContext';
 import { useToast } from '../src/contexts/ToastContext';
 import { appointmentsService } from '../src/services/appointmentsService';
 import { remindersService, Reminder } from '../src/services/remindersService';
+import { financialService } from '../src/services/financialService';
+import { patientService } from '../src/services/patientService';
 
 const Dashboard = () => {
     const { clinic, user, logout } = useAuth(); // Get clinic & user from context
     const { showToast } = useToast();
     const [appointments, setAppointments] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({ revenue: 0, patients: 0, revenueTrend: '+0%', patientTrend: '+0%' });
 
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [colleagues, setColleagues] = useState<any[]>([]);
@@ -24,12 +27,23 @@ const Dashboard = () => {
     const loadRemindersData = async () => {
         if (!clinic?.id) return;
         try {
-            const [rems, cols] = await Promise.all([
+            const [rems, cols, finStats, pats] = await Promise.all([
                 remindersService.getReminders(),
-                remindersService.getColleagues(clinic.id)
+                remindersService.getColleagues(clinic.id),
+                financialService.getDashboardStats(),
+                patientService.getPatients() // Getting all for total count. For "Patients Today" we can use appointments.length
             ]);
             setReminders(rems);
             setColleagues(cols);
+
+            // Stats Logic
+            setStats({
+                revenue: finStats.income,
+                patients: pats.length, // Total patients DB
+                revenueTrend: '+12%', // Mocked for MVP
+                patientTrend: '+5%' // Mocked
+            });
+
         } catch (error) {
             console.error('Error loading reminders data:', error);
         }
@@ -74,10 +88,10 @@ const Dashboard = () => {
     };
 
     const metrics = [
-        { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: '+12%', icon: 'group', color: 'blue' },
-        { label: 'Faturamento', val: 'R$ 4.2k', trend: '+8%', icon: 'payments', color: 'emerald' },
-        { label: 'Pendências', val: '3', trend: '-2%', icon: 'pending_actions', color: 'orange' },
-        { label: 'Satisfação', val: '4.9/5', trend: '+5%', icon: 'star', color: 'purple' },
+        { label: 'Pacientes Hoje', val: appointments.length.toString(), trend: stats.patientTrend, icon: 'group', color: 'blue' },
+        { label: 'Faturamento', val: `R$ ${stats.revenue.toLocaleString('pt-BR', { notation: 'compact' })}`, trend: stats.revenueTrend, icon: 'payments', color: 'emerald' },
+        { label: 'Pendências', val: reminders.filter(r => r.status !== 'done').length.toString(), trend: 'Active', icon: 'pending_actions', color: 'orange' },
+        { label: 'Satisfação', val: '5.0', trend: 'Top', icon: 'star', color: 'purple' },
     ];
 
     return (
@@ -85,7 +99,7 @@ const Dashboard = () => {
             {/* Header with Greeting */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                         Olá, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 capitalize">{user?.name || 'Doutor'}</span> 👋
                     </h2>
                     <p className="text-slate-500 font-medium mt-1">Aqui está o resumo da sua clínica hoje.</p>
@@ -109,16 +123,16 @@ const Dashboard = () => {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {metrics.map((m, i) => (
-                    <div key={i} className="bg-white/80 backdrop-blur-xl p-6 rounded-2xl border border-white/20 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div key={i} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all duration-300">
                         <div className="flex justify-between items-start z-10 relative">
-                            <div className={`p-3 rounded-xl bg-${m.color}-50 text-${m.color}-600 border border-${m.color}-100/50 group-hover:scale-110 transition-transform`}>
+                            <div className={`p-3 rounded-xl bg-${m.color}-50 dark:bg-${m.color}-900/20 text-${m.color}-600 dark:text-${m.color}-400 border border-${m.color}-100/50 dark:border-${m.color}-800/50 group-hover:scale-110 transition-transform`}>
                                 <span className="material-symbols-outlined">{m.icon}</span>
                             </div>
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full bg-${m.color}-50 text-${m.color}-700 border border-${m.color}-100`}>{m.trend}</span>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full bg-${m.color}-50 dark:bg-${m.color}-900/30 text-${m.color}-700 dark:text-${m.color}-300 border border-${m.color}-100 dark:border-${m.color}-800`}>{m.trend}</span>
                         </div>
                         <div className="mt-4 z-10 relative">
-                            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">{m.label}</p>
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tight">{m.val}</h3>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">{m.label}</p>
+                            <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{m.val}</h3>
                         </div>
                         {/* Tech-ish background decoration */}
                         <div className={`absolute -right-6 -bottom-6 size-32 bg-${m.color}-50/50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500`}></div>
@@ -130,11 +144,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Schedule Feed */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-sm overflow-hidden flex flex-col h-full">
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col h-full transition-colors">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900">Agenda em Tempo Real</h3>
-                                <p className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full w-fit mt-1 flex items-center gap-1">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Agenda em Tempo Real</h3>
+                                <p className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full w-fit mt-1 flex items-center gap-1">
                                     <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                     Atualizado agora
                                 </p>
@@ -149,36 +163,36 @@ const Dashboard = () => {
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-slate-50/50 border-b border-slate-100">
+                                <thead className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500">
                                     <tr>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Hora</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Paciente</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Procedimento</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Doutor</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Hora</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Paciente</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Procedimento</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Doutor</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
                                     {isLoading ? (
                                         <tr><td colSpan={5} className="p-12 text-center text-slate-400">Carregando agendamentos...</td></tr>
                                     ) : appointments.length > 0 ? appointments.map((row, i) => (
-                                        <tr key={i} className="hover:bg-slate-50/80 transition-all cursor-pointer group">
-                                            <td className="px-6 py-4 text-xs font-bold text-slate-500 font-mono">{row.time}</td>
+                                        <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-all cursor-pointer group">
+                                            <td className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono">{row.time}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     {/* Foto removida conforme solicitado */}
                                                     <div>
-                                                        <p className="text-sm font-bold text-slate-800">{row.patientName}</p>
-                                                        <p className="text-[10px] font-mono text-slate-400">ID: #P-{row.id.substring(0, 4)}</p>
+                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{row.patientName}</p>
+                                                        <p className="text--[10px] font-mono text-slate-400">ID: #P-{row.id.substring(0, 4)}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-bold bg-white border border-slate-100 text-slate-600 shadow-sm">
+                                                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-bold bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm">
                                                     <span className="size-1.5 rounded-full bg-blue-500"></span>{row.proc}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-slate-600">{row.doc}</td>
+                                            <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">{row.doc}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide 
                                                     ${row.status === 'confirmed' ? 'bg-green-50 text-green-600 border border-green-100' :
@@ -231,9 +245,9 @@ const Dashboard = () => {
 
                     {/* Auto Reminders (Static for now) */}
                     {/* Auto Reminders (Dynamic) */}
-                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 p-6 shadow-sm">
+                    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-white/20 dark:border-slate-700 p-6 shadow-sm transition-colors">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <span className="material-symbols-outlined text-blue-500">task_alt</span>
                                 Tarefas & Lembretes
                             </h3>
@@ -247,17 +261,17 @@ const Dashboard = () => {
 
                         {/* Create Form */}
                         {isCreatingReminder && (
-                            <div className="mb-4 bg-slate-50 p-3 rounded-xl border border-slate-200 animate-in fade-in slide-in-from-top-2">
+                            <div className="mb-4 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 animate-in fade-in slide-in-from-top-2">
                                 <input
                                     type="text"
                                     placeholder="Título da tarefa..."
-                                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 mb-2"
+                                    className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 mb-2 dark:text-white"
                                     value={newReminder.title}
                                     onChange={e => setNewReminder({ ...newReminder, title: e.target.value })}
                                 />
                                 <div className="flex gap-2">
                                     <select
-                                        className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                        className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 dark:text-white"
                                         value={newReminder.assigned_to}
                                         onChange={e => setNewReminder({ ...newReminder, assigned_to: e.target.value })}
                                     >
@@ -265,7 +279,7 @@ const Dashboard = () => {
                                         {colleagues.map((c: any) => <option key={c.id} value={c.id}>{c.full_name}</option>)}
                                     </select>
                                     <select
-                                        className="w-24 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500"
+                                        className="w-24 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 dark:text-white"
                                         value={newReminder.priority}
                                         onChange={e => setNewReminder({ ...newReminder, priority: e.target.value as any })}
                                     >
@@ -285,9 +299,9 @@ const Dashboard = () => {
 
                         <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                             {reminders.length > 0 ? reminders.map((r, i) => (
-                                <div key={i} className="group p-3 rounded-xl bg-white border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all">
+                                <div key={i} className="group p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-blue-200 hover:shadow-md transition-all">
                                     <div className="flex justify-between items-start mb-2">
-                                        <p className={`text-sm font-semibold ${r.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                                        <p className={`text-sm font-semibold ${r.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-200'}`}>
                                             {r.title}
                                         </p>
                                         <div className="flex items-center gap-1">
