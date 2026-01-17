@@ -16,11 +16,37 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
     // Booking Form State
     const [patientName, setPatientName] = useState('');
     const [patientPhone, setPatientPhone] = useState('');
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [dayAppointments, setDayAppointments] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         loadServices();
     }, []);
+
+    useEffect(() => {
+        loadDayAvailability();
+    }, [selectedDate, clinic, tenant, selectedService]);
+
+    const loadDayAvailability = async () => {
+        const targetId = clinic?.id || tenant.clinic_id;
+        if (!targetId) return;
+
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const { data } = await supabase
+            .from('appointments')
+            .select('start_time, end_time')
+            .eq('clinic_id', targetId)
+            .neq('status', 'canceled')
+            .gte('start_time', startOfDay.toISOString())
+            .lte('start_time', endOfDay.toISOString());
+
+        if (data) setDayAppointments(data);
+    };
 
     const loadServices = async () => {
         try {
@@ -49,18 +75,47 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
         const [endHour, endMin] = tenant.settings.closingTime.split(':').map(Number);
         const duration = tenant.settings.slotDuration;
 
-        let current = new Date();
-        // Start from either Opening Time or Current Time (rounded up) if today
-        // For simplicity, showing all slots for "Today" assuming simple demo
+        let current = new Date(selectedDate + 'T00:00:00');
         current.setHours(startHour, startMin, 0, 0);
-        const end = new Date();
+
+        const end = new Date(selectedDate + 'T00:00:00');
         end.setHours(endHour, endMin, 0, 0);
 
+        const now = new Date();
+
         while (current < end) {
-            slots.push(current.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+            const timeString = current.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            // Check if slot is in the past (only if selectedDate is today)
+            const isPast = new Date(selectedDate).toDateString() === now.toDateString() && current < now;
+
+            if (!isPast) {
+                slots.push(timeString);
+            }
+
             current.setMinutes(current.getMinutes() + duration);
         }
         return slots;
+    };
+
+    const isSlotAvailable = (slotTime: string) => {
+        if (!selectedService) return true;
+
+        const [hours, minutes] = slotTime.split(':').map(Number);
+        const slotStart = new Date(selectedDate);
+        slotStart.setHours(hours, minutes, 0, 0);
+
+        // Calculate expected end time based on service duration
+        const slotEnd = new Date(slotStart.getTime() + selectedService.duration_minutes * 60000);
+
+        // Check for overlap with any existing appointment
+        return !dayAppointments.some(appt => {
+            const apptStart = new Date(appt.start_time);
+            const apptEnd = new Date(appt.end_time);
+
+            // Overlap condition: (StartA < EndB) and (EndA > StartB)
+            return slotStart < apptEnd && slotEnd > apptStart;
+        });
     };
 
     const slots = generatePublicSlots();
@@ -71,7 +126,7 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
 
         setIsSubmitting(true);
         try {
-            const today = new Date();
+            const today = new Date(selectedDate);
             const [hours, minutes] = selectedSlot.split(':').map(Number);
             today.setHours(hours, minutes, 0, 0);
 
@@ -203,21 +258,43 @@ const PublicBookingView = ({ tenant, onBack }: { tenant: TenantConfig; onBack: (
                     {/* Step 3: Schedule */}
                     {step === 3 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="text-center mb-8">
+                            <div className="text-center mb-4">
                                 <h2 className="text-2xl font-bold text-slate-900">Escolha o horário</h2>
-                                <p className="text-slate-500">Horários para <strong>{selectedService?.title}</strong>.</p>
+                                <p className="text-slate-500">Disponibilidade para <strong>{selectedService?.title}</strong>.</p>
                             </div>
+
+                            {/* Date Picker */}
+                            <div className="flex justify-center mb-6">
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    className="px-4 py-3 border border-slate-200 rounded-xl font-bold text-slate-700 focus:border-primary outline-none shadow-sm"
+                                />
+                            </div>
+
                             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                {slots.map((slot) => (
-                                    <button
-                                        key={slot}
-                                        onClick={() => { setSelectedSlot(slot); setStep(4); }}
-                                        className="py-3 px-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-primary hover:text-white hover:border-primary transition-all text-sm"
-                                    >
-                                        {slot}
-                                    </button>
-                                ))}
+                                {slots.map((slot) => {
+                                    const available = isSlotAvailable(slot);
+                                    return (
+                                        <button
+                                            key={slot}
+                                            disabled={!available}
+                                            onClick={() => { setSelectedSlot(slot); setStep(4); }}
+                                            className={`py-3 px-2 border rounded-xl font-bold text-sm transition-all
+                                                ${available
+                                                    ? 'bg-white border-slate-200 text-slate-600 hover:bg-primary hover:text-white hover:border-primary'
+                                                    : 'bg-slate-100 border-slate-100 text-slate-300 cursor-not-allowed decoration-slice'
+                                                }
+                                            `}
+                                        >
+                                            {slot}
+                                        </button>
+                                    );
+                                })}
                             </div>
+                            {slots.length === 0 && <p className="text-center text-slate-400">Nenhum horário disponível para este dia.</p>}
                         </div>
                     )}
 
