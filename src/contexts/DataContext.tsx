@@ -34,35 +34,48 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
     const refreshPatients = useCallback(async () => {
         if (!clinic?.id) return;
-        setIsLoadingPatients(true);
+
+        // Initial load show spinner, background refresh does not
+        if (patients.length === 0) setIsLoadingPatients(true);
+
         try {
             const data = await patientService.getPatients();
-            setPatients(data || []);
+            console.log(`[DataContext] Fetched ${data?.length} patients for clinic ${clinic.id}`);
+
+            // Safety check: specific case where RLS might return [] but no error
+            // If we have patients effectively in memory, and suddenly we get 0, could be a glitch?
+            // Unless user deleted them all. But for now let's trust the DB but log it.
+            if (data) {
+                setPatients(data);
+            }
         } catch (error) {
-            console.error('Error fetching patients:', error);
+            console.error('[DataContext] Error fetching patients:', error);
         } finally {
             setIsLoadingPatients(false);
         }
-    }, [clinic?.id]);
+    }, [clinic?.id, patients.length]);
 
     const refreshAppointments = useCallback(async () => {
         if (!clinic?.id) return;
-        setIsLoadingAppointments(true);
+
+        if (appointments.length === 0) setIsLoadingAppointments(true);
+
         try {
             const { data, error } = await supabase
                 .from('appointments')
                 .select('*, patient:patients(full_name)')
                 .eq('clinic_id', clinic.id)
-                .order('start_time', { ascending: true });
+                .order('start_time', { ascending: true }); // optimize limit later
 
             if (error) throw error;
-            setAppointments(data || []);
+            console.log(`[DataContext] Fetched ${data?.length} appointments`);
+            if (data) setAppointments(data);
         } catch (error) {
-            console.error('Error fetching appointments:', error);
+            console.error('[DataContext] Error fetching appointments:', error);
         } finally {
             setIsLoadingAppointments(false);
         }
-    }, [clinic?.id]);
+    }, [clinic?.id, appointments.length]);
 
     const stats = {
         patientsCount: patients.length,
