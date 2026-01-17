@@ -11,7 +11,6 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import ScheduleView from './components/ScheduleView';
 import ClientsView from './components/ClientsView';
-import FinancialsView from './components/FinancialsView';
 import ClinicSettingsView from './components/ClinicSettingsView';
 import InventoryView from './components/InventoryView';
 import PublicBookingView from './components/PublicBookingView';
@@ -217,9 +216,6 @@ function AppContent() {
                             </div>
                             <div className={activePage === 'clients' ? 'block' : 'hidden'}>
                                 <ClientsView />
-                            </div>
-                            <div className={activePage === 'financials' ? 'block' : 'hidden'}>
-                                <FinancialsView />
                             </div>
                             <div className={activePage === 'settings' ? 'block' : 'hidden'}>
                                 <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />

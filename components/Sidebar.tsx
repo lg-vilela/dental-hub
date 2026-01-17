@@ -14,8 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tenant, activePage, setPage, openPubl
         { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
         { id: 'schedule', label: 'Agenda', icon: 'calendar_month' },
         { id: 'clients', label: 'Clientes', icon: 'group' },
-        { id: 'financials', label: 'Financeiro', icon: 'payments' },
-        { id: 'inventory', label: 'Laboratório', icon: 'science' },
+        { id: 'inventory', label: 'Estoque', icon: 'inventory_2' },
         { id: 'settings', label: 'Configurações', icon: 'settings' },
     ];
 

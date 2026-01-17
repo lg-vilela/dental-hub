@@ -4,16 +4,7 @@ import { Client } from '../../types';
 // Re-export type for compatibility
 export type { Client };
 
-export interface ClientFile {
-    id: string;
-    client_id: string;
-    clinic_id: string;
-    name: string;
-    url: string;
-    type: string;
-    size?: number;
-    created_at: string;
-}
+
 
 export const clientService = {
     async getClients() {
@@ -101,33 +92,5 @@ export const clientService = {
         if (error) throw error;
     },
 
-    // Files
-    async getFiles(clientId: string) {
-        const { data, error } = await supabase
-            .from('patient_files')
-            .select('*')
-            .eq('patient_id', clientId)
-            .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return data as ClientFile[];
-    },
-
-    async createFileRecord(file: Omit<ClientFile, 'id' | 'created_at'>) {
-        const dbFile = {
-            ...file,
-            patient_id: file.client_id
-        };
-        // @ts-ignore
-        delete dbFile.client_id;
-
-        const { data, error } = await supabase
-            .from('patient_files')
-            .insert(dbFile)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data as ClientFile;
-    }
 };
