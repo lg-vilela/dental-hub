@@ -53,5 +53,27 @@ export const appointmentService = {
 
         if (error) throw error;
         return data as Appointment;
+    },
+
+    async updateAppointment(id: string, updates: Partial<Appointment>) {
+        const { data, error } = await supabase
+            .from('appointments')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as Appointment;
+    },
+
+    async deleteAppointment(id: string) {
+        const { error } = await supabase
+            .from('appointments')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
     }
 };
+
