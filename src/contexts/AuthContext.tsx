@@ -27,6 +27,7 @@ interface AuthContextType {
     clinic: ClinicData | null;
     isAuthenticated: boolean;
     signIn: (email: string) => Promise<{ error: any }>;
+    signInWithGoogle: () => Promise<{ error: any }>;
     signUp: (email: string, pass: string, meta: any) => Promise<{ error: any }>;
     signOut: () => Promise<void>;
     updateClinicSettings: (settings: Partial<ClinicData>) => Promise<void>;
@@ -242,6 +243,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return res;
     };
 
+    const signInWithGoogle = async () => {
+        setAuthError(null);
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+
+        if (error) setAuthError(error.message);
+        return { data, error };
+    };
+
     const customSignUp = async (email: string, password: string, meta: any) => {
         setAuthError(null);
         // 1. Create Auth User
@@ -299,6 +313,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             clinic,
             isAuthenticated: !!session,
             signIn: customSignIn as any,
+            signInWithGoogle,
             signUp: customSignUp as any,
             signOut: customSignOut,
             updateClinicSettings, // Export new function

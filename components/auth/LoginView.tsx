@@ -7,7 +7,7 @@ interface LoginViewProps {
 }
 
 const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
-    const { signIn } = useAuth();
+    const { signIn, signInWithGoogle } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +85,26 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSignup }) => {
                             )}
                         </button>
                     </form>
+
+                    <div className="mt-8 space-y-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-slate-200" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-white px-2 text-slate-500 font-bold">Ou continue com</span>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => signInWithGoogle()}
+                            className="w-full bg-white border border-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-3"
+                        >
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                            Continuar com Google
+                        </button>
+                    </div>
 
                     <div className="mt-8 pt-8 border-t border-slate-100 text-center">
                         <p className="text-slate-500 text-sm mb-4">Ainda não tem conta?</p>
