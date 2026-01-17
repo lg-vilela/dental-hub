@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SetupWizardProps {
     onComplete: (data: any) => void;
@@ -18,10 +18,47 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
         clinicName: '',
         type: '',
         goal: '',
-        plan: 'free' // Default
+        plan: 'free', // Default
+        inviteClinicId: '',
+        inviteRole: ''
     });
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const clinicId = params.get('invite_clinic_id');
+        const role = params.get('invite_role');
+
+        if (clinicId && role) {
+            setFormData(prev => ({
+                ...prev,
+                inviteClinicId: clinicId,
+                inviteRole: role,
+                clinicName: 'Clínica Existente' // Placeholder to bypass step 2 validation if needed
+            }));
+            // Skip to Step 1 immediately
+        }
+    }, []);
+
     const handleNext = async () => {
+        if (formData.inviteClinicId) {
+            // If invited, skip steps 2-5
+            setIsLoading(true);
+            setError('');
+            try {
+                const { error } = await signUp(formData.email, formData.password, {
+                    name: formData.name,
+                    inviteClinicId: formData.inviteClinicId,
+                    inviteRole: formData.inviteRole
+                });
+                if (error) throw error;
+                onComplete(formData);
+            } catch (err: any) {
+                setError(err.message || 'Erro ao criar conta.');
+                setIsLoading(false);
+            }
+            return;
+        }
+
         if (step < 5) {
             setStep(step + 1);
         } else {
@@ -31,10 +68,12 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
             try {
                 const { error } = await signUp(formData.email, formData.password, {
                     name: formData.name,
-                    clinicName: formData.clinicName,
+                    clinicName: formData.inviteClinicId ? '' : formData.clinicName, // Don't create clinic if invited
                     type: formData.type,
                     goal: formData.goal,
-                    plan: formData.plan
+                    plan: formData.plan,
+                    inviteClinicId: formData.inviteClinicId,
+                    inviteRole: formData.inviteRole
                 });
 
                 if (error) throw error;
@@ -95,15 +134,21 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                             {step === 1 ? 'Crie sua conta' : 'Vamos configurar sua clínica'}
                         </h1>
                         <p className="text-slate-400 mt-2">
-                            {step === 1 ? 'Dados para acesso administrativo.' : 'Levará menos de 1 minuto.'}
+                            {formData.inviteClinicId ? 'Você foi convidado para participar de uma clínica.' : step === 1 ? 'Dados para acesso administrativo.' : 'Levará menos de 1 minuto.'}
                         </p>
                     </div>
                 </div>
 
                 <div className="p-8 sm:p-12">
-                    {/* Step 1: User Data */}
+                    {/* Step 1: User Data (Always show) */}
                     {step === 1 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                            {formData.inviteClinicId && (
+                                <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800 text-sm font-bold flex items-center gap-2 mb-4">
+                                    <span className="material-symbols-outlined">mail</span>
+                                    <span>Aceitando convite para entrar na equipe ({formData.inviteRole === 'dentist' ? 'Dentista' : formData.inviteRole}).</span>
+                                </div>
+                            )}
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-sm font-bold text-slate-700 block mb-1">Nome Completo</label>
@@ -265,7 +310,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ onComplete }) => {
                                     <div className="size-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 ) : (
                                     <>
-                                        {step === 5 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
+                                        {formData.inviteClinicId ? 'Entrar na Equipe' : step === 5 ? 'Finalizar Setup' : 'Continuar'} <span className="material-symbols-outlined">arrow_forward</span>
                                     </>
                                 )}
                             </button>

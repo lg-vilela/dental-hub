@@ -14,6 +14,10 @@ export interface ClinicData {
     id: string;
     name: string;
     plan: 'free' | 'pro' | 'plus';
+    opening_time: string;
+    closing_time: string;
+    slot_duration: number;
+    working_days: number[];
 }
 
 interface AuthContextType {
@@ -25,7 +29,9 @@ interface AuthContextType {
     signIn: (email: string) => Promise<{ error: any }>;
     signUp: (email: string, pass: string, meta: any) => Promise<{ error: any }>;
     signOut: () => Promise<void>;
+    updateClinicSettings: (settings: Partial<ClinicData>) => Promise<void>;
     isLoading: boolean;
+    authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -86,7 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         setProfile(newProfile as UserProfile);
                         return;
 
-                    } catch (healingErr) {
+                    } catch (healingErr: any) {
                         console.error('Auto-healing failed:', healingErr);
                         setAuthError(`Falha na recuperação automática: ${healingErr.message || healingErr}`);
                     }
@@ -107,7 +113,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 if (clinicError) {
                     setAuthError(`Clinic Error: ${clinicError.message}`);
                 } else {
-                    setClinic(clinicData as ClinicData);
+                    // Start with defaults if nulls
+                    setClinic({
+                        ...clinicData,
+                        opening_time: clinicData.opening_time || '08:00',
+                        closing_time: clinicData.closing_time || '18:00',
+                        slot_duration: clinicData.slot_duration || 30,
+                        working_days: clinicData.working_days || [1, 2, 3, 4, 5]
+                    } as ClinicData);
                 }
             } else {
                 setAuthError('Profile has no Clinic ID linked.');
@@ -178,6 +191,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             subscription.unsubscribe();
         };
     }, []);
+
+    const updateClinicSettings = async (settings: Partial<ClinicData>) => {
+        if (!clinic?.id) return;
+
+        try {
+            const { error } = await supabase
+                .from('clinics')
+                .update(settings)
+                .eq('id', clinic.id);
+
+            if (error) throw error;
+
+            // Update local state
+            setClinic(prev => prev ? { ...prev, ...settings } : null);
+        } catch (error: any) {
+            console.error('Failed to update clinic settings:', error);
+            throw error;
+        }
+    };
 
     const signIn = async (email: string) => {
         // First try to sign in with OTP (Magic Link) if password is NOT provided (just kidding, we need password flow or OTP)
@@ -269,6 +301,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             signIn: customSignIn as any,
             signUp: customSignUp as any,
             signOut: customSignOut,
+            updateClinicSettings, // Export new function
             isLoading,
             authError: authError // Exposed for debugging
         } as any}>

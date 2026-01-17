@@ -2,13 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { TenantConfig } from '../types';
 
 // 6c. Audit Logs Tab (Phase 6)
+// 6c. Audit Logs Tab (Phase 6)
+import { auditService, AuditLog } from '../src/services/auditService';
+
 const AuditLogsTab = () => {
-    const logs = [
-        { user: 'Dr. Smith', action: 'Acessou Prontuário (João Silva)', time: 'Hoje, 14:32', ip: '192.168.1.1' },
-        { user: 'Recepção', action: 'Agendou Consulta (Maria Souza)', time: 'Hoje, 10:15', ip: '192.168.1.5' },
-        { user: 'Dr. Smith', action: 'Alterou Configurações da Clínica', time: 'Ontem, 18:40', ip: '192.168.1.1' },
-        { user: 'Sistema', action: 'Backup Automático', time: 'Ontem, 02:00', ip: 'Localhost' },
-    ];
+    const [logs, setLogs] = useState<AuditLog[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadLogs();
+    }, []);
+
+    const loadLogs = async () => {
+        try {
+            const data = await auditService.getLogs();
+            setLogs(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -29,12 +43,19 @@ const AuditLogsTab = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {logs.map((log, i) => (
-                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 py-3 font-medium text-slate-900">{log.user}</td>
+                        {isLoading ? (
+                            <tr><td colSpan={4} className="p-8 text-center bg-slate-50 animate-pulse">Carregando logs...</td></tr>
+                        ) : logs.length === 0 ? (
+                            <tr><td colSpan={4} className="p-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>
+                        ) : logs.map((log) => (
+                            <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="px-6 py-3 font-medium text-slate-900">
+                                    {log.profiles?.full_name || 'Usuário Desconhecido'}
+                                    <span className="block text-xs text-slate-400 font-normal">{log.profiles?.email}</span>
+                                </td>
                                 <td className="px-6 py-3 text-slate-600">{log.action}</td>
-                                <td className="px-6 py-3 text-slate-500">{log.time}</td>
-                                <td className="px-6 py-3 text-slate-400 font-mono text-xs">{log.ip}</td>
+                                <td className="px-6 py-3 text-slate-500">{new Date(log.created_at).toLocaleString('pt-BR')}</td>
+                                <td className="px-6 py-3 text-slate-400 font-mono text-xs">{log.ip_address || '-'}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -100,6 +121,7 @@ const TeamTab = () => {
 
         console.log("Generating invite for clinic:", clinic.id, "Role:", inviteRole);
         const baseUrl = window.location.origin;
+        // Correct Invite Link Format
         const link = `${baseUrl}/signup?invite_clinic_id=${clinic.id}&invite_role=${inviteRole}`;
         setInviteLink(link);
     };
@@ -437,33 +459,43 @@ const ServicesTab = () => {
 };
 
 // 5. Clinic Settings View
-const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; updateConfig: (c: Partial<TenantConfig>) => void }) => {
+const ClinicSettingsView = () => {
+    const { clinic, updateClinicSettings } = useAuth();
+    const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState<'schedule' | 'services' | 'plan' | 'security' | 'team'>('schedule');
 
     // Schedule Settings State
-    const [openingTime, setOpeningTime] = useState(tenant.settings.openingTime);
-    const [closingTime, setClosingTime] = useState(tenant.settings.closingTime);
-    const [slotDuration, setSlotDuration] = useState(tenant.settings.slotDuration);
-    const [workingDays, setWorkingDays] = useState(tenant.settings.workingDays);
+    const [openingTime, setOpeningTime] = useState('08:00');
+    const [closingTime, setClosingTime] = useState('18:00');
+    const [slotDuration, setSlotDuration] = useState(30);
+    const [workingDays, setWorkingDays] = useState<number[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        setOpeningTime(tenant.settings.openingTime);
-        setClosingTime(tenant.settings.closingTime);
-        setSlotDuration(tenant.settings.slotDuration);
-        setWorkingDays(tenant.settings.workingDays);
-    }, [tenant]);
+        if (clinic) {
+            setOpeningTime(clinic.opening_time || '08:00');
+            setClosingTime(clinic.closing_time || '18:00');
+            setSlotDuration(clinic.slot_duration || 30);
+            setWorkingDays(clinic.working_days || [1, 2, 3, 4, 5]);
+        }
+    }, [clinic]);
 
-    const handleSave = () => {
-        updateConfig({
-            settings: {
-                ...tenant.settings,
-                openingTime,
-                closingTime,
-                slotDuration,
-                workingDays
-            }
-        });
-        alert('Configurações salvas com sucesso!');
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await updateClinicSettings({
+                opening_time: openingTime,
+                closing_time: closingTime,
+                slot_duration: slotDuration,
+                working_days: workingDays
+            });
+            await auditService.logAction('Alterou Configurações da Clínica');
+            showToast('Configurações salvas com sucesso!', 'success');
+        } catch (err) {
+            showToast('Erro ao salvar configurações.', 'error');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -473,8 +505,20 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                     <h2 className="text-2xl font-bold text-slate-900">Configurações da Clínica</h2>
                     <p className="text-slate-500 text-sm">Gerencie horários e planos da sua conta.</p>
                 </div>
-                <button onClick={handleSave} className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-                    <span className="material-symbols-outlined">save</span> Salvar Alterações
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-70"
+                >
+                    {isSaving ? (
+                        <>
+                            <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Salvando...
+                        </>
+                    ) : (
+                        <>
+                            <span className="material-symbols-outlined">save</span> Salvar Alterações
+                        </>
+                    )}
                 </button>
             </div>
 
@@ -555,7 +599,7 @@ const ClinicSettingsView = ({ tenant, updateConfig }: { tenant: TenantConfig; up
                                     <label className="text-sm font-bold text-slate-700">Dias de Funcionamento</label>
                                     <div className="flex gap-2 flex-wrap">
                                         {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, i) => {
-                                            const isActive = workingDays.includes(i);
+                                            const isActive = workingDays?.includes(i);
                                             return (
                                                 <button
                                                     key={i}
