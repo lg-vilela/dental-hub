@@ -66,7 +66,7 @@ export const inventoryService = {
 
         if (error) throw error;
     }
-},
+    ,
 
     // Suppliers CRUD
     async getSuppliers() {
@@ -79,35 +79,35 @@ export const inventoryService = {
         return data as Supplier[];
     },
 
-        async createSupplier(supplier: Omit<Supplier, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-        .from('suppliers')
-        .insert(supplier)
-        .select()
-        .single();
+    async createSupplier(supplier: Omit<Supplier, 'id' | 'created_at'>) {
+        const { data, error } = await supabase
+            .from('suppliers')
+            .insert(supplier)
+            .select()
+            .single();
 
-    if (error) throw error;
-    return data as Supplier;
-},
+        if (error) throw error;
+        return data as Supplier;
+    },
 
     async updateSupplier(id: string, updates: Partial<Supplier>) {
-    const { data, error } = await supabase
-        .from('suppliers')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+        const { data, error } = await supabase
+            .from('suppliers')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
 
-    if (error) throw error;
-    return data as Supplier;
-},
+        if (error) throw error;
+        return data as Supplier;
+    },
 
     async deleteSupplier(id: string) {
-    const { error } = await supabase
-        .from('suppliers')
-        .delete()
-        .eq('id', id);
+        const { error } = await supabase
+            .from('suppliers')
+            .delete()
+            .eq('id', id);
 
-    if (error) throw error;
-}
+        if (error) throw error;
+    }
 };
