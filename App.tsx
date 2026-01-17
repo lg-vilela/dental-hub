@@ -207,12 +207,26 @@ function AppContent() {
                 {/* Dynamic Content */}
                 <main className="flex-1 overflow-y-auto p-4 sm:p-8">
                     <div className="max-w-[1400px] mx-auto">
-                        {activePage === 'dashboard' && <Dashboard openModal={() => setIsModalOpen(true)} setPage={setActivePage} />}
-                        {activePage === 'schedule' && <ScheduleView openModal={() => setIsModalOpen(true)} tenant={activeTenant} />}
-                        {activePage === 'patients' && <PatientsView />}
-                        {activePage === 'financials' && <FinancialsView />}
-                        {activePage === 'settings' && <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />}
-                        {activePage === 'inventory' && <InventoryView />}
+                        <div className="max-w-[1400px] mx-auto">
+                            <div className={activePage === 'dashboard' ? 'block' : 'hidden'}>
+                                <Dashboard openModal={() => setIsModalOpen(true)} setPage={setActivePage} />
+                            </div>
+                            <div className={activePage === 'schedule' ? 'block' : 'hidden'}>
+                                <ScheduleView openModal={() => setIsModalOpen(true)} tenant={activeTenant} />
+                            </div>
+                            <div className={activePage === 'patients' ? 'block' : 'hidden'}>
+                                <PatientsView />
+                            </div>
+                            <div className={activePage === 'financials' ? 'block' : 'hidden'}>
+                                <FinancialsView />
+                            </div>
+                            <div className={activePage === 'settings' ? 'block' : 'hidden'}>
+                                <ClinicSettingsView tenant={activeTenant} updateConfig={updateTenantConfig} />
+                            </div>
+                            <div className={activePage === 'inventory' ? 'block' : 'hidden'}>
+                                <InventoryView />
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
