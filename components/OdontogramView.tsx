@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { patientService } from '../src/services/patientService';
+import { useAuth } from '../src/contexts/AuthContext';
+import { useToast } from '../src/contexts/ToastContext';
 
 // Types for the Odontogram
 export type ToothCondition = 'healthy' | 'caries' | 'restoration' | 'crown' | 'missing' | 'implant';
@@ -40,9 +43,53 @@ export const ToothSVG: React.FC<{ num: number; condition?: ToothCondition; onCli
 };
 
 // 5a. Odontogram View
-const OdontogramView = () => {
+const OdontogramView = ({ patientId }: { patientId?: string }) => {
+    const { clinic } = useAuth();
+    const { showToast } = useToast();
     const [selectedTool, setSelectedTool] = useState<ToothCondition | 'clear'>('healthy');
     const [teeth, setTeeth] = useState<Record<number, ToothState>>({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Load initial state
+    useEffect(() => {
+        if (patientId) {
+            loadOdontogram();
+        }
+    }, [patientId]);
+
+    const loadOdontogram = async () => {
+        setIsLoading(true);
+        try {
+            const data = await patientService.getOdontogram(patientId!);
+            if (data?.teeth_data) {
+                setTeeth(data.teeth_data);
+            }
+        } catch (error) {
+            console.error("Error loading odontogram:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!patientId || !clinic?.id) return;
+        setIsLoading(true);
+        try {
+            await patientService.saveOdontogram({
+                patient_id: patientId,
+                clinic_id: clinic.id,
+                teeth_data: teeth
+            });
+            showToast('Odontograma salvo com sucesso!', 'success');
+            setHasChanges(false);
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao salvar.', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Adult dentition (11-18, 21-28, 31-38, 41-48)
     const upperRight = [18, 17, 16, 15, 14, 13, 12, 11];
@@ -51,6 +98,7 @@ const OdontogramView = () => {
     const lowerRight = [41, 42, 43, 44, 45, 46, 47, 48].reverse();
 
     const handleToothClick = (id: number) => {
+        setHasChanges(true);
         if (selectedTool === 'clear') {
             const newTeeth = { ...teeth };
             delete newTeeth[id];
@@ -82,7 +130,27 @@ const OdontogramView = () => {
     ];
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)]">
+        <div className="flex flex-col h-[calc(100vh-140px)] relative">
+            {/* Save Button Overlay */}
+            {hasChanges && (
+                <div className="absolute top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2">
+                    <button
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2 transform hover:scale-105"
+                    >
+                        {isLoading ? (
+                            <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <>
+                                <span className="material-symbols-outlined">save</span>
+                                Salvar Alterações
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
+
             {/* Header (Removed in favor of Tab Container) */}
 
             {/* Odontogram Toolbar */}

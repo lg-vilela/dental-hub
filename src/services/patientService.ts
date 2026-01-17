@@ -139,8 +139,40 @@ export const patientService = {
 
         if (error) throw error;
         return data as PatientFile;
+    },
+
+    // Odontogram
+    async getOdontogram(patientId: string) {
+        const { data, error } = await supabase
+            .from('patient_odontograms')
+            .select('*')
+            .eq('patient_id', patientId)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error; // Ignore Not Found
+        return data as OdontogramData | null;
+    },
+
+    async saveOdontogram(data: { patient_id: string; clinic_id: string; teeth_data: any }) {
+        // Upsert based on patient_id (unique constraint)
+        const { data: result, error } = await supabase
+            .from('patient_odontograms')
+            .upsert(data, { onConflict: 'patient_id' })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return result as OdontogramData;
     }
 };
+
+export interface OdontogramData {
+    id: string;
+    patient_id: string;
+    clinic_id: string;
+    teeth_data: Record<string, any>;
+    updated_at: string;
+}
 
 export interface Evolution {
     id: string;

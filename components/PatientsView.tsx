@@ -471,7 +471,7 @@ const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }
             </div>
 
             <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col print:border-none print:shadow-none">
-                {activeTab === 'odontogram' && <OdontogramView />}
+                {activeTab === 'odontogram' && <OdontogramView patientId={patient.id} />}
                 {activeTab === 'anamnesis' && <AnamnesisTab patientId={patient.id} />}
                 {activeTab === 'evolution' && <EvolutionTab patientId={patient.id} />}
                 {activeTab === 'files' && <FilesTab patientId={patient.id} />}
