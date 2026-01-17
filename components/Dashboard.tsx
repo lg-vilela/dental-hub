@@ -125,7 +125,7 @@ const Dashboard = ({ setPage, openModal }: DashboardProps) => {
             <div className="flex justify-between items-end">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                        Olá, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 capitalize">{user?.user_metadata?.name || 'Doutor'}</span> 👋
+                        Olá, Dr(a). <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 capitalize">{user?.user_metadata?.name || 'Usuario'}</span> 👋
                     </h2>
                     <p className="text-slate-500 font-medium mt-1">Aqui está o resumo da sua clínica hoje.</p>
                 </div>

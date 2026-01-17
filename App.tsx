@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { TenantConfig } from './types';
 import { initialTenants } from './mockData';
@@ -19,9 +20,8 @@ import SetupWizard from './components/auth/SetupWizard';
 import LandingPage from './components/landing/LandingPage';
 
 function AppContent() {
-    const { isAuthenticated, isLoading, user, signOut } = useAuth();
+    const { isAuthenticated, isLoading, user, clinic, signOut } = useAuth();
     const { theme, toggleTheme } = useTheme();
-    // Auth State handled by Context now
 
     const [isSetupComplete, setIsSetupComplete] = useState(true);
     const [showLanding, setShowLanding] = useState(true); // Keep Landing as first screen
@@ -121,7 +121,7 @@ function AppContent() {
                             <span className="material-symbols-outlined">menu</span>
                         </button>
                         <div>
-                            <h2 className="text-slate-900 text-lg font-bold leading-tight">Bom Dia, {user?.user_metadata?.name || 'Doutor'}</h2>
+                            <h2 className="text-slate-900 text-lg font-bold leading-tight">{clinic?.name || 'Sua Clínica'}</h2>
                             <p className="text-slate-500 text-xs hidden sm:block">Aqui está o resumo de hoje.</p>
                         </div>
                     </div>
