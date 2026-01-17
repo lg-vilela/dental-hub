@@ -104,16 +104,16 @@ function AppContent() {
     return (
         <div className="flex h-screen bg-slate-50 text-slate-900">
             {/* Sidebar Navigation */}
-            <div className={`fixed inset-0 z-20 bg-slate-900/50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`} onClick={() => setSidebarOpen(false)}></div>
-            <div className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className={`fixed inset-0 z-20 bg-slate-900/50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'} print:hidden`} onClick={() => setSidebarOpen(false)}></div>
+            <div className={`fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} print:hidden`}>
                 <Sidebar tenant={activeTenant} activePage={activePage} setPage={(p) => { setActivePage(p); setSidebarOpen(false); }} openPublic={() => setIsPublicView(true)} />
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+            <div className="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 print:h-auto print:overflow-visible">
 
                 {/* Top Header */}
-                <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-10">
+                <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 h-16 flex items-center justify-between px-4 lg:px-8 z-10 print:hidden">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg">
                             <span className="material-symbols-outlined">menu</span>

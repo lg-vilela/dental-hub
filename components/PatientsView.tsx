@@ -435,8 +435,8 @@ const PatientDetail = ({ patient, onBack }: { patient: any, onBack: () => void }
     const [activeTab, setActiveTab] = useState<'odontogram' | 'anamnesis' | 'evolution' | 'files'>('odontogram');
 
     return (
-        <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-4">
-            <div className="flex justify-between items-center mb-6 no-print">
+        <div className="flex flex-col h-[calc(100vh-140px)] animate-in fade-in slide-in-from-right-4 print:h-auto print:overflow-visible">
+            <div className="flex justify-between items-center mb-6 print:hidden">
                 <div className="flex items-center gap-4">
                     <button onClick={onBack} className="size-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors">
                         <span className="material-symbols-outlined">arrow_back</span>
